@@ -48,8 +48,8 @@ class TestController extends Controller
         $answer -> totalAmount_Accepted = $totalAmount_Accepted;
         $answer -> totalTX_Rejected = $totalTX_Rejected;
         $answer -> totalAmount_Rejected = $totalAmount_Rejected;
-        $answer -> percenAccepted = round(($totalTX_Acepted/$totalTX)*100);
-        $answer -> percenRejected = round(($totalTX_Rejected/$totalTX)*100);
+        $answer -> percenAccepted = round((($totalTX_Acepted/$totalTX)*100), 2);
+        $answer -> percenRejected = round((($totalTX_Rejected/$totalTX)*100), 2);
 
         return $answer;
     }
