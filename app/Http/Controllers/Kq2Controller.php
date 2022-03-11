@@ -34,16 +34,15 @@ class Kq2Controller extends Controller
         }
 
         $answer = array();
-
-
+        
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> TX_Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
-            $answer[$key] -> TX_Accepted = $data['TXSA'];
-            $answer[$key] -> TX_Rejected = $data['TXSR'];
-            $answer[$key] -> accepted_Amount = $data['MONTOA'];
-            $answer[$key] -> rejected_Amount = $data['MONTOR']; 
+            $answer[$key] -> TX_Accepted = number_format($data['TXSA']);
+            $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
+            $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');
+            $answer[$key] -> rejected_Amount = number_format($data['MONTOR'], 2, '.'); 
             $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2);
             $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2);
         }

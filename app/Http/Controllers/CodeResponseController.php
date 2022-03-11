@@ -32,11 +32,11 @@ class codeResponseController extends Controller
             $answer[$key] = new stdClass();
             $answer[$key] -> ID_CodeResponse = $data['CODIGO_RESPUESTA'];
             $answer[$key] -> CodeResp_Description = $data['Codigo_Respuesta_Des'];
-            $answer[$key] -> CodeResp_Amount = $data['MONTO'];
-            $answer[$key] -> CodeResp_TXS = $data['TXS'];
+            $answer[$key] -> CodeResp_Amount = number_format($data['MONTO'], 2, '.');
+            $answer[$key] -> CodeResp_TXS = number_format($data['TXS']);
             $answer[$key] -> CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 2);
         }
-        $arrayJson = json_decode(json_encode($answer), true);
+        $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
 
         return $arrayJson;
     }
