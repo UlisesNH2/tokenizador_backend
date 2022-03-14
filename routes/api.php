@@ -22,3 +22,7 @@ Route::get('/test','App\Http\Controllers\TestController@index'); //Traer los dat
 Route::get('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
 Route::get('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
 Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
+//RUTAS TOKEN C4
+Route::get('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Traer datos para tabla principal
+Route::get('/tokenC4DataTable', 'App\Http\Controllers\TokenC4Controller@getDataTable'); //Traer datos no filtrados
+Route::post('/tokenC4Filter', 'App\Http\Controllers\TokenC4Controller@getDataTableFilter'); //Traer datos para tabla filtro
