@@ -57,7 +57,7 @@ class TokenC4Controller extends Controller
             $answer[$key] -> Number_Sec = $data['NUM_SEC'];
             $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> entryMode = $data['ENTRY_MODE'];
-            $answer[$key] -> amount = $data['MONTO1'];
+            $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
@@ -109,7 +109,7 @@ class TokenC4Controller extends Controller
             $answer[$key] -> Number_Sec = $data['NUM_SEC'];
             $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> entryMode = $data['ENTRY_MODE'];
-            $answer[$key] -> amount = $data['MONTO1'];      
+            $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');      
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
