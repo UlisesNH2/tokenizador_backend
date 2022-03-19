@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 
-class TokenC0Controller extends Controller
+class TokenB4Controller extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,50 +15,61 @@ class TokenC0Controller extends Controller
      */
     public function index()
     {
-        $tokenC0 = DB::select('select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test');
-        $array = json_decode(json_encode($tokenC0), true);
+        $tokenB4 = DB::select("select KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test");
+        $array = json_decode(json_encode($tokenB4), true); //Array asociativo
 
         $answer = array();
 
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
-            $answer[$key] -> ID_Ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
-            $answer[$key] -> Card_Type = $data['KC0_TIPO_DE_TARJETA'];
-            $answer[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
-            $answer[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
+            $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
+            $answer[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
+            $answer[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
+            $answer[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
+            $answer[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
+            $answer[$key] -> Device_Info= $data['KB4_DEV_INFO'];
+            $answer[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
+            $answer[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
+            $answer[$key] -> ID_Response_ISO= $data['KB4_ISO_RC_IND'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
     }
 
-    public function getDataTableFilter(Request $request)
-    {
+    public function getDataTableFilter(Request $request){
         $values = array();
-        $label = ['KC0_INDICADOR_DE_COMERCIO_ELEC', 'KC0_TIPO_DE_TARJETA', 'KC0_INDICADOR_DE_CVV2_CVC2_PRE',
-        'KC0_INDICADOR_DE_INFORMACION_A'];
+        $labels = ['KB4_PT_SRV_ENTRY_MDE', 'KB4_TERM_ENTRY_CAP', 'KB4_LAST_EMV_STAT', 'KB4_DATA_SUSPECT', 
+        'KB4_APPL_PAN_SEQ_NUM', 'KB4_DEV_INFO', 'KB4_RSN_ONL_CDE', 'KB4_ARQC_VRFY', 'KB4_ISO_RC_IND'];
 
-        $values[0] = $request -> ID_Ecommerce;
-        $values[1] = $request -> Card_Type;
-        $values[2] = $request -> ID_CVV2;
-        $values[3] = $request -> ID_Information;
+        $values[0] = $request -> Service_EntryMode;
+        $values[1] = $request -> Capacity_Terminal;
+        $values[2] = $request -> EVM_Status;
+        $values[3] = $request -> Data_Suspect;
+        $values[4] = $request -> PAN_Number;
+        $values[5] = $request -> Device_Info;
+        $values[6] = $request -> Online_Code;
+        $values[7] = $request -> ARQC_Verification;
+        $values[8] = $request -> ID_Response_ISO;
 
         $answer = array();
 
         for($key = 0; $key < sizeof($values); $key++){
             if($values[$key] == "NonValue"){
                 unset($values[$key]);
-                unset($label[$key]);
+                unset($labels[$key]);
             }
         }
+
         $filteredValues = array_values($values);
-        $filteredLabels = array_values($label);
+        $filteredLabels = array_values($labels);
 
         for($key = 0; $key < sizeof($filteredValues); $key++){
             $response = DB::select("select FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,CODIGO_RESPUESTA,R,
             NUM_SEC,KQ2_ID_MEDIO_ACCESO,ENTRY_MODE,MONTO1 from test where ".$filteredLabels[$key]." = '".$filteredValues[$key]."'");
             $array = json_decode(json_encode($response), true);
         }
+
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];

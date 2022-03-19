@@ -38,4 +38,54 @@ class TokenB3Controller extends Controller
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
     }
+
+    public function getDataTableFilter(Request $request){
+        $values = array();
+        $label = ['KB3_BIT_MAP', 'KB3_TERM_SRL_NUM', 'KB3_EMV_TERM_CAP', 'KB3_USR_FLD1', 'KB3_USR_FLD2',
+                'KB3_EMV_TERM_TYPE', 'KB3_APP_VER_NUM', 'KB3_CVM_RSLTS', 'KB3_DF_NAME_LGTH', 'KB3_DF_NAME'];
+        
+        $values[0] = $request -> Bit_Map;
+        $values[1] = $request -> Terminal_Serial_Number;
+        $values[2] = $request -> Check_Cardholder;
+        $values[3] = $request -> User_Field_One;
+        $values[4] = $request -> User_Field_Two;
+        $values[5] = $request -> Terminal_Type_EMV;
+        $values[6] = $request -> App_Version_Number;
+        $values[7] = $request -> CVM_Result;
+        $values[8] = $request -> File_Name_Length;
+        $values[9] = $request -> File_Name;
+
+        $answer = array();
+
+        for($key = 0; $key < sizeof($values); $key++){
+            if($values[$key] == "NonValue"){
+                unset($values[$key]);
+                unset($label[$key]);
+            }
+        }
+
+        $filteredValues = array_values($values);
+        $filteredLabels = array_values($label);
+
+        for($key = 0; $key < sizeof($filteredValues); $key++){
+            $response = DB::select("select FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,CODIGO_RESPUESTA,R,
+            NUM_SEC,KQ2_ID_MEDIO_ACCESO,ENTRY_MODE,MONTO1 from test where ".$filteredLabels[$key]." = '".$filteredValues[$key]."'");
+            $array = json_decode(json_encode($response), true); 
+        }
+
+        foreach($array as $key => $data){
+            $answer[$key] = new stdClass();
+            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
+            $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+            $answer[$key] -> Code_Response = $data['CODIGO_RESPUESTA'];
+            $answer[$key] -> R = $data['R'];
+            $answer[$key] -> Number_Sec = $data['NUM_SEC'];
+            $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+            $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');
+        }
+        $arrayJSON = json_decode(json_encode($answer), true);
+        return $arrayJSON;
+    }
 }

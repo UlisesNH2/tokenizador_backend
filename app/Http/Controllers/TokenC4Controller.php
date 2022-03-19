@@ -48,19 +48,37 @@ class TokenC4Controller extends Controller
 
         $answer = array();
         foreach($array as $key => $data){
-            $answer[$key] = new stdClass();
-            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
-            $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-            $answer[$key] -> Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key] -> R = $data['R'];
-            $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-            $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> entryMode = $data['ENTRY_MODE'];
-            $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');
+            if($data['CODIGO_RESPUESTA'] > 010){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
+                $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+                $answer[$key] -> Code_Response = $data['CODIGO_RESPUESTA'];
+                $answer[$key] -> R = $data['R'];
+                $answer[$key] -> Number_Sec = $data['NUM_SEC'];
+                $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+                $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');
+            }
+        }
+
+        foreach($array as $key => $data){
+            if($data['CODIGO_RESPUESTA'] < 010){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
+                $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+                $answer[$key] -> Code_Response = $data['CODIGO_RESPUESTA'];
+                $answer[$key] -> R = $data['R'];
+                $answer[$key] -> Number_Sec = $data['NUM_SEC'];
+                $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+                $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.');
+            }
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
-        return $arrayJson;
+        $arrayJSONOrdered = array_values($arrayJson);
+        return $arrayJSONOrdered;
     }
 
     public function getDataTableFilter(Request $request)
@@ -89,14 +107,16 @@ class TokenC4Controller extends Controller
         //Eliminar aquellos elementos que esten vacios para hacer la consulta
         for($key = 0; $key < sizeof($values); $key++){
             if($values[$key] == ""){
-                array_splice($values, $key);
-                array_splice($label, $key);
+                unset($values[$key]);
+                unset($label[$key]);
             }
         }
+        $filteredValues = array_values($values);
+        $filteredLabels = array_values($label);
 
-        for($key = 0; $key < sizeof($values); $key++){
+        for($key = 0; $key < sizeof($filteredValues); $key++){
             $response = DB::select("select FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,CODIGO_RESPUESTA,R,NUM_SEC,
-            KQ2_ID_MEDIO_ACCESO,ENTRY_MODE,MONTO1 from test where ".$label[$key]." = ".$values[$key]);
+            KQ2_ID_MEDIO_ACCESO,ENTRY_MODE,MONTO1 from test where ".$filteredLabels[$key]." = '".$filteredValues[$key]."'");
             $array = json_decode(json_encode($response), true); //Array asociativo 
         }
         foreach($array as $key => $data){
