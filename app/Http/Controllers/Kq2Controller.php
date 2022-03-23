@@ -38,7 +38,7 @@ class Kq2Controller extends Controller
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> TX_Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
+            $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
             $answer[$key] -> TX_Accepted = number_format($data['TXSA']);
             $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
             $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');

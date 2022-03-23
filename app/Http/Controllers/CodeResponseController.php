@@ -30,8 +30,8 @@ class codeResponseController extends Controller
 
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
-            $answer[$key] -> ID_CodeResponse = $data['CODIGO_RESPUESTA'];
-            $answer[$key] -> CodeResp_Description = $data['Codigo_Respuesta_Des'];
+            $answer[$key] -> ID = $data['CODIGO_RESPUESTA'];
+            $answer[$key] -> Description = $data['Codigo_Respuesta_Des'];
             $answer[$key] -> CodeResp_Amount = number_format($data['MONTO'], 2, '.');
             $answer[$key] -> CodeResp_TXS = number_format($data['TXS']);
             $answer[$key] -> CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 2);

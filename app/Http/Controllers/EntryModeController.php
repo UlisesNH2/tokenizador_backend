@@ -38,7 +38,7 @@ class EntryModeController extends Controller
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> ID = $data['ENTRY_MODE'];
-            $answer[$key] -> entryMode_Description = $data['ENTRY_MODE_DES'];
+            $answer[$key] -> Description = $data['ENTRY_MODE_DES'];
             $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');
             $answer[$key] -> accepted_TX = number_format($data['TXSA']);
             $answer[$key] -> rejected_Amount = number_format($data['MONTOR'], 2, '.');
