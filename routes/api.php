@@ -19,8 +19,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
+Route::post('/dashboardFilter', 'App\Http\Controllers\DashboardController@filterDashboard');//Filtar datos para dashboard
+//PRINCIPALES FILTROS
 Route::get('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
+Route::post('/kq2Filter', 'App\Http\Controllers\Kq2Controller@filterKq2');
+
 Route::get('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
+Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController');
+
 Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 //RUTAS TOKEN C4
 Route::get('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Traer datos para tabla principal

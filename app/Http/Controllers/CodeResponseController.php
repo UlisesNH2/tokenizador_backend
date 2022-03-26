@@ -40,4 +40,8 @@ class codeResponseController extends Controller
 
         return $arrayJson;
     }
+
+    public function filterCodeResponse(Request $request){
+        
+    }
 }
