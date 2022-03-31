@@ -42,6 +42,31 @@ class codeResponseController extends Controller
     }
 
     public function filterCodeResponse(Request $request){
-        
+        $code = $request -> codeResponse;
+        $answer = array();
+        $totalTX = 0;
+
+        $codeResponse = DB::select("select t.CODIGO_RESPUESTA,c.Codigo_Respuesta_Des,sum(t.MONTO1) AS MONTO, count(*) as TXS 
+        from test as t inner join codrespuesta as c on t.CODIGO_RESPUESTA = c.CODIGO_RESPUESTA 
+        group by CODIGO_RESPUESTA,c.Codigo_Respuesta_Des");
+        $array = json_decode(json_encode($codeResponse), true); //Codificar un array asociativo
+
+        foreach($array as $keyTotal => $data){
+            $totalTX += $data['TXS'];
+        }
+
+        foreach($array as $key => $data){
+            if($data['CODIGO_RESPUESTA'] == $code){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> ID = $data['CODIGO_RESPUESTA'];
+                $answer[$key] -> Description = $data['Codigo_Respuesta_Des'];
+                $answer[$key] -> CodeResp_Amount = number_format($data['MONTO'], 2, '.');
+                $answer[$key] -> CodeResp_TXS = number_format($data['TXS']);
+                $answer[$key] -> CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 2);
+            }
+        }
+        $arrayJSON = json_decode(json_encode($answer), true);
+        $arrayJSONOrdened = array_values($arrayJSON);
+        return $arrayJSONOrdened;
     }
 }

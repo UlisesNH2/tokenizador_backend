@@ -141,7 +141,7 @@ class TokenC4Controller extends Controller
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Code_Response = $data['CODIGO_RESPUESTA'];
                 $answer[$key] -> R = $data['R'];
-                $answer[$key] -> Number_Sec = $data['NUM_SEC'];
+                $answer[$key] -> Number_Sec = $data['NUM_SEC']; 
                 $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
                 $answer[$key] -> entryMode = $data['ENTRY_MODE'];
                 $answer[$key] -> amount = number_format($data['MONTO1'], 2, '.'); 
