@@ -16,25 +16,118 @@ class TokenB4Controller extends Controller
     public function index()
     {
         $tokenB4 = DB::select("select KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
-        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test");
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test order by KB4_PT_SRV_ENTRY_MDE");
         $array = json_decode(json_encode($tokenB4), true); //Array asociativo
 
         $answer = array();
+        foreach($array as $key => $data){
+            if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 0){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
+                $answer[$key] -> serviceEMFlag = 0;
+                $answer[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
+                $answer[$key] -> capTermFlag = 0;
+                $answer[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
+                $answer[$key] -> evmStatFlag = 0;
+                $answer[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
+                $answer[$key] -> dataSuspFlag = 0;
+                $answer[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
+                $answer[$key] -> panFlag = 0;
+                $answer[$key] -> Device_Info = $data['KB4_DEV_INFO'];
+                $answer[$key] -> devinfoFlag = 0; 
+                $answer[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
+                $answer[$key] -> onlCodeFlag = 0;
+                $answer[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
+                $answer[$key] -> arqcVerFlag = 0;
+                $answer[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
+                $answer[$key] -> IDrespFlag = 0;
+            }
+        }
 
         foreach($array as $key => $data){
-            $answer[$key] = new stdClass();
-            $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
-            $answer[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
-            $answer[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
-            $answer[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
-            $answer[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
-            $answer[$key] -> Device_Info= $data['KB4_DEV_INFO'];
-            $answer[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
-            $answer[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
-            $answer[$key] -> ID_Response_ISO= $data['KB4_ISO_RC_IND'];
+            $serviceEMFlag = 0; $capTermFlag = 0; $evmStatFlag = 0;
+            $dataSusFlag = 0; $panFlag = 0; $devinfoFlag = 0;
+            $onlCodeflag = 0; $arqcVerFlag = 0; $IDrespFlag = 0;
+            if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 2 || strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 3){
+                $serviceEMFlag = 1;
+
+                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 4){
+                    switch($data['KB4_TERM_ENTRY_CAP']){
+                        case 0: $capTermFlag = 1; break;
+                        case 2: $capTermFlag = 1; break;
+                        case 5: $capTermFlag = 1; break;
+                        default: $capTermFlag = 0;
+                    }
+                }else{ $capTermFlag = 0; }
+
+                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 1){
+                    switch($data['KB4_TERM_ENTRY_CAP']){
+                        case 0: $evmStatFlag = 1; break;
+                        case 1: $evmStatFlag = 1; break;
+                        case '': $evmStatFlag = 1; break;
+                        default: $evmStatFlag = 0; 
+                    }
+                }else{ $evmStatFlag = 0; }
+
+                if(strlen($data['KB4_DATA_SUSPECT']) == 1){
+                    switch($data['KB4_DATA_SUSPECT']){
+                        case 0: $dataSusFlag = 1; break;
+                        case 1: $dataSusFlag = 1; break;
+                        case '': $dataSusFlag = 1; break;
+                        default: $dataSusFlag = 0;
+                    }
+                }else{ $dataSusFlag = 0; }
+
+                if(strlen($data['KB4_APPL_PAN_SEQ_NUM']) == 2){ $panFlag = 1; }
+                if(strlen($data['KB4_DEV_INFO']) == 6){ $devinfoFlag = 1; }
+                if(strlen($data['KB4_RSN_ONL_CDE']) == 4){ $onlCodeflag = 1; }
+
+                if(strlen($data['KB4_ARQC_VRFY']) == 1 || strlen($data['KB4_ARQC_VRFY']) == 0){
+                    switch($data['KB4_ARQC_VRFY']){
+                        case 0: $arqcVerFlag = 1; break;
+                        case 1: $arqcVerFlag = 1; break;
+                        case 2: $arqcVerFlag = 1; break; 
+                        case 3: $arqcVerFlag = 1; break;
+                        case 4: $arqcVerFlag = 1; break;
+                        case 9: $arqcVerFlag = 1; break;
+                        default: $arqcVerFlag = 0;
+                    }
+                }else{ $arqcVerFlag = 0; }
+
+                if(strlen($data['KB4_ISO_RC_IND']) == 1 || strlen($data['KB4_ISO_RC_IND']) == 0){
+                    switch($data['KB4_ISO_RC_IND']){
+                        case 0: $IDrespFlag = 1; break;
+                        case 1: $IDrespFlag = 1; break;
+                        case '': $IDrespFlag = 1; break;
+                        default: $IDrespFlag = 0;
+                    }
+                }else { $IDrespFlag = 0; }
+
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
+                $answer[$key] -> serviceEMFlag = $serviceEMFlag;
+                $answer[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
+                $answer[$key] -> capTermFlag = $capTermFlag;
+                $answer[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
+                $answer[$key] -> evmStatFlag = $evmStatFlag;
+                $answer[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
+                $answer[$key] -> dataSuspFlag = $dataSusFlag;
+                $answer[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
+                $answer[$key] -> panFlag = $panFlag;
+                $answer[$key] -> Device_Info = $data['KB4_DEV_INFO'];
+                $answer[$key] -> devinfoFlag = $devinfoFlag; 
+                $answer[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
+                $answer[$key] -> onlCodeFlag = $onlCodeflag;
+                $answer[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
+                $answer[$key] -> arqcVerFlag = $arqcVerFlag;
+                $answer[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
+                $answer[$key] -> IDrespFlag = $IDrespFlag;
+            }
         }
+        
         $arrayJSON = json_decode(json_encode($answer), true);
-        return $arrayJSON;
+        $arrayJSONOrdered = array_values($arrayJSON);
+        return $arrayJSONOrdered;
     }
 
     public function getDataTableFilter(Request $request){

@@ -21,22 +21,80 @@ class TokenB3Controller extends Controller
         $array = json_decode(json_encode($tokenb3), true);
 
         $answer = array();
+        $bitMapFlag = 0; $termSerNumFlag = 0; $checkCHFlag = 0; $userFoFlag = 0;
+        $userFtFlag = 0; $termTypeFlag = 0; $appVersionFlag = 0; $cvmResFlag = 0;
+        $fileNamelenFlag = 0; $fileNameFlag = 0; 
 
         foreach($array as $key => $data){
-            $answer[$key] = new stdClass();
-            $answer[$key] -> Bit_Map = $data['KB3_BIT_MAP'];
-            $answer[$key] -> Terminal_Serial_Number = $data['KB3_TERM_SRL_NUM'];
-            $answer[$key] -> Check_Cardholder = $data['KB3_EMV_TERM_CAP'];
-            $answer[$key] -> User_Field_One = $data['KB3_USR_FLD1'];
-            $answer[$key] -> User_Field_Two = $data['KB3_USR_FLD2'];
-            $answer[$key] -> Terminal_Type_EMV = $data['KB3_EMV_TERM_TYPE'];
-            $answer[$key] -> App_Version_Number = $data['KB3_APP_VER_NUM'];
-            $answer[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
-            $answer[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
-            $answer[$key] -> File_Name = $data['KB3_DF_NAME'];
+            if(strlen($data['KB3_BIT_MAP']) !== 4){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Bit_Map = $data['KB3_BIT_MAP'];
+                $answer[$key] -> bitMapFlag = 0;
+                $answer[$key] -> Terminal_Serial_Number = $data['KB3_TERM_SRL_NUM'];
+                $answer[$key] -> termSerNumFlag = 0;
+                $answer[$key] -> Check_Cardholder = $data['KB3_EMV_TERM_CAP'];
+                $answer[$key] -> checkCHFlag = 0;
+                $answer[$key] -> User_Field_One = $data['KB3_USR_FLD1'];
+                $answer[$key] -> userFoFlag = 0;
+                $answer[$key] -> User_Field_Two = $data['KB3_USR_FLD2'];
+                $answer[$key] -> userFtFlag = 0;
+                $answer[$key] -> Terminal_Type_EMV = $data['KB3_EMV_TERM_TYPE'];
+                $answer[$key] -> termTypeFlag = 0;
+                $answer[$key] -> App_Version_Number = $data['KB3_APP_VER_NUM'];
+                $answer[$key] -> appVersionFlag = 0;
+                $answer[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
+                $answer[$key] -> cvmResFlag = 0;
+                $answer[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
+                $answer[$key] -> fileNamelenFlag = 0;
+                $answer[$key] -> File_Name = $data['KB3_DF_NAME'];
+                $answer[$key] -> fileNameFlag = 0;
+            }
         }
+
+        foreach($array as $key => $data){
+            $bitMapFlag = 0; $termSerNumFlag = 0; $checkCHFlag = 0; $userFoFlag = 0;
+            $userFtFlag = 0; $termTypeFlag = 0; $appVersionFlag = 0; $cvmResFlag = 0;
+            $fileNamelenFlag = 0; $fileNameFlag = 0;
+            if(strlen($data['KB3_BIT_MAP']) == 4){
+                $bitMapFlag = 1;
+
+                if(strlen($data['KB3_TERM_SRL_NUM']) === 8){ $termSerNumFlag = 1; };
+                if(strlen($data['KB3_EMV_TERM_CAP']) === 8){ $checkCHFlag = 1; };
+                if(strlen($data['KB3_USR_FLD1']) === 4){ $userFoFlag = 1; };
+                if(strlen($data['KB3_USR_FLD2']) === 8){ $userFtFlag = 1; };
+                if(strlen($data['KB3_EMV_TERM_TYPE']) === 2){ $termTypeFlag = 1; };
+                if(strlen($data['KB3_APP_VER_NUM']) === 4){ $appVersionFlag = 1; };
+                if(strlen($data['KB3_CVM_RSLTS']) === 6){ $cvmResFlag = 1; };
+                if(strlen($data['KB3_DF_NAME_LGTH']) === 4){ $fileNamelenFlag = 1; };
+                if(strlen($data['KB3_DF_NAME']) === 32){ $fileNameFlag = 1; };
+
+                $answer[$key] = new stdClass();
+                $answer[$key] -> Bit_Map = $data['KB3_BIT_MAP'];
+                $answer[$key] -> bitMapFlag = $bitMapFlag;
+                $answer[$key] -> Terminal_Serial_Number = $data['KB3_TERM_SRL_NUM'];
+                $answer[$key] -> termSerNumFlag = $termSerNumFlag;
+                $answer[$key] -> Check_Cardholder = $data['KB3_EMV_TERM_CAP'];
+                $answer[$key] -> checkCHFlag = $checkCHFlag;
+                $answer[$key] -> User_Field_One = $data['KB3_USR_FLD1'];
+                $answer[$key] -> userFoFlag = $userFoFlag;
+                $answer[$key] -> User_Field_Two = $data['KB3_USR_FLD2'];
+                $answer[$key] -> userFtFlag = $userFtFlag;
+                $answer[$key] -> Terminal_Type_EMV = $data['KB3_EMV_TERM_TYPE'];
+                $answer[$key] -> termTypeFlag = $termTypeFlag;
+                $answer[$key] -> App_Version_Number = $data['KB3_APP_VER_NUM'];
+                $answer[$key] -> appVersionFlag = $appVersionFlag;
+                $answer[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
+                $answer[$key] -> cvmResFlag = $cvmResFlag;
+                $answer[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
+                $answer[$key] -> fileNamelenFlag = $fileNamelenFlag;
+                $answer[$key] -> File_Name = $data['KB3_DF_NAME'];
+                $answer[$key] -> fileNameFlag = $fileNameFlag;
+            }
+        }
+        
         $arrayJSON = json_decode(json_encode($answer), true);
-        return $arrayJSON;
+        $arrayJSONOrdered = array_values($arrayJSON);
+        return $arrayJSONOrdered;
     }
 
     public function getDataTableFilter(Request $request){
