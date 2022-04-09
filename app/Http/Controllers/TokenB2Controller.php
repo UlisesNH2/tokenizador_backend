@@ -22,7 +22,7 @@ class TokenB2Controller extends Controller
 
         //Número 7 en binario (111) para hacer la comparación
         //con las diversas combinaciones
-        $fisrtCombinationNumber = base_convert('7', 10, 2);
+        $fisrtCombinationNumber = base_convert('4', 10, 2);
         //$secondCombinationNumber = str_pad(base_convert('1',10,2), 2, '0', STR_PAD_LEFT);
 
         $answer = array();

@@ -95,8 +95,6 @@ return new class extends Migration
             $table -> string('KB2_ISS_APPL_DATA');
             $table -> string('KQ2_ID_MEDIO_ACCESO');
             $table -> string('ENTRY_MODE');
-            
-
         });
         */
     }

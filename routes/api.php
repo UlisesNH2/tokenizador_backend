@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer');
 
 Route::get('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 Route::post('/dashboardFilter', 'App\Http\Controllers\DashboardController@filterDashboard');//Filtar datos para dashboard
