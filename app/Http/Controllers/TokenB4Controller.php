@@ -16,12 +16,14 @@ class TokenB4Controller extends Controller
     public function index()
     {
         $tokenB4 = DB::select("select KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
-        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test order by KB4_PT_SRV_ENTRY_MDE");
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test");
         $array = json_decode(json_encode($tokenB4), true); //Array asociativo
 
         $answer = array();
+        
         foreach($array as $key => $data){
-            if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 0){
+
+            if($data['KB4_PT_SRV_ENTRY_MDE'] == ' '){
                 $answer[$key] = new stdClass();
                 $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
                 $answer[$key] -> serviceEMFlag = 0;
@@ -48,10 +50,10 @@ class TokenB4Controller extends Controller
             $serviceEMFlag = 0; $capTermFlag = 0; $evmStatFlag = 0;
             $dataSusFlag = 0; $panFlag = 0; $devinfoFlag = 0;
             $onlCodeflag = 0; $arqcVerFlag = 0; $IDrespFlag = 0;
-            if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 2 || strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 3){
+            if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 3){
                 $serviceEMFlag = 1;
 
-                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 4){
+                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 1){
                     switch($data['KB4_TERM_ENTRY_CAP']){
                         case 0: $capTermFlag = 1; break;
                         case 2: $capTermFlag = 1; break;
@@ -60,8 +62,8 @@ class TokenB4Controller extends Controller
                     }
                 }else{ $capTermFlag = 0; }
 
-                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 1){
-                    switch($data['KB4_TERM_ENTRY_CAP']){
+                if(strlen($data['KB4_LAST_EMV_STAT']) == 1){
+                    switch($data['KB4_LAST_EMV_STAT']){
                         case 0: $evmStatFlag = 1; break;
                         case 1: $evmStatFlag = 1; break;
                         case '': $evmStatFlag = 1; break;

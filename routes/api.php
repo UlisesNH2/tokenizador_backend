@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer');
+Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer'); //Buscar usuario en la base de datos para login
+Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a todos los usuarios
+Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
 
 Route::get('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 Route::post('/dashboardFilter', 'App\Http\Controllers\DashboardController@filterDashboard');//Filtar datos para dashboard
@@ -28,10 +30,13 @@ Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@
 Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filterEntryMode');
 
+//TABLA DE COMERCIOS
+Route::get('/tokenC4DataTable', 'App\Http\Controllers\TokenC4Controller@getDataTableComerce'); //Traer datos no filtrados
+
 //RUTAS TOKEN C4
 Route::get('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Traer datos para tabla principal
-Route::get('/tokenC4DataTable', 'App\Http\Controllers\TokenC4Controller@getDataTable'); //Traer datos no filtrados
-Route::post('/tokenC4Filter', 'App\Http\Controllers\TokenC4Controller@getDataTableFilter'); //Datos para tabla filtro
+Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter');
+Route::post('/tokenC4Filter', 'App\Http\Controllers\TokenC4Controller@getDataTableComerceFilter'); //Datos para tabla filtro
 
 //RUTAS TOKEN C0
 Route::get('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer datos para tabla principal
