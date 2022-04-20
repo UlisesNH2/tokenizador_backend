@@ -13,13 +13,14 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+//USUARIO
 Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer'); //Buscar usuario en la base de datos para login
 Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a todos los usuarios
 Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
 
 Route::get('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 Route::post('/dashboardFilter', 'App\Http\Controllers\DashboardController@filterDashboard');//Filtar datos para dashboard
+
 //PRINCIPALES FILTROS
 Route::get('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
 Route::post('/kq2Filter', 'App\Http\Controllers\Kq2Controller@filterKq2');
@@ -30,13 +31,10 @@ Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@
 Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filterEntryMode');
 
-//TABLA DE COMERCIOS
-Route::get('/tokenC4DataTable', 'App\Http\Controllers\TokenC4Controller@getDataTableComerce'); //Traer datos no filtrados
-
 //RUTAS TOKEN C4
-Route::get('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Traer datos para tabla principal
-Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter');
-Route::post('/tokenC4Filter', 'App\Http\Controllers\TokenC4Controller@getDataTableComerceFilter'); //Datos para tabla filtro
+Route::get('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos para el formulario
+Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter'); //Datos para tabla del Token
+Route::post('/tokenC4Filter', 'App\Http\Controllers\TokenC4Controller@getDataTableComerceFilter'); //Datos para tabla de comercios
 
 //RUTAS TOKEN C0
 Route::get('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer datos para tabla principal
