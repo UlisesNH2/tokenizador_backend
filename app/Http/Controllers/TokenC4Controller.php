@@ -9,20 +9,63 @@ use stdClass;
 class TokenC4Controller extends Controller
 {
     //FUNCIÓN PARA LLEVAR TODOS LOS DATOS A LA TABLA TOKENC4
-    public function index()
+    public function index(Request $request)
     {
-        $tokenC4 = DB::select("select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+        $values = array();
+        $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE'];
+        $values[0] = $request -> kq2;
+        $values[1] = $request -> Code_Response;
+        $values[2] = $request -> Entry_Mode;
+        $query = "select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
-        $array = json_decode(json_encode($tokenC4), true); //Codificar un array asociativo
-
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
+        $array = array();
         $answer = array();
 
-        foreach ($array as $key => $data) {
+        //Eliminar values y labels que no esten filtrados desde frontend
+        for($key = 0; $key < 3; $key++){
+            if($values[$key] == "allData"){
+                unset($values[$key]);
+                unset($labels[$key]);
+            }
+        }
+        $filteredValues = array_values($values);
+        $filteredLabels = array_values($labels);
+
+        switch(sizeof($filteredLabels)){
+            case 1: {
+                $tokenC4 = DB::select($query.$filteredLabels[0]." = ?", [$filteredValues[0]]);
+                $array = json_decode(json_encode($tokenC4), true); //Array asociativo
+                break;
+            }
+            case 2: {
+                $tokenC4 = DB::select($query."
+                (".$filteredLabels[0]." = ? ) and
+                (".$filteredLabels[1]." = ?)",
+                [$filteredValues[0], $filteredValues[1]]);
+                $array = json_decode(json_encode($tokenC4), true);
+                break;
+            }
+            case 3: {
+                $tokenC4 = DB::select($query."
+                (".$filteredLabels[0]." = ? ) and
+                (".$filteredLabels[1]." = ? ) and
+                (".$filteredLabels[2]." = ?)",
+                [$filteredValues[0], $filteredValues[1], $filteredValues[2]]);
+                $array = json_decode(json_encode($tokenC4), true);
+                break;
+            }
+            default: {
+                $tokenC4 = DB:: select("select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+                KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
+                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
+                $array = json_decode(json_encode($tokenC4), true);
+                break;
+            }
+        }
+
+        foreach($array as $key => $data) {
             $answer[$key] = new stdClass();
-            $answer[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key]->ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
             $answer[$key]->ID_Terminal_Attended = $data['KC4_TERM_ATTEND_IND'];
             $answer[$key]->ID_Terminal = $data['KC4_TERM_OPER_IND'];
             $answer[$key]->Terminal_Location = $data['KC4_TERM_LOC_IND'];
@@ -44,11 +87,9 @@ class TokenC4Controller extends Controller
     public function getTableFilter(Request $request)
     {
         $values = array();
-        $label = [
-            'KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 'KC4_CRDHLDR_PRESENT_IND',
+        $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 'KC4_CRDHLDR_PRESENT_IND',
             'KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',
-            'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD'
-        ];
+            'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD'];
 
         $values[0] = $request->kq2;
         $values[1] = $request->Code_Response;
@@ -319,11 +360,186 @@ class TokenC4Controller extends Controller
         }
 
         foreach ($array as $key => $data) {
+
             $termLocFlag = 0; $cardholdrPresFlag = 0; $cardPresenceFlag = 0; $cardholdrMethodFlag = 0;
             $termAttFlag = 0; $termActivateFlag = 0; $routingFlag = 0; $termDataTransFlag = 0;
-            switch($data['KQ2_ID_MEDIO_ACCESO']){               
+            $termOperFlag = 0; $reqStatusFlag = 0; $secLevelFlag = 0; $cardCaptureFlag = 0;
+
+            switch($data['KQ2_ID_MEDIO_ACCESO']){   
+                case '00': {
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] == 0 || $data['KC4_TERM_ATTEND_IND'] == 1) { $termAttFlag = 1; } 
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] == 0) { $termLocFlag = 1; }
+                    //subcampo 4
+                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0 || $data['KC4_CRDHLDR_PRESENT_IND'] == 3) { $cardholdrPresFlag = 1; }
+                    //subcampo 5
+                    if($data['KC4_CRD_PRESENT_IND'] == 0) { $cardPresenceFlag = 1; }
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    if($data['KC4_TXN_RTN_IND'] == 0 || $data['KC4_TXN_RTN_IND'] == 3) { $routingFlag = 1; }
+                    //subcampo 10
+                    if($data['KC4_CRDHLDR_ACTVT_TERM_IND'] == 0) { $termActivateFlag = 1; }
+                    //subcampo 11
+                    switch($data['KC4_TERM_INPUT_CAP_IND']){
+                        case 0: $termDataTransFlag = 1; break;
+                        case 5: $termDataTransFlag = 1; break;
+                        case 6: $termDataTransFlag = 1; break;
+                        default: $termDataTransFlag = 0; break;
+                    }
+                    //subcampo 12
+                    switch($data['KC4_CRDHLDR_ID_METHOD']){
+                        case ' ': $cardholdrMethodFlag = 1; break;
+                        case 0: $cardholdrMethodFlag = 1; break;
+                        case 9: $cardholdrMethodFlag = 1; break;
+                        default: $cardholdrMethodFlag = 0; break;
+                    }
+                    break;
+                }
+                //validación de transacciones CARGOS AUTOMÁTICOS O PERIÓDICOS.
+                case '02':{
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] > -1 && $data['KC4_TERM_ATTEND_IND'] < 3) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] > 0 && $data['KC4_TERM_LOC_IND'] < 4) { $termLocFlag = 1; }
+                    //subcampo 4
+                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 4) { $cardholdrPresFlag = 1; }
+                    //subcampo 5
+                    if($data['KC4_CRD_PRESENT_IND'] == 1){ $cardPresenceFlag = 1; }
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0 || $data['KC4_TXN_STAT_IND'] == 4) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    if($data['KC4_TXN_RTN_IND'] == 3) { $routingFlag = 1; }
+                    //subcampo 10
+                    if($data['KC4_CRDHLDR_ACTVT_TERM_IND'] == 0 || $data['KC4_CRDHLDR_ACTVT_TERM_IND'] == 6) { $termActivateFlag = 1; }
+                    //subcampo 11
+                    switch($data['KC4_TERM_INPUT_CAP_IND']){
+                        case 0: $termDataTransFlag = 1; break;
+                        case 1: $termDataTransFlag = 1; break;
+                        case 6: $termDataTransFlag = 1; break;
+                        default: $termDataTransFlag = 0; break;
+                    }
+                    //subcampo 12
+                    switch($data['KC4_CRDHLDR_ID_METHOD']){
+                        case ' ': $cardholdrMethodFlag = 1; break;
+                        case 0: $cardholdrMethodFlag = 1; break;
+                        case 5: $cardholdrMethodFlag = 1; break;
+                        case 9: $cardholdrMethodFlag = 1; break;
+                        default: $cardholdrMethodFlag = 0; break;
+                    }
+                    break;
+                }
+                //validación de transacciones TERMINAL PUNTO DE VENTA
+                case '03':{
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] == 0) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] == 0) { $termLocFlag = 1; }
+                    //subcampo 4
+                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
+                    //subcampo 5
+                    if($data['KC4_CRD_PRESENT_IND'] == 0) { $cardPresenceFlag = 1; } 
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0 || $data['KC4_CRD_CAPTR_IND'] == 1) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    switch($data['KC4_TXN_RTN_IND']){
+                        case 0: $routingFlag = 1; break; 
+                        case 1: $routingFlag = 1; break;
+                        case 3: $routingFlag = 1; break;
+                        default: $routingFlag = 0; break;
+                    }
+                    //subcampo 10
+                    switch($data['KC4_CRDHLDR_ACTVT_TERM_IND']){
+                        case 0: $termActivateFlag = 1; break;
+                        case 7: $termActivateFlag = 1; break;
+                        case 9: $termActivateFlag = 1; break;
+                        default: $termActivateFlag = 0; break;
+                    }
+                    //subcampo 11
+                    if($data['KC4_TERM_INPUT_CAP_IND'] > 1 && $data['KC4_TERM_INPUT_CAP_IND'] < 10) { $termDataTransFlag = 1; }
+                    //subcampo 12
+                    switch($data['KC4_CRDHLDR_ID_METHOD']){
+                        case ' ': $cardholdrMethodFlag = 1; break;
+                        case 0: $cardholdrMethodFlag = 1; break;
+                        case 1: $cardholdrMethodFlag = 1; break;
+                        case 2: $cardholdrMethodFlag = 1; break;
+                        case 5: $cardholdrMethodFlag = 1; break;
+                        case 9: $cardholdrMethodFlag = 1; break;
+                        default: $cardholdrMethodFlag = 0; break;
+                    }
+                    break;
+                }
+                //validación de transacciones COMERCIO INTERRED
+                case '04':{
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] == 0) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] == 0) { $termLocFlag = 1; }
+                    //subcampo 4
+                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
+                    //subcampo 5
+                    if($data['KC4_CRD_PRESENT_IND'] == 0){ $cardPresenceFlag = 1; }
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0 || $data['KC4_CRD_CAPTR_IND'] == 1) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    switch($data['KC4_TXN_RTN_IND']){
+                        case 0: $routingFlag = 1; break;
+                        case 1: $routingFlag = 1; break;
+                        case 3: $routingFlag = 1; break;
+                        default: $routingFlag = 0; break;
+                    }
+                    //subcampo 10
+                    switch($data['KC4_CRDHLDR_ACTVT_TERM_IND']){
+                        case 0: $termActivateFlag = 1; break;
+                        case 1: $termActivateFlag = 1; break;
+                        case 9: $termActivateFlag = 1; break;
+                        default: $termActivateFlag = 0; break;
+                    }
+                    //subcampo 11
+                    if($data['KC4_TERM_INPUT_CAP_IND'] > 1 && $data['KC4_TERM_INPUT_CAP_IND'] < 10) { $termDataTransFlag = 1; }
+                    //subcampo 12
+                    switch($data['KC4_CRDHLDR_ID_METHOD']){
+                        case ' ': $cardholdrMethodFlag = 1; break;
+                        case 0: $cardholdrMethodFlag = 1; break;
+                        case 1: $cardholdrMethodFlag = 1; break;
+                        case 2: $cardholdrMethodFlag = 1; break;
+                        case 5: $cardholdrMethodFlag = 1; break;
+                        case 9: $cardholdrPresFlag = 1; break;
+                        default: $cardholdrMethodFlag = 0; break;
+                    }
+                    break;
+                }          
                 //Validación de TRANSACCIONES MANUALES MOTO.
                 case '08':{
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] == 2) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
                     //subcampo 3
                     if($data['KC4_TERM_LOC_IND'] == 3){ $termLocFlag = 1; } 
                     //subcampo 4 
@@ -353,38 +569,6 @@ class TokenC4Controller extends Controller
                     if($data['KC4_CRD_PRESENT_IND'] == 1){ $cardPresenceFlag = 1; }
                     //subcampo 10
                     if($data['KC4_CRDHLDR_ACTVT_TERM_IND'] == 6){ $termActivateFlag = 1; }
-                    break;
-                }
-                //validación de transacciones CARGOS AUTOMÁTICOS O PERIÓDICOS.
-                case '02':{
-                    //subcampo 4
-                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 4) { $cardholdrPresFlag = 1; }
-                    //subcampo 5
-                    if($data['KC4_CRD_PRESENT_IND'] == 1){ $cardPresenceFlag = 1; }
-                    break;
-                }
-                //validación de transacciones COMERCIO INTERRED
-                case '04':{
-                    //subcampo 4
-                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
-                    //subcampo 5
-                    if($data['KC4_CRD_PRESENT_IND'] == 0){ $cardPresenceFlag = 1; }
-                    //subcampo 9
-                    switch($data['KC4_TXN_RTN_IND']){
-                        case 0: $routingFlag = 1; break;
-                        case 1: $routingFlag = 1; break;
-                        case 3: $routingFlag = 1; break;
-                        default: $routingFlag = 0; break;
-                    }
-                    //subcampo 11
-                    if($data['KC4_TERM_INPUT_CAP_IND'] > 1 && $data['KC4_TERM_INPUT_CAP_IND'] < 10) { $termDataTransFlag = 1; }
-                    //subcampo 12
-                    switch($data['KC4_CRDHLDR_ID_METHOD']){
-                        case 1: $cardholdrMethodFlag = 1; break;
-                        case 2: $cardholdrMethodFlag = 1; break;
-                        case 5: $cardholdrMethodFlag = 1; break;
-                        default: $cardholdrMethodFlag = 0; break;
-                    }
                     break;
                 }
                 //validación de transacciones ACTIVADAS POR EL TARJETAHABIENTE
@@ -424,31 +608,8 @@ class TokenC4Controller extends Controller
                         default: $cardholdrMethodFlag = 0; break;
                     }
                 }
-                //validación de transacciones TERMINAL PUNTO DE VENTA
-                case '03':{
-                    //subcampo 4
-                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
-                    //subcampo 5
-                    if($data['KC4_CRD_PRESENT_IND'] == 0) { $cardPresenceFlag = 1; } 
-                    //subcampo 9
-                    switch($data['KC4_TXN_RTN_IND']){
-                        case 0: $routingFlag = 1; break; 
-                        case 1: $routingFlag = 1; break;
-                        case 3: $routingFlag = 1; break;
-                        default: $routingFlag = 0; break;
-                    }
-                    //subcampo 11
-                    if($data['KC4_TERM_INPUT_CAP_IND'] > 1 && $data['KC4_TERM_INPUT_CAP_IND'] < 10) { $termDataTransFlag = 1; }
-                    //subcampo 12
-                    switch($data['KC4_CRDHLDR_ID_METHOD']){
-                        case 1: $cardholdrMethodFlag = 1; break;
-                        case 2: $cardholdrMethodFlag = 1; break;
-                        case 5: $cardholdrMethodFlag = 1; break;
-                        default: $cardholdrMethodFlag = 0; break;
-                    }
-                    break;
-                }
             }
+
             $answer[$key] = new stdClass();
             $answer[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
@@ -456,6 +617,7 @@ class TokenC4Controller extends Controller
             $answer[$key]->ID_Terminal_Attended = $data['KC4_TERM_ATTEND_IND']; //subcampo 1
             $answer[$key]->TermAttFlag = $termAttFlag;
             $answer[$key]->ID_Terminal = $data['KC4_TERM_OPER_IND']; //subcampo 2
+            $answer[$key]->TermOperFlag = $termOperFlag;
             $answer[$key]->Terminal_Location = $data['KC4_TERM_LOC_IND']; //subcampo 3
             $answer[$key]->TermLocFlag = $termLocFlag;
             $answer[$key]->ID_Cardholder_Presence = $data['KC4_CRDHLDR_PRESENT_IND']; //subcampo 4
@@ -463,8 +625,11 @@ class TokenC4Controller extends Controller
             $answer[$key]->ID_Card_Presence = $data['KC4_CRD_PRESENT_IND']; //subcampo 5
             $answer[$key]->CardpresenceFlag = $cardPresenceFlag;
             $answer[$key]->ID_Card_Capture = $data['KC4_CRD_CAPTR_IND']; //subcampo 6
+            $answer[$key]->CardCaptureFlag = $cardCaptureFlag;
             $answer[$key]->ID_Status = $data['KC4_TXN_STAT_IND']; //subcampo 7
+            $answer[$key]->ReqStatusFlag = $reqStatusFlag;
             $answer[$key]->Security_Level = $data['KC4_TXN_SEC_IND']; //subcampo 8
+            $answer[$key]->SecLevelFlag = $secLevelFlag;
             $answer[$key]->Routing_Indicator = $data['KC4_TXN_RTN_IND']; //subcampo 9
             $answer[$key]->routingFlag = $routingFlag;
             $answer[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND']; //subcampo 10
