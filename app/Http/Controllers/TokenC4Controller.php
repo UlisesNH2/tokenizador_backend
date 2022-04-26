@@ -641,7 +641,7 @@ class TokenC4Controller extends Controller
         }
 
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
-        return $request;
+        return $arrayJson;
     }
 
     //FUNCIÓN PARA MANDAR INFORMACIÓN DE LA TABLA DE COMERCIOS (FILTRADA)
