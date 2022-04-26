@@ -13,7 +13,7 @@ class TokenC4Controller extends Controller
     {
         $values = array();
         $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE'];
-        $values[0] = $request -> kq2;
+        $values[0] = $request -> Kq2;
         $values[1] = $request -> Code_Response;
         $values[2] = $request -> Entry_Mode;
         $query = "select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
@@ -91,7 +91,7 @@ class TokenC4Controller extends Controller
             'KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',
             'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD'];
 
-        $values[0] = $request->kq2;
+        $values[0] = $request->Kq2;
         $values[1] = $request->Code_Response;
         $values[2] = $request->Entry_Mode;
         $values[3] = $request->ID_Terminal_Attended;
@@ -655,7 +655,7 @@ class TokenC4Controller extends Controller
         ];
 
         //No se usa estructura de control por el request
-        $values[0] = $request->kq2;
+        $values[0] = $request->Kq2;
         $values[1] = $request->Code_Response;
         $values[2] = $request->Entry_Mode;
         $values[3] = $request->ID_Terminal_Attended;
