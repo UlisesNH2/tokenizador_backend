@@ -56,7 +56,7 @@ class TokenC4Controller extends Controller
                 break;
             }
             default: {
-                $tokenC4 = DB:: select("select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+                $tokenC4 = DB:: select("select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
                 KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
                 KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
                 $array = json_decode(json_encode($tokenC4), true);
@@ -641,7 +641,7 @@ class TokenC4Controller extends Controller
         }
 
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
-        return $arrayJson;
+        return $filteredLabels;
     }
 
     //FUNCIÓN PARA MANDAR INFORMACIÓN DE LA TABLA DE COMERCIOS (FILTRADA)
