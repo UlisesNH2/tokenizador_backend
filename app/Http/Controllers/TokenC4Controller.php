@@ -24,7 +24,7 @@ class TokenC4Controller extends Controller
 
         //Eliminar values y labels que no esten filtrados desde frontend
         for($key = 0; $key < 3; $key++){
-            if($values[$key] == "allDat"){
+            if($values[$key] == "allData"){
                 unset($values[$key]);
                 unset($labels[$key]);
             }
