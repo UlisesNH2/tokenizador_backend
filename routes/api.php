@@ -18,8 +18,7 @@ Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer'); //Bus
 Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a todos los usuarios
 Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
 
-Route::get('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
-Route::post('/dashboardFilter', 'App\Http\Controllers\DashboardController@filterDashboard');//Filtar datos para dashboard
+Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 
 //PRINCIPALES FILTROS
 Route::get('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)

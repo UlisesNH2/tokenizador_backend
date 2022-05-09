@@ -15,27 +15,69 @@ class Kq2Controller extends Controller
      */
     public function index()
     {
-        $kq2 = DB::select("SELECT s.KQ2_ID_MEDIO_ACCESO,s.KQ2_ID_MEDIO_ACCESO_DES,s.MONTOA,s.TXSA,w.MONTOR,w.TXSR FROM (
-        select t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES,sum(t.MONTO1) AS MONTOA, count(*) as TXSA 
-        from medioacceso as e inner join test as t on e.KQ2_ID_MEDIO_ACCESO = t.KQ2_ID_MEDIO_ACCESO
-        where t.CODIGO_RESPUESTA < '010'
-        group by t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES) as s
+        $kq2 = DB::select("select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA < '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
         inner join
-        (
-        select t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES,sum(t.MONTO1) AS MONTOR, count(*) as TXSR 
-        from medioacceso as e inner join test as t on e.KQ2_ID_MEDIO_ACCESO = t.KQ2_ID_MEDIO_ACCESO
-        where t.CODIGO_RESPUESTA >= '010'
-        group by t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES) as w on s.KQ2_ID_MEDIO_ACCESO = w.KQ2_ID_MEDIO_ACCESO");
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
+        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO");
         $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
+        $answer = array();
+        foreach($array as $key => $data){
+            $answer[$key] = new stdClass();
+            $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
+        }
+        $arrayJson = json_decode(json_encode($answer), true);
+        return $arrayJson;
+    }
 
+    public function filterKq2(Request $request){
+
+        $kq2Filter = $request -> kq2;
         $totalTX = 0;
+        $response = array();
+        $answer = array();
+        //Query en caso de que no exista algún filtro
+        $query = "select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA < '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
+        inner join
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
+        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO";
 
-        foreach($array as $keyTotal => $data){
+        //Query modificado para obtener los valores decuerdo al filtro
+        $queryFilter = "select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA < '010' and main.kq2_ID_MEDIO_ACCESO = ? group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
+        inner join
+        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
+        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        where main.CODIGO_RESPUESTA >= '010' and main.kq2_ID_MEDIO_ACCESO = ? group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
+        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO";
+
+        if(!empty($kq2Filter)){
+            for($i = 0; $i < count($kq2Filter); $i++){
+                $response = array_merge($response, DB::select($queryFilter, [$kq2Filter[$i], $kq2Filter[$i]]));
+            }
+            $array = json_decode(json_encode($response), true);
+
+        }else{
+            $response = array_merge($response, DB::select($query));
+            $array = json_decode(json_encode($response), true);
+        }
+
+        foreach($array as $key => $data){
             $totalTX += $data['TXSA'] + $data['TXSR'];
         }
 
-        $answer = array();
-        
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -49,46 +91,5 @@ class Kq2Controller extends Controller
         }
         $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;
-    }
-
-    public function filterKq2(Request $request){
-
-        $kq2filter = $request -> kq2;
-        $totalTX = 0;
-        $answer = array();
-
-        $kq2 = DB::select("SELECT s.KQ2_ID_MEDIO_ACCESO,s.KQ2_ID_MEDIO_ACCESO_DES,s.MONTOA,s.TXSA,w.MONTOR,w.TXSR FROM (
-            select t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES,sum(t.MONTO1) AS MONTOA, count(*) as TXSA 
-            from medioacceso as e inner join test as t on e.KQ2_ID_MEDIO_ACCESO = t.KQ2_ID_MEDIO_ACCESO
-            where t.CODIGO_RESPUESTA < '010'
-            group by t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES) as s
-            inner join
-            (
-            select t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES,sum(t.MONTO1) AS MONTOR, count(*) as TXSR 
-            from medioacceso as e inner join test as t on e.KQ2_ID_MEDIO_ACCESO = t.KQ2_ID_MEDIO_ACCESO
-            where t.CODIGO_RESPUESTA >= '010'
-            group by t.KQ2_ID_MEDIO_ACCESO,e.KQ2_ID_MEDIO_ACCESO_DES) as w on s.KQ2_ID_MEDIO_ACCESO = w.KQ2_ID_MEDIO_ACCESO");
-            $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
-
-        foreach($array as $keyTotal => $data){
-            $totalTX += $data['TXSA'] + $data['TXSR'];
-        }
-
-        foreach($array as $key => $data){
-            if($data['KQ2_ID_MEDIO_ACCESO'] == $kq2filter){
-                $answer[$key] = new stdClass();
-                $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
-                $answer[$key] -> TX_Accepted = number_format($data['TXSA']);
-                $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
-                $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');
-                $answer[$key] -> rejected_Amount = number_format($data['MONTOR'], 2, '.'); 
-                $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2);
-                $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2);
-            }
-        }
-        $arrayJSON = json_decode(json_encode($answer), true);
-        $arrayJSONOrdened = array_values($arrayJSON);
-        return $arrayJSONOrdened;
     }
 }

@@ -8,58 +8,243 @@ use stdClass;
 
 class TokenC4Controller extends Controller
 {
-    //FUNCIÓN PARA LLEVAR TODOS LOS DATOS A LA TABLA TOKENC4
     public function index(Request $request)
     {
-        $values = array();
-        $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE'];
-        $values[0] = $request -> Kq2;
-        $values[1] = $request -> Code_Response;
-        $values[2] = $request -> Entry_Mode;
+        $kq2 = $request -> Kq2;
+        $codeResponse = $request -> Code_Response;
+        $entryMode = $request -> Entry_Mode;
+        $response = array();
+        $answer = array();
+        $array = array();
+        $numberFilters = 0;
+        $flagkq2 = false;
+        $flagCode = false;
+        $flagEntry = false;
         $query = "select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
         KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
-        $array = array();
-        $answer = array();
 
-        //Eliminar values y labels que no esten filtrados desde frontend
-        for($key = 0; $key < 3; $key++){
-            if($values[$key] == "allData"){
-                unset($values[$key]);
-                unset($labels[$key]);
-            }
-        }
-        $filteredValues = array_values($values);
-        $filteredLabels = array_values($labels);
+        if(!empty($kq2)){ $numberFilters++; $flagkq2 = true;}
+        if(!empty($codeResponse)) { $numberFilters++; $flagCode = true;}
+        if(!empty($entryMode)){ $numberFilters++; $flagEntry = true;}
 
-        switch(sizeof($filteredLabels)){
-            case 1: {
-                $tokenC4 = DB::select($query.$filteredLabels[0]." = ?", [$filteredValues[0]]);
-                $array = json_decode(json_encode($tokenC4), true); //Array asociativo
+        switch($numberFilters){
+            case 1: { //Un solo filtro utilizado
+                if($flagkq2){ //Filtrado por medio de Acceso
+                    for($i = 0; $i < count($kq2); $i++){
+                        $response = array_merge($response, DB::select($query."
+                        KQ2_ID_MEDIO_ACCESO = ?", [$kq2[$i]]));
+                    }
+                    $array = json_decode(json_encode($response), true);
+                }
+                if($flagCode){//Filtrado por código de respuesta
+                    for($i = 0; $i < count($codeResponse); $i++){
+                        $response = array_merge($response, DB::select($query."
+                        CODIGO_RESPUESTA = ?", [$codeResponse[$i]]));
+                    }
+                    $array = json_decode(json_encode($response), true);
+                }
+                if($flagEntry){
+                    for($i = 0; $i < count($entryMode); $i++){
+                        $response = array_merge($response, DB::select($query."
+                        ENTRY_MODE = ?", [$entryMode[$i]]));
+                    }
+                    $array = json_decode(json_encode($response), true);
+                }
                 break;
             }
-            case 2: {
-                $tokenC4 = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ?)",
-                [$filteredValues[0], $filteredValues[1]]);
-                $array = json_decode(json_encode($tokenC4), true);
+            case 2: { //Dos filtros utilizados
+                if($flagkq2){
+                    if($flagCode && !$flagEntry){
+                        $firstLength = max($kq2, $codeResponse);
+                        switch($firstLength){
+                            case $kq2: {
+                                for($i = 0; $i < count($kq2); $i++){
+                                    for($j = 0; $j < count($codeResponse); $j++){
+                                        $response = array_merge($response, DB::select($query."
+                                        KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ?",
+                                        [$kq2[$i], $codeResponse[$j]]));
+                                    }
+                                }
+                                $array = json_decode(json_encode($response), true);
+                                break;
+                            }
+                            case $codeResponse: {
+                                for($i = 0; $i < count($codeResponse); $i++){
+                                    for($j = 0; $j < count($kq2); $j++){
+                                        $response = array_merge($response, DB::select($query."
+                                        KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ?",
+                                        [$kq2[$j], $codeResponse[$i]]));
+                                    }
+                                }
+                                $array = json_decode(json_encode($response), true);
+                                break;
+                            }
+                        }
+                    }else{
+                        if(!$flagCode && $flagEntry){
+                            $firstLength = max($kq2, $entryMode);
+                            switch($firstLength){
+                                case $kq2: {
+                                    for($i = 0; $i < count($kq2); $i++){
+                                        for($j = 0; $j < count($entryMode); $j++){
+                                            $response = array_merge($response, DB::select($query."
+                                            KQ2_ID_MEDIO_ACCESO = ? and ENTRY_MODE = ?",
+                                            [$kq2[$i], $entryMode[$j]]));
+                                        }
+                                    }
+                                    $array = json_decode(json_encode($response), true);
+                                    break;
+                                }
+                                case $entryMode: {
+                                    for($i = 0; $i < count($entryMode); $i++){
+                                        for($j = 0; $j < count($kq2); $j++){
+                                            $response = array_merge($response, DB::select($query."
+                                            KQ2_ID_MEDIO_ACCESO = ? and ENTRY_MODE = ?",
+                                            [$kq2[$j], $entryMode[$i]]));
+                                        }
+                                    }
+                                    $array = json_decode(json_encode($response), true);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    if($flagCode && $flagEntry){
+                        $firstLength = max($codeResponse, $entryMode);
+                        switch($firstLength){
+                            case $codeResponse: {
+                                for($i = 0; $i < count($codeResponse); $i++){
+                                    for($j = 0; $j < count($entryMode); $j++){
+                                        $response = array_merge($response, DB::select($query."
+                                        CODIGO_RESPUESTA = ? and ENTRY_MODE = ?", 
+                                        [$codeResponse[$i], $entryMode[$j]]));
+                                    }
+                                }
+                                $array = json_decode(json_encode($response), true);
+                                break;
+                            }
+                            case $entryMode: {
+                                for($i = 0; $i < count($entryMode); $i++){
+                                    for($j = 0; $j < count($codeResponse); $j++){
+                                        $response = array_merge($response, DB::select($query."
+                                        CODIGO_RESPUESTA = ? and ENTRY_MODE = ?", 
+                                        [$codeResponse[$j], $entryMode[$i]]));
+                                    }
+                                }
+                                $array = json_decode(json_encode($response), true);
+                                break;
+                            }
+                        }
+                    }
+                }
                 break;
             }
             case 3: {
-                $tokenC4 = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ?)",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2]]);
-                $array = json_decode(json_encode($tokenC4), true);
+                if($flagkq2 && $flagCode && $flagEntry){
+                    $firstLength = max($kq2, $codeResponse, $entryMode);
+                    switch($firstLength){
+                        case $kq2:{ //Medio de Acceso (filtro mas largo)
+                            $secondLength = max($codeResponse, $entryMode);
+                            switch($secondLength){
+                                case $codeResponse:{
+                                    for($i = 0; $i < count($kq2); $i++){
+                                        for($j = 0; $j < count($codeResponse); $j++){
+                                            for($z = 0; $z < count($entryMode); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$i], $codeResponse[$j], $entryMode[$z]]));
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                                case $entryMode: {
+                                    for($i = 0; $i < count($kq2); $i++){
+                                        for($j = 0; $j < count($entryMode); $j++){
+                                            for($z = 0; $z < count($codeResponse); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$i], $codeResponse[$z], $entryMode[$j]]));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            $array = json_decode(json_encode($response), true);
+                            break;
+                        }
+                        case $codeResponse:{ //Código de respuesta (filtro más largo)
+                            $secondLength = max($kq2, $entryMode);
+                            switch($secondLength){
+                                case $kq2:{
+                                    for($i = 0; $i < count($codeResponse); $i++){
+                                        for($j = 0; $j < count($kq2); $j++){
+                                            for($z = 0; $z < count($entryMode); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$j], $codeResponse[$i], $entryMode[$z]]));
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                                case $entryMode: {
+                                    for($i = 0; $i < count($codeResponse); $i++){
+                                        for($j = 0; $j < count($entryMode); $j++){
+                                            for($z = 0; $z < count($kq2); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$z], $codeResponse[$i], $entryMode[$j]]));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            $array = json_decode(json_encode($response), true);
+                            break;
+                        }
+                        case $entryMode:{//Entry mode (filtro más largo)
+                            $secondLength = max($kq2, $codeResponse);
+                            switch($secondLength){
+                                case $kq2: {
+                                    for($i = 0; $i < count($entryMode); $i++){
+                                        for($j = 0; $j < count($kq2); $j++){
+                                            for($z = 0; $z < count($codeResponse); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$j], $codeResponse[$z], $entryMode[$i]]));
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                                case $codeResponse:{
+                                    for($i = 0; $i < count($entryMode); $i++){
+                                        for($j = 0; $j < count($codeResponse); $j++){
+                                            for($z = 0; $z < count($kq2); $z++){
+                                                $response = array_merge($response, DB::select($query."
+                                                KQ2_ID_MEDIO_ACCESO = ? and CODIGO_RESPUESTA = ? and ENTRY_MODE = ?",
+                                                [$kq2[$z], $codeResponse[$j], $entryMode[$z]]));
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                            $array = json_decode(json_encode($response), true);
+                            break;
+                        }
+                    }
+                }
                 break;
             }
             default: {
-                $tokenC4 = DB:: select("select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+                $response = DB::select("select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
                 KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
                 KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
-                $array = json_decode(json_encode($tokenC4), true);
+                $array = json_decode(json_encode($response), true);
                 break;
             }
         }
@@ -682,14 +867,74 @@ class TokenC4Controller extends Controller
                 case '19':{
                     //subcampo 1
                     if($data['KC4_TERM_ATTEND_IND'] == 1) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0){ $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] == 0){ $termLocFlag = 1; }
                     //subcampo 4
                     if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
                     //subcampo 5
                     if($data['KC4_CRD_PRESENT_IND'] == 0) { $cardPresenceFlag = 1; }
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0 || $data['KC4_CRD_CAPTR_IND'] == 1) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    if($data['KC4_TXN_RTN_IND'] == 0 || $data['KC4_TXN_RTN_IND'] == 1) { $routingFlag = 1; }
                     //subcampo 10
                     if($data['KC4_CRDHLDR_ACTVT_TERM_IND'] > -1 && $data['KC4_CRDHLDR_ACTVT_TERM_IND'] < 4) { $termActivateFlag = 1; }
+                    //subcampo 11
+                    switch($data['KC4_TERM_INPUT_CAP_IND']){
+                        case 0: $termDataTransFlag = 1; break;
+                        case 2: $termDataTransFlag = 1; break;
+                        case 3: $termDataTransFlag = 1; break;
+                        case 5: $termDataTransFlag = 1; break;
+                        case 8; $termDataTransFlag = 1; break;
+                        default: $termDataTransFlag = 1; break;
+                    }
                     //subcampo 12
                     if($data['KC4_CRDHLDR_ID_METHOD'] > 1 && $data['KC4_CRDHLDR_ID_METHOD'] < 4) { $cardholdrMethodFlag = 1; }
+                    break;
+                }
+                //validación de transacciones QPS
+                case '20': {
+                    //subcampo 1
+                    if($data['KC4_TERM_ATTEND_IND'] == 0) { $termAttFlag = 1; }
+                    //subcampo 2
+                    if($data['KC4_TERM_OPER_IND'] == 0) { $termOperFlag = 1; }
+                    //subcampo 3
+                    if($data['KC4_TERM_LOC_IND'] == 0) { $termLocFlag = 1; }
+                    //subcampo 4
+                    if($data['KC4_CRDHLDR_PRESENT_IND'] == 0) { $cardholdrPresFlag = 1; }
+                    //subcampo 5
+                    if($data['KC4_CRD_PRESENT_IND'] == 0) { $cardPresenceFlag = 1; }
+                    //subcampo 6
+                    if($data['KC4_CRD_CAPTR_IND'] == 0 || $data['KC4_CRD_CAPTR_IND'] == 1) { $cardCaptureFlag = 1; }
+                    //subcampo 7
+                    if($data['KC4_TXN_STAT_IND'] == 0) { $reqStatusFlag = 1; }
+                    //subcampo 8
+                    if($data['KC4_TXN_SEC_IND'] == 0 || $data['KC4_TXN_SEC_IND'] == 2) { $secLevelFlag = 1; }
+                    //subcampo 9
+                    if($data['KC4_TXN_RTN_IND'] == 0 || $data['KC4_TXN_RTN_IND'] == 1) { $routingFlag = 1; }
+                    //subcampo 10
+                    switch($data['KC4_CRDHLDR_ACTVT_TERM_IND']){
+                        case 0: $termActivateFlag = 1; break;
+                        case 3: $termActivateFlag = 1; break;
+                        case 9; $termActivateFlag = 1; break;
+                        default: $termActivateFlag = 0; break;
+                    }
+                    //subcampo 11
+                    //pendiente
+                    //subcampo 12
+                    switch($data['KC4_CRDHLDR_ID_METHOD']){
+                        case ' ': $cardholdrMethodFlag = 1; break;
+                        case 0: $cardholdrMethodFlag = 1; break;
+                        case 9: $cardholdrMethodFlag = 1; break;
+                        case 5: $cardholdrMethodFlag = 1; break;
+                        default: $cardholdrMethodFlag = 1; break;
+                    }
                     break;
                 }
             }
