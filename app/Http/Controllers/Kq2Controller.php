@@ -23,7 +23,7 @@ class Kq2Controller extends Controller
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
         from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
-        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO");
+        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO ORDER BY accepted.KQ2_ID_MEDIO_ACCESO");
         $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
         $answer = array();
         foreach($array as $key => $data){

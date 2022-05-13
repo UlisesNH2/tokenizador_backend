@@ -291,265 +291,94 @@ class TokenC4Controller extends Controller
         $values[12] = $request->Terminal_Activation_Cardholder;
         $values[13] = $request->ID_Terminal_Data_Transfer;
         $values[14] = $request->ID_Cardholder_Method;
+        $arrayValues = array();
 
         $answer = array();
+        $answerAllRight = array();
         $response = array();
         $array = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
+        R,NUM_SEC,MONTO1 from test where ";
+
+        $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+        KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
+        R,NUM_SEC,MONTO1 from test";
 
         //Eliminar values y label que no se estén filtrando
         for ($key = 0; $key < 15; $key++) {
-            if ($values[$key] == "NonValue" || $values[$key] == "allData") {
+            if(empty($values[$key])) {
                 unset($values[$key]);
                 unset($label[$key]);
             }
         }
+
         $filteredValues = array_values($values);
         $filteredLabels = array_values($label);
 
-        //Filtrado de acuerdo a las opciones elegidas en frontend
-        switch (sizeof($filteredValues)) {
-            case 1: {
-                $response = DB::select($query . $filteredLabels[0] . " = ?", [$filteredValues[0]]);
-                $array = json_decode(json_encode($response), true); //Array asociativo
-                break;
-            }
-            case 2: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ?) and 
-                (".$filteredLabels[1]." = ?)",
-                [$filteredValues[0], $filteredValues[1]]);
-                $array = json_decode(json_encode($response), true); //Array asociativo
-                break;
-            }
-            case 3: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ?) and
-                (".$filteredLabels[1]." = ?) and
-                (".$filteredLabels[2]." = ?)",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2]]);
-                $array = json_decode(json_encode($response), true); //Array asociativo
-                break;
-            }
-            case 4: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ?) and
-                (".$filteredLabels[1]." = ?) and
-                (".$filteredLabels[2]." = ?) and
-                (".$filteredLabels[3]." = ?)",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3]]);
+        if(empty($filteredValues)){
+            $response = DB::select($queryOutFilters);
+            $array = json_decode(json_encode($response), true);
+        }else{
+            if(count($filteredValues) < 1){
+                for($i = 0; $i < count($filteredValues); $i++){
+                    for($j = 0; $j < count($filteredValues[$i]); $j++){
+                        $response = array_merge($response, DB::select($query.$filteredLabels[$i]." = ?",
+                        [$filteredValues[$i][$j]]));
+                    }
+                }
                 $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 5: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? )",
-                [ $filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3],
-                $filteredValues[4]]);
+            }else{
+                //Ingresar todos los valores elegidos en el filtro dentro de un solo arreglo. (Valores para la consulta)
+                for($i = 0; $i < count($filteredValues); $i++){
+                    for($j = 0; $j < count($filteredValues[$i]); $j++){
+                        array_push($arrayValues, $filteredValues[$i][$j]);
+                    }
+                }
+                $z = 1;
+                //Constructor del query (Varias consultas al mismo tiempo)
+                for($i = 0; $i < count($filteredValues); $i++){
+                    for($j = 0; $j < count($filteredValues[$i]); $j++){
+                        if($j == count($filteredValues[$i]) -1){
+                            if($j == 0){
+                                if($z == count($arrayValues)){
+                                    $query .= "(".$filteredLabels[$i]." = ?)";
+                                }else{
+                                    $query .= "(".$filteredLabels[$i]." = ?) and ";
+                                }
+                                $z++;
+                            }else{
+                                if($z == count($arrayValues)){
+                                    $query .= $filteredLabels[$i]." = ?)";
+                                    $z = 1;
+                                }else{
+                                    $query .= $filteredLabels[$i]." = ?) and ";
+                                    $z++;
+                                }
+                            }
+                        }else{
+                            if($j == 0){
+                                $query .= "(".$filteredLabels[$i]." = ? or ";
+                                $z++;
+                            }else{
+                                $query .= $filteredLabels[$i]." = ? or ";
+                                $z++;
+                            }
+                        }
+                    }
+                }
+                //Consulta del query obtenido por los filtros y los valores elegidos
+                $response = DB::select($query, [...$arrayValues]);
                 $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 6: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? )and
-                (".$filteredLabels[1]." = ? )and 
-                (".$filteredLabels[2]." = ? )and 
-                (".$filteredLabels[3]." = ? )and 
-                (".$filteredLabels[4]." = ? )and
-                (".$filteredLabels[5]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], 
-                $filteredValues[4], $filteredValues[5]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 7: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 8: {
-                    $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 9: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and 
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and 
-                (".$filteredLabels[3]." = ? ) and 
-                (".$filteredLabels[4]." = ? ) and 
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 10: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 11: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 12: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 13: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? ) and
-                (".$filteredLabels[12]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 14: {
-                    $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? ) and
-                (".$filteredLabels[12]." = ? ) and
-                (".$filteredLabels[13]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12], $filteredValues[13]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 15: {
-                $response = DB::select($query."
-                (" . $filteredLabels[0] . " = ? ) and
-                (" . $filteredLabels[1] . " = ? ) and
-                (" . $filteredLabels[2] . " = ? ) and
-                (" . $filteredLabels[3] . " = ? ) and
-                (" . $filteredLabels[4] . " = ? ) and
-                (" . $filteredLabels[5] . " = ? ) and
-                (" . $filteredLabels[6] . " = ? ) and
-                (" . $filteredLabels[7] . " = ? ) and
-                (" . $filteredLabels[8] . " = ? ) and
-                (" . $filteredLabels[9] . " = ? ) and
-                (" . $filteredLabels[10] . " = ? ) and
-                (" . $filteredLabels[11] . " = ? ) and
-                (" . $filteredLabels[12] . " = ? ) and
-                (" . $filteredLabels[13] . " = ? ) and
-                (" . $filteredLabels[14] . " = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12], $filteredValues[13], $filteredValues[14]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            default: {
-                $response = DB::select("select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
-                KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
-                $array = json_decode(json_encode($response), true);
-                break;
             }
         }
-
+        
         foreach ($array as $key => $data) {
-
             $termLocFlag = 0; $cardholdrPresFlag = 0; $cardPresenceFlag = 0; $cardholdrMethodFlag = 0;
             $termAttFlag = 0; $termActivateFlag = 0; $routingFlag = 0; $termDataTransFlag = 0;
             $termOperFlag = 0; $reqStatusFlag = 0; $secLevelFlag = 0; $cardCaptureFlag = 0;
-
             switch($data['KQ2_ID_MEDIO_ACCESO']){   
                 case '00': {
                     //subcampo 1
@@ -938,331 +767,85 @@ class TokenC4Controller extends Controller
                     break;
                 }
             }
-
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key]->ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key]->ID_Terminal_Attended = $data['KC4_TERM_ATTEND_IND']; //subcampo 1
-            $answer[$key]->TermAttFlag = $termAttFlag;
-            $answer[$key]->ID_Terminal = $data['KC4_TERM_OPER_IND']; //subcampo 2
-            $answer[$key]->TermOperFlag = $termOperFlag;
-            $answer[$key]->Terminal_Location = $data['KC4_TERM_LOC_IND']; //subcampo 3
-            $answer[$key]->TermLocFlag = $termLocFlag;
-            $answer[$key]->ID_Cardholder_Presence = $data['KC4_CRDHLDR_PRESENT_IND']; //subcampo 4
-            $answer[$key]->CardholdrPresFlag = $cardholdrPresFlag;
-            $answer[$key]->ID_Card_Presence = $data['KC4_CRD_PRESENT_IND']; //subcampo 5
-            $answer[$key]->CardpresenceFlag = $cardPresenceFlag;
-            $answer[$key]->ID_Card_Capture = $data['KC4_CRD_CAPTR_IND']; //subcampo 6
-            $answer[$key]->CardCaptureFlag = $cardCaptureFlag;
-            $answer[$key]->ID_Status = $data['KC4_TXN_STAT_IND']; //subcampo 7
-            $answer[$key]->ReqStatusFlag = $reqStatusFlag;
-            $answer[$key]->Security_Level = $data['KC4_TXN_SEC_IND']; //subcampo 8
-            $answer[$key]->SecLevelFlag = $secLevelFlag;
-            $answer[$key]->Routing_Indicator = $data['KC4_TXN_RTN_IND']; //subcampo 9
-            $answer[$key]->routingFlag = $routingFlag;
-            $answer[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND']; //subcampo 10
-            $answer[$key]->TermActivationFlag = $termActivateFlag;
-            $answer[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND']; //subcampo 11
-            $answer[$key]->TermDataTransFlag = $termDataTransFlag; 
-            $answer[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
-            $answer[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;
-        }
-
-        $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
-        return $arrayJson;
-    }
-
-    //FUNCIÓN PARA MANDAR INFORMACIÓN DE LA TABLA DE COMERCIOS (FILTRADA)
-    public function getDataTableComerceFilter(Request $request)
-    {
-        $values = array();
-        $label = [
-            'KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 'KC4_CRDHLDR_PRESENT_IND',
-            'KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',
-            'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD'
-        ];
-
-        //No se usa estructura de control por el request
-        $values[0] = $request->Kq2;
-        $values[1] = $request->Code_Response;
-        $values[2] = $request->Entry_Mode;
-        $values[3] = $request->ID_Terminal_Attended;
-        $values[4] = $request->ID_Terminal;
-        $values[5] = $request->Terminal_Location;
-        $values[6] = $request->ID_Cardholder_Presence;
-        $values[7] = $request->ID_Card_Presence;
-        $values[8] = $request->ID_Card_Capture;
-        $values[9] = $request->ID_Status;
-        $values[10] = $request->Security_Level;
-        $values[11] = $request->Routing_Indicator;
-        $values[12] = $request->Terminal_Activation_Cardholder;
-        $values[13] = $request->ID_Terminal_Data_Transfer;
-        $values[14] = $request->ID_Cardholder_Method;
-
-        $answer = array();
-        $array = array();
-        $response = array();
-        $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
-        R,NUM_SEC,MONTO1 from test where ";
-
-        //Eliminar aquellos elementos que esten vacios para hacer la consulta
-        for ($key = 0; $key < 15; $key++) {
-            if ($values[$key] == "NonValue" || $values[$key] == "allData") {
-                unset($values[$key]);
-                unset($label[$key]);
+            if($termAttFlag == 0 || $termAttFlag == 0 || $termOperFlag == 0 || $termLocFlag == 0
+                || $cardholdrPresFlag == 0 || $cardPresenceFlag == 0 || $cardCaptureFlag == 0 ||
+                $reqStatusFlag == 0 || $secLevelFlag == 0 || $routingFlag == 0 || $termActivateFlag == 0 ||
+                $termDataTransFlag == 0 || $cardholdrMethodFlag == 0){
+                $answer[$key] = new stdClass();
+                $answer[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answer[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
+                $answer[$key]->ID_Entry_Mode = $data['ENTRY_MODE'];
+                $answer[$key]->ID_Terminal_Attended = $data['KC4_TERM_ATTEND_IND']; //subcampo 1
+                $answer[$key]->TermAttFlag = $termAttFlag;
+                $answer[$key]->ID_Terminal = $data['KC4_TERM_OPER_IND']; //subcampo 2
+                $answer[$key]->TermOperFlag = $termOperFlag;
+                $answer[$key]->Terminal_Location = $data['KC4_TERM_LOC_IND']; //subcampo 3
+                $answer[$key]->TermLocFlag = $termLocFlag;
+                $answer[$key]->ID_Cardholder_Presence = $data['KC4_CRDHLDR_PRESENT_IND']; //subcampo 4
+                $answer[$key]->CardholdrPresFlag = $cardholdrPresFlag;
+                $answer[$key]->ID_Card_Presence = $data['KC4_CRD_PRESENT_IND']; //subcampo 5
+                $answer[$key]->CardpresenceFlag = $cardPresenceFlag;
+                $answer[$key]->ID_Card_Capture = $data['KC4_CRD_CAPTR_IND']; //subcampo 6
+                $answer[$key]->CardCaptureFlag = $cardCaptureFlag;
+                $answer[$key]->ID_Status = $data['KC4_TXN_STAT_IND']; //subcampo 7
+                $answer[$key]->ReqStatusFlag = $reqStatusFlag;
+                $answer[$key]->Security_Level = $data['KC4_TXN_SEC_IND']; //subcampo 8
+                $answer[$key]->SecLevelFlag = $secLevelFlag;
+                $answer[$key]->Routing_Indicator = $data['KC4_TXN_RTN_IND']; //subcampo 9
+                $answer[$key]->routingFlag = $routingFlag;
+                $answer[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND']; //subcampo 10
+                $answer[$key]->TermActivationFlag = $termActivateFlag;
+                $answer[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND']; //subcampo 11
+                $answer[$key]->TermDataTransFlag = $termDataTransFlag; 
+                $answer[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
+                $answer[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;
+                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key]->Fiid_Comerce = $data['FIID_COMER'];
+                $answer[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+                //$answer[$key]->R = $data['R'];
+                $answer[$key]->Number_Sec = $data['NUM_SEC'];
+                $answer[$key]->amount = number_format($data['MONTO1'], 2, '.');
+            }else{
+                $answerAllRight[$key] = new stdClass();
+                $answerAllRight[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answerAllRight[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
+                $answerAllRight[$key]->ID_Entry_Mode = $data['ENTRY_MODE'];
+                $answerAllRight[$key]->ID_Terminal_Attended = $data['KC4_TERM_ATTEND_IND']; //subcampo 1
+                $answerAllRight[$key]->TermAttFlag = $termAttFlag;
+                $answerAllRight[$key]->ID_Terminal = $data['KC4_TERM_OPER_IND']; //subcampo 2
+                $answerAllRight[$key]->TermOperFlag = $termOperFlag;
+                $answerAllRight[$key]->Terminal_Location = $data['KC4_TERM_LOC_IND']; //subcampo 3
+                $answerAllRight[$key]->TermLocFlag = $termLocFlag;
+                $answerAllRight[$key]->ID_Cardholder_Presence = $data['KC4_CRDHLDR_PRESENT_IND']; //subcampo 4
+                $answerAllRight[$key]->CardholdrPresFlag = $cardholdrPresFlag;
+                $answerAllRight[$key]->ID_Card_Presence = $data['KC4_CRD_PRESENT_IND']; //subcampo 5
+                $answerAllRight[$key]->CardpresenceFlag = $cardPresenceFlag;
+                $answerAllRight[$key]->ID_Card_Capture = $data['KC4_CRD_CAPTR_IND']; //subcampo 6
+                $answerAllRight[$key]->CardCaptureFlag = $cardCaptureFlag;
+                $answerAllRight[$key]->ID_Status = $data['KC4_TXN_STAT_IND']; //subcampo 7
+                $answerAllRight[$key]->ReqStatusFlag = $reqStatusFlag;
+                $answerAllRight[$key]->Security_Level = $data['KC4_TXN_SEC_IND']; //subcampo 8
+                $answerAllRight[$key]->SecLevelFlag = $secLevelFlag;
+                $answerAllRight[$key]->Routing_Indicator = $data['KC4_TXN_RTN_IND']; //subcampo 9
+                $answerAllRight[$key]->routingFlag = $routingFlag;
+                $answerAllRight[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND']; //subcampo 10
+                $answerAllRight[$key]->TermActivationFlag = $termActivateFlag;
+                $answerAllRight[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND']; //subcampo 11
+                $answerAllRight[$key]->TermDataTransFlag = $termDataTransFlag; 
+                $answerAllRight[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
+                $answerAllRight[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;
+                $answerAllRight[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answerAllRight[$key]->Fiid_Comerce = $data['FIID_COMER'];
+                $answerAllRight[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+                //$answer[$key]->R = $data['R'];
+                $answerAllRight[$key]->Number_Sec = $data['NUM_SEC'];
+                $answerAllRight[$key]->amount = number_format($data['MONTO1'], 2, '.');
             }
         }
-        $filteredValues = array_values($values);
-        $filteredLabels = array_values($label);
-
-        switch (sizeof($filteredValues)) {
-            case 1: {
-                $response = DB::select($query . $filteredLabels[0] . " = ?", [$filteredValues[0]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 2: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? )",
-                [$filteredValues[0], $filteredValues[1]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 3: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 4: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 5: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? )",
-                [ $filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3],
-                $filteredValues[4]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 6: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? )and
-                (".$filteredLabels[1]." = ? )and 
-                (".$filteredLabels[2]." = ? )and 
-                (".$filteredLabels[3]." = ? )and 
-                (".$filteredLabels[4]." = ? )and
-                (".$filteredLabels[5]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], 
-                $filteredValues[4], $filteredValues[5]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 7: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 8: {
-                    $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 9: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and 
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and 
-                (".$filteredLabels[3]." = ? ) and 
-                (".$filteredLabels[4]." = ? ) and 
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 10: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 11: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 12: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 13: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? ) and
-                (".$filteredLabels[12]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 14: {
-                    $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? ) and
-                (".$filteredLabels[12]." = ? ) and
-                (".$filteredLabels[13]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12], $filteredValues[13]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            case 15: {
-                $response = DB::select($query."
-                (".$filteredLabels[0]." = ? ) and
-                (".$filteredLabels[1]." = ? ) and
-                (".$filteredLabels[2]." = ? ) and
-                (".$filteredLabels[3]." = ? ) and
-                (".$filteredLabels[4]." = ? ) and
-                (".$filteredLabels[5]." = ? ) and
-                (".$filteredLabels[6]." = ? ) and
-                (".$filteredLabels[7]." = ? ) and
-                (".$filteredLabels[8]." = ? ) and
-                (".$filteredLabels[9]." = ? ) and
-                (".$filteredLabels[10]." = ? ) and
-                (".$filteredLabels[11]." = ? ) and
-                (".$filteredLabels[12]." = ? ) and
-                (".$filteredLabels[13]." = ? ) and
-                (".$filteredLabels[14]." = ? )",
-                [$filteredValues[0], $filteredValues[1], $filteredValues[2], $filteredValues[3], $filteredValues[4],
-                $filteredValues[5], $filteredValues[6], $filteredValues[7], $filteredValues[8], $filteredValues[9],
-                $filteredValues[10], $filteredValues[11], $filteredValues[12], $filteredValues[13], $filteredValues[14]]);
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-            default: {
-                $response = DB::select("select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,
-                R,NUM_SEC,MONTO1 from test");
-                $array = json_decode(json_encode($response), true);
-                break;
-            }
-        }
-
-        foreach ($array as $key => $data) {
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key]->ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key]->ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key]->Fiid_Comerce = $data['FIID_COMER'];
-            $answer[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-            $answer[$key]->R = $data['R'];
-            $answer[$key]->Number_Sec = $data['NUM_SEC'];
-            $answer[$key]->amount = number_format($data['MONTO1'], 2, '.');
-        }
-
-        $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
+        $badResponse = array_values($answer);
+        $goodResponse = array_values($answerAllRight);
+        $generalResponse = array_merge($badResponse, $goodResponse);
+        $arrayJson = json_decode(json_encode($generalResponse), true); //Codificar a un array asociativo
         return $arrayJson;
     }
 }
