@@ -35,8 +35,8 @@ Route::post('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos
 Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter'); //Datos para tabla del Token
 
 //RUTAS TOKEN C0
-Route::get('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer datos para tabla principal
-Route::post('/tokenC0Filter', 'App\Http\Controllers\TokenC0Controller@getDataTableFilter'); //Datos para el filtro
+Route::post('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer datos para tabla principal
+Route::post('/tokenC0Filter/main', 'App\Http\Controllers\TokenC0Controller@getDataTableFilter'); //Datos para el filtro
 
 //RUTAS TOKEN B3
 Route::get('/tokenB3', 'App\Http\Controllers\TokenB3Controller@index'); //Traer datos para la tabla principal

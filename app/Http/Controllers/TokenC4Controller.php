@@ -24,6 +24,11 @@ class TokenC4Controller extends Controller
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
         KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
 
+        /*
+        Detectar cual de lso filtros está siendo utilizad.
+        Se incermenta la variable $numberFilters para ingresar al switch
+        y se configura la bandera para saber cual de estos filtros son utilizados.
+        */
         if(!empty($kq2)){ $numberFilters++; $flagkq2 = true;}
         if(!empty($codeResponse)) { $numberFilters++; $flagCode = true;}
         if(!empty($entryMode)){ $numberFilters++; $flagEntry = true;}
@@ -44,7 +49,7 @@ class TokenC4Controller extends Controller
                     }
                     $array = json_decode(json_encode($response), true);
                 }
-                if($flagEntry){
+                if($flagEntry){ //Filtrado por entry mode
                     for($i = 0; $i < count($entryMode); $i++){
                         $response = array_merge($response, DB::select($query."
                         ENTRY_MODE = ?", [$entryMode[$i]]));
@@ -141,7 +146,7 @@ class TokenC4Controller extends Controller
                 }
                 break;
             }
-            case 3: {
+            case 3: { //Los tres filtros son utilizados
                 if($flagkq2 && $flagCode && $flagEntry){
                     $firstLength = max($kq2, $codeResponse, $entryMode);
                     switch($firstLength){
@@ -322,7 +327,7 @@ class TokenC4Controller extends Controller
             $response = DB::select($queryOutFilters);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) < 1){
+            if(count($filteredValues) <= 1){
                 for($i = 0; $i < count($filteredValues); $i++){
                     for($j = 0; $j < count($filteredValues[$i]); $j++){
                         $response = array_merge($response, DB::select($query.$filteredLabels[$i]." = ?",
@@ -337,7 +342,7 @@ class TokenC4Controller extends Controller
                         array_push($arrayValues, $filteredValues[$i][$j]);
                     }
                 }
-                $z = 1;
+                $z = 1; //Variable 'controladora' de el largo del query
                 //Constructor del query (Varias consultas al mismo tiempo)
                 for($i = 0; $i < count($filteredValues); $i++){
                     for($j = 0; $j < count($filteredValues[$i]); $j++){

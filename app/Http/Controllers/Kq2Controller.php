@@ -86,8 +86,8 @@ class Kq2Controller extends Controller
             $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
             $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');
             $answer[$key] -> rejected_Amount = number_format($data['MONTOR'], 2, '.'); 
-            $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2);
-            $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2);
+            $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 4);
+            $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 4);
         }
         $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;

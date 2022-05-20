@@ -85,8 +85,8 @@ class EntryModeController extends Controller
             $answer[$key]->accepted_TX = number_format($data['TXSA']);
             $answer[$key]->rejected_Amount = number_format($data['MONTOR'], 2, '.');
             $answer[$key]->rejected_TX = number_format($data['TXSR']);
-            $answer[$key]->percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2);
-            $answer[$key]->percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2);
+            $answer[$key]->percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 4);
+            $answer[$key]->percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 4);
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
