@@ -323,6 +323,14 @@ class TokenC4Controller extends Controller
         $filteredValues = array_values($values);
         $filteredLabels = array_values($label);
 
+        for($i = 0; $i < count($filteredValues); $i++){
+            for($j = 0; $j < count($filteredValues[$i]); $j++){
+                if($filteredValues[$i][$j] === null){
+                    $filteredValues[$i][$j] = " ";
+                }
+            }
+        }
+
         if(empty($filteredValues)){
             $response = DB::select($queryOutFilters);
             $array = json_decode(json_encode($response), true);
@@ -809,7 +817,7 @@ class TokenC4Controller extends Controller
                 $answer[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 //$answer[$key]->R = $data['R'];
                 $answer[$key]->Number_Sec = $data['NUM_SEC'];
-                $answer[$key]->amount = number_format($data['MONTO1'], 2, '.');
+                $answer[$key]->amount = $data['MONTO1'];
             }else{
                 $answerAllRight[$key] = new stdClass();
                 $answerAllRight[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -844,7 +852,7 @@ class TokenC4Controller extends Controller
                 $answerAllRight[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 //$answer[$key]->R = $data['R'];
                 $answerAllRight[$key]->Number_Sec = $data['NUM_SEC'];
-                $answerAllRight[$key]->amount = number_format($data['MONTO1'], 2, '.');
+                $answerAllRight[$key]->amount = $data['MONTO1'];
             }
         }
         $badResponse = array_values($answer);

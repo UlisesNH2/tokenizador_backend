@@ -68,7 +68,6 @@ class Kq2Controller extends Controller
                 $response = array_merge($response, DB::select($queryFilter, [$kq2Filter[$i], $kq2Filter[$i]]));
             }
             $array = json_decode(json_encode($response), true);
-
         }else{
             $response = array_merge($response, DB::select($query));
             $array = json_decode(json_encode($response), true);
@@ -84,8 +83,8 @@ class Kq2Controller extends Controller
             $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
             $answer[$key] -> TX_Accepted = number_format($data['TXSA']);
             $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
-            $answer[$key] -> accepted_Amount = number_format($data['MONTOA'], 2, '.');
-            $answer[$key] -> rejected_Amount = number_format($data['MONTOR'], 2, '.'); 
+            $answer[$key] -> accepted_Amount = $data['MONTOA'];
+            $answer[$key] -> rejected_Amount = $data['MONTOR']; 
             $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 4);
             $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 4);
         }

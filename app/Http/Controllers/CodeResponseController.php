@@ -62,7 +62,7 @@ class codeResponseController extends Controller
             $answer[$key] = new stdClass();
             $answer[$key]->ID = $data['CODIGO_RESPUESTA'];
             $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
-            $answer[$key]->CodeResp_Amount = number_format($data['MONTO'], 2, '.');
+            $answer[$key]->CodeResp_Amount = $data['MONTO'];
             $answer[$key]->CodeResp_TXS = number_format($data['TXS']);
             $answer[$key]->CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 4);
         }

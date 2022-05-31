@@ -8,6 +8,7 @@ use SebastianBergmann\CodeCoverage\Driver\Selector;
 use stdClass;
 
 use function PHPSTORM_META\map;
+use function PHPUnit\Framework\isNull;
 
 class TokenC0Controller extends Controller
 {
@@ -298,6 +299,14 @@ class TokenC0Controller extends Controller
         }
         $filteredValues = array_values($values);
         $filteredLabels = array_values($label);
+
+        for($i = 0; $i < count($filteredValues); $i++){
+            for($j = 0; $j < count($filteredValues[$i]); $j++){
+                if($filteredValues[$i][$j] === null){
+                    $filteredValues[$i][$j] = " ";
+                }
+            }
+        }
 
         if(empty($filteredValues)){//Ningún filtro ha sido seleccionado para la tabla
             $response = DB::select($queryOutFilters);
