@@ -62,9 +62,12 @@ class codeResponseController extends Controller
             $answer[$key] = new stdClass();
             $answer[$key]->ID = $data['CODIGO_RESPUESTA'];
             $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
-            $answer[$key]->CodeResp_Amount = $data['MONTO'];
+            //Separación de cifra decimal y entera para el monto
+            $dec = substr($data['MONTO'], strlen($data['MONTO'])-2, 2);
+            $int = substr($data['MONTO'], 0, strlen($data['MONTO'])-2);
+            $answer[$key]->CodeResp_Amount = '$'.number_format($int.".".$dec, 2);
             $answer[$key]->CodeResp_TXS = number_format($data['TXS']);
-            $answer[$key]->CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 4);
+            $answer[$key]->CodeResp_Percent = round(($data['TXS'] / $totalTX * 100), 2).'%';
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;

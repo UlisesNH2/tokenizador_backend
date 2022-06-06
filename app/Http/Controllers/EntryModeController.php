@@ -81,12 +81,17 @@ class EntryModeController extends Controller
             $answer[$key] = new stdClass();
             $answer[$key]->ID = $data['ENTRY_MODE'];
             $answer[$key]->Description = $data['ENTRY_MODE_DES'];
-            $answer[$key]->accepted_Amount = $data['MONTOA'];
+            //Separación del numero decimal y entero de ambos montos
+            $decAccepted = substr($data['MONTOA'], strlen($data['MONTOA'])-2, 2);
+            $intAccepted = substr($data['MONTOA'], 0, strlen($data['MONTOA'])-2);
+            $answer[$key]->accepted_Amount = '$'.number_format($intAccepted.'.'.$decAccepted);
+            $decRejected = substr($data['MONTOR'], strlen($data['MONTOR'])-2, 2);
+            $intRejected = substr($data['MONTOR'], 0, strlen($data['MONTOA'])-2);
+            $answer[$key]->rejected_Amount = '$'.number_format($intRejected.'.'.$decRejected, 2);
             $answer[$key]->accepted_TX = number_format($data['TXSA']);
-            $answer[$key]->rejected_Amount = $data['MONTOR'];
             $answer[$key]->rejected_TX = number_format($data['TXSR']);
-            $answer[$key]->percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 4);
-            $answer[$key]->percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 4);
+            $answer[$key]->percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2).'%';
+            $answer[$key]->percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2).'%';
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;

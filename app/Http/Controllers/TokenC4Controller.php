@@ -20,9 +20,10 @@ class TokenC4Controller extends Controller
         $flagkq2 = false;
         $flagCode = false;
         $flagEntry = false;
-        $query = "select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+        $query = "select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER,
+        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -246,9 +247,10 @@ class TokenC4Controller extends Controller
                 break;
             }
             default: {
-                $response = DB::select("select KQ2_ID_MEDIO_ACCESO, ENTRY_MODE, CODIGO_RESPUESTA, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
+                $response = DB::select("select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
                 KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
+                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER,
+                FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -268,6 +270,14 @@ class TokenC4Controller extends Controller
             $answer[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND'];
             $answer[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND'];
             $answer[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD'];
+            $answer[$key]->ID_Comer = $data['ID_COMER'];
+            $answer[$key]->Term_Comer = $data['TERM_COMER'];
+            $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+            $answer[$key]->Ln_Comer = $data['LN_COMER'];
+            $answer[$key]->Ln_Term = $data['LN_TERM'];
+            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key]->Ln_Card = $data['LN_TARJ'];
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
@@ -277,9 +287,10 @@ class TokenC4Controller extends Controller
     public function getTableFilter(Request $request)
     {
         $values = array();
-        $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 'KC4_CRDHLDR_PRESENT_IND',
-            'KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',
-            'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD'];
+        $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 
+        'KC4_CRDHLDR_PRESENT_IND','KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',
+        'KC4_CRDHLDR_ACTVT_TERM_IND', 'KC4_TERM_INPUT_CAP_IND', 'KC4_CRDHLDR_ID_METHOD', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
 
         $values[0] = $request->Kq2;
         $values[1] = $request->Code_Response;
@@ -296,6 +307,15 @@ class TokenC4Controller extends Controller
         $values[12] = $request->Terminal_Activation_Cardholder;
         $values[13] = $request->ID_Terminal_Data_Transfer;
         $values[14] = $request->ID_Cardholder_Method;
+        $values[15] = $request->ID_Comer;
+        $values[16] = $request->Term_Comer;
+        $values[17] = $request->Fiid_Comer;
+        $values[18] = $request->Fiid_Term;
+        $values[19] = $request->Ln_Comer;
+        $values[20] = $request->Ln_Term;
+        $values[21] = $request->Fiid_Card;
+        $values[22] = $request->Ln_Card;
+
         $arrayValues = array();
 
         $answer = array();
@@ -304,16 +324,16 @@ class TokenC4Controller extends Controller
         $array = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
-        R,NUM_SEC,MONTO1 from test where ";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
-        R,NUM_SEC,MONTO1 from test";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Eliminar values y label que no se estén filtrando
-        for ($key = 0; $key < 15; $key++) {
+        for ($key = 0; $key < 23; $key++) {
             if(empty($values[$key])) {
                 unset($values[$key]);
                 unset($label[$key]);
@@ -330,7 +350,7 @@ class TokenC4Controller extends Controller
                 }
             }
         }
-
+        
         if(empty($filteredValues)){
             $response = DB::select($queryOutFilters);
             $array = json_decode(json_encode($response), true);
@@ -812,12 +832,21 @@ class TokenC4Controller extends Controller
                 $answer[$key]->TermDataTransFlag = $termDataTransFlag; 
                 $answer[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
                 $answer[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;
-                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
-                $answer[$key]->Fiid_Comerce = $data['FIID_COMER'];
                 $answer[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 //$answer[$key]->R = $data['R'];
                 $answer[$key]->Number_Sec = $data['NUM_SEC'];
-                $answer[$key]->amount = $data['MONTO1'];
+                //Separación del monto en decimal y entero para agregar el punto decimal
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+                $int =  substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answer[$key]->amount = '$'.number_format($int.'.'.$dec, 2);
+                $answer[$key]->ID_Comer = $data['ID_COMER'];
+                $answer[$key]->Term_Comer = $data['TERM_COMER'];
+                $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answer[$key]->Ln_Comer = $data['LN_COMER'];
+                $answer[$key]->Ln_Term = $data['LN_TERM'];
+                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key]->Ln_Card = $data['LN_TARJ'];
             }else{
                 $answerAllRight[$key] = new stdClass();
                 $answerAllRight[$key]->ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -846,13 +875,21 @@ class TokenC4Controller extends Controller
                 $answerAllRight[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND']; //subcampo 11
                 $answerAllRight[$key]->TermDataTransFlag = $termDataTransFlag; 
                 $answerAllRight[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
-                $answerAllRight[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;
-                $answerAllRight[$key]->Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRight[$key]->Fiid_Comerce = $data['FIID_COMER'];
+                $answerAllRight[$key]->CardholdrMethodFlag = $cardholdrMethodFlag;;
                 $answerAllRight[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                //$answer[$key]->R = $data['R'];
                 $answerAllRight[$key]->Number_Sec = $data['NUM_SEC'];
-                $answerAllRight[$key]->amount = $data['MONTO1'];
+                //Separación del monto en decimal y entero para agregar el punto decimal
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+                $int =  substr($data['MONTO1'], 0, strlen($data['MONTO1'])-2);
+                $answerAllRight[$key]->amount = '$'.number_format($int.'.'.$dec, 2);
+                $answerAllRight[$key]->ID_Comer = $data['ID_COMER'];
+                $answerAllRight[$key]->Term_Comer = $data['TERM_COMER'];
+                $answerAllRight[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answerAllRight[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answerAllRight[$key]->Ln_Comer = $data['LN_COMER'];
+                $answerAllRight[$key]->Ln_Term = $data['LN_TERM'];
+                $answerAllRight[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answerAllRight[$key]->Ln_Card = $data['LN_TARJ'];
             }
         }
         $badResponse = array_values($answer);

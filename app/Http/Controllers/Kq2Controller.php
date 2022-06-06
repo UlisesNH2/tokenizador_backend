@@ -83,10 +83,15 @@ class Kq2Controller extends Controller
             $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
             $answer[$key] -> TX_Accepted = number_format($data['TXSA']);
             $answer[$key] -> TX_Rejected = number_format($data['TXSR']);
-            $answer[$key] -> accepted_Amount = $data['MONTOA'];
-            $answer[$key] -> rejected_Amount = $data['MONTOR']; 
-            $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 4);
-            $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 4);
+            //Separación decimal y entero de ambos montos
+            $decAccepted = substr($data['MONTOA'], strlen($data['MONTOA'])-2, 2);
+            $intAccepted = substr($data['MONTOA'], 0, strlen($data['MONTOA'])-2);
+            $answer[$key] -> accepted_Amount = '$'.number_format($intAccepted.".".$decAccepted, 2);
+            $decRejected = substr($data['MONTOR'], strlen($data['MONTOA'])-2, 2);
+            $intRejected = substr($data['MONTOR'], 0, strlen($data['MONTOR'])-2);
+            $answer[$key] -> rejected_Amount = '$'.number_format($intRejected.".".$decRejected, 2);
+            $answer[$key] -> percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2).'%';
+            $answer[$key] -> percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2).'%';
         }
         $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;

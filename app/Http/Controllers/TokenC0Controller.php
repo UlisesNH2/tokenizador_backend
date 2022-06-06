@@ -28,7 +28,8 @@ class TokenC0Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test where ";
+        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER,
+        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -249,7 +250,8 @@ class TokenC0Controller extends Controller
             }
             default: {
                 $response = DB::select("select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test");
+                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER,
+                FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
                 $array = json_decode(json_encode($response), true);
             }
         }
@@ -259,6 +261,14 @@ class TokenC0Controller extends Controller
             $answer[$key] -> Card_Type = $data['KC0_TIPO_DE_TARJETA'];
             $answer[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
             $answer[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
+            $answer[$key] -> ID_Comer = $data['ID_COMER'];
+            $answer[$key] -> Term_Comer = $data['TERM_COMER'];
+            $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $answer[$key] -> Ln_Comer = $data['LN_COMER'];
+            $answer[$key] -> Ln_Term = $data['LN_TERM'];
+            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key] -> Ln_Card = $data['LN_TARJ'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
@@ -268,7 +278,8 @@ class TokenC0Controller extends Controller
     {
         $values = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC0_INDICADOR_DE_COMERCIO_ELEC', 'KC0_TIPO_DE_TARJETA', 'KC0_INDICADOR_DE_CVV2_CVC2_PRE',
-        'KC0_INDICADOR_DE_INFORMACION_A'];
+        'KC0_INDICADOR_DE_INFORMACION_A', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM', 'LN_COMER', 'LN_TERM', 'FIID_TARJ', 
+        'LN_TARJ'];
 
         $values[0] = $request->Kq2;
         $values[1] = $request->Code_Response;
@@ -277,6 +288,14 @@ class TokenC0Controller extends Controller
         $values[4] = $request->Card_Type;
         $values[5] = $request->ID_CVV2;
         $values[6] = $request->ID_Information;
+        $values[7] = $request->ID_Comer;
+        $values[8] = $request->Term_Comer;
+        $values[9] = $request->Fiid_Comer;
+        $values[10] = $request->Fiid_Term;
+        $values[11] = $request->Ln_Comer;
+        $values[12] = $request->Ln_Term;
+        $values[13] = $request->Fiid_Card;
+        $values[14] = $request->Ln_Card;
 
         $answer = array();
         $answerAllRight = array();
@@ -284,14 +303,15 @@ class TokenC0Controller extends Controller
         $array = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
-        R,NUM_SEC,MONTO1 from test where ";
+        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1  from test where ";
+
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, FIID_TARJ,FIID_COMER, NOMBRE_DE_TERMINAL,
-        R,NUM_SEC,MONTO1 from test";
+        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Detectar cuales son los filtros seleccionados para la tabla
-        for($key = 0; $key < 7; $key++){
+        for($key = 0; $key < 15; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($label[$key]);
@@ -535,7 +555,18 @@ class TokenC0Controller extends Controller
                 $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answer[$key] -> amount = $data['MONTO1'];
+                //Separación del decimal y entero para agregar el punto decimal
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
+                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answer[$key]->ID_Comer = $data['ID_COMER'];
+                $answer[$key]->Term_Comer = $data['TERM_COMER'];
+                $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answer[$key]->Ln_Comer = $data['LN_COMER'];
+                $answer[$key]->Ln_Term = $data['LN_TERM'];
+                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key]->Ln_Card = $data['LN_TARJ'];
             }else{
                 $answerAllRight[$key] = new stdClass();
                 $answerAllRight[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -553,7 +584,18 @@ class TokenC0Controller extends Controller
                 $answerAllRight[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answerAllRight[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answerAllRight[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answerAllRight[$key] -> amount = $data['MONTO1'];
+                //Separación del decimal y entero para agregar el punto decimal
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
+                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answerAllRight[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answerAllRight[$key]->ID_Comer = $data['ID_COMER'];
+                $answerAllRight[$key]->Term_Comer = $data['TERM_COMER'];
+                $answerAllRight[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answerAllRight[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answerAllRight[$key]->Ln_Comer = $data['LN_COMER'];
+                $answerAllRight[$key]->Ln_Term = $data['LN_TERM'];
+                $answerAllRight[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answerAllRight[$key]->Ln_Card = $data['LN_TARJ'];
             }
         }
         $badResponse = array_values($answer);

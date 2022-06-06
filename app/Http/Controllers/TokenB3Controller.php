@@ -24,8 +24,8 @@ class TokenB3Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, 
-        KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME  
-        from test where ";
+        KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER,
+        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
 
         //Detectar cuales filtros son los que están siendo utilizados
         if(!empty($kq2)){ $numberFilters++; $flagKq2 = true; }
@@ -245,8 +245,8 @@ class TokenB3Controller extends Controller
             }
             default:{
                 $response = DB::select("select KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, 
-                KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME  
-                from test");
+                KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME,  
+                ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -264,6 +264,14 @@ class TokenB3Controller extends Controller
             $answer[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
             $answer[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
             $answer[$key] -> File_Name = $data['KB3_DF_NAME'];
+            $answer[$key] -> ID_Comer = $data['ID_COMER'];
+            $answer[$key] -> Term_Comer = $data['TERM_COMER'];
+            $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $answer[$key] -> Ln_Comer = $data['LN_COMER'];
+            $answer[$key] -> Ln_Term = $data['LN_TERM'];
+            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key] -> Ln_Card = $data['LN_TARJ'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
@@ -272,7 +280,8 @@ class TokenB3Controller extends Controller
     public function getDataTableFilter(Request $request){
         $values = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KB3_BIT_MAP', 'KB3_TERM_SRL_NUM', 'KB3_EMV_TERM_CAP', 'KB3_USR_FLD1', 'KB3_USR_FLD2',
-                'KB3_EMV_TERM_TYPE', 'KB3_APP_VER_NUM', 'KB3_CVM_RSLTS', 'KB3_DF_NAME_LGTH', 'KB3_DF_NAME'];
+        'KB3_EMV_TERM_TYPE', 'KB3_APP_VER_NUM', 'KB3_CVM_RSLTS', 'KB3_DF_NAME_LGTH', 'KB3_DF_NAME', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
         $values[0] = $request -> Kq2;
         $values[1] = $request -> Code_Response;
         $values[2] = $request -> Entry_Mode;
@@ -286,19 +295,28 @@ class TokenB3Controller extends Controller
         $values[10] = $request -> CVM_Result;
         $values[11] = $request -> File_Name_Length;
         $values[12] = $request -> File_Name;
+        $values[13] = $request -> ID_Comer;
+        $values[14] = $request -> Term_Comer;
+        $values[15] = $request -> Fiid_Comer;
+        $values[16] = $request -> Ln_Comer;
+        $values[17] = $request -> Ln_Term;
+        $values[18] = $request -> Fiid_Card;
+        $values[19] = $request -> Ln_Card; 
 
         $response = array();
         $answer = array();
         $answerAllRigth = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
-        KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,CODIGO_RESPUESTA,R,NUM_SEC, MONTO1 from test where ";
+        KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
-        KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL,CODIGO_RESPUESTA,R,NUM_SEC, MONTO1 from test";
+        KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Detectar cuales son los filtros utilizados
-        for($key = 0; $key < 13; $key++){
+        for($key = 0; $key < 20; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($label[$key]);
@@ -391,16 +409,16 @@ class TokenB3Controller extends Controller
                     if(strlen($data['KB3_DF_NAME']) == 32){ $fileNameFlag = 1; }
                 }
             }else{
-                if(strlen($data['KB3_BIT_MAP']) == 1){ $bitMapFlag = 1; }
-                if(strlen($data['KB3_TERM_SRL_NUM']) == 1){ $termSerNumFlag = 1; }
-                if(strlen($data['KB3_EMV_TERM_CAP']) == 1){ $checkCHFlag = 1; }
-                if(strlen($data['KB3_USR_FLD1']) == 1){ $userFoFlag = 1; }
-                if(strlen($data['KB3_USR_FLD2']) == 1){ $userFtFlag = 1; }
-                if(strlen($data['KB3_EMV_TERM_TYPE']) == 1){ $termTypeFlag = 1; }
-                if(strlen($data['KB3_APP_VER_NUM']) == 1){ $appVersionFlag = 1; }
-                if(strlen($data['KB3_CVM_RSLTS']) == 1){ $cvmResFlag = 1; }
-                if(strlen($data['KB3_DF_NAME_LGTH']) == 1){ $fileNamelenFlag = 1; }
-                if(strlen($data['KB3_DF_NAME']) == 1){ $fileNameFlag = 1; }
+                if(strlen($data['KB3_BIT_MAP']) == 1 || $data['KB3_BIT_MAP'] == ""){ $bitMapFlag = 1; }
+                if(strlen($data['KB3_TERM_SRL_NUM']) == 1 || $data['KB3_TERM_SRL_NUM'] == ""){ $termSerNumFlag = 1; }
+                if(strlen($data['KB3_EMV_TERM_CAP']) == 1 || $data['KB3_EMV_TERM_CAP'] == ""){ $checkCHFlag = 1; }
+                if(strlen($data['KB3_USR_FLD1']) == 1 || $data['KB3_USR_FLD1'] == ""){ $userFoFlag = 1; }
+                if(strlen($data['KB3_USR_FLD2']) == 1 || $data['KB3_USR_FLD2'] == ""){ $userFtFlag = 1; }
+                if(strlen($data['KB3_EMV_TERM_TYPE']) == 1 || $data['KB3_EMV_TERM_TYPE'] == ""){ $termTypeFlag = 1; }
+                if(strlen($data['KB3_APP_VER_NUM']) == 1 || $data['KB3_APP_VER_NUM'] == ""){ $appVersionFlag = 1; }
+                if(strlen($data['KB3_CVM_RSLTS']) == 1 || $data['KB3_CVM_RSLTS'] == ""){ $cvmResFlag = 1; }
+                if(strlen($data['KB3_DF_NAME_LGTH']) == 1 || $data['KB3_DF_NAME_LGTH'] == ""){ $fileNamelenFlag = 1; }
+                if(strlen($data['KB3_DF_NAME']) == 1 || $data['KB3_DF_NAME'] == ""){ $fileNameFlag = 1; }
             }
 
             if($bitMapFlag == 0 || $termSerNumFlag == 0 || $checkCHFlag == 0 || $userFoFlag == 0||
@@ -435,7 +453,18 @@ class TokenB3Controller extends Controller
                 $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answer[$key] -> amount = $data['MONTO1'];
+                //Separación del decimal y del entero en el monto
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
+                $int = substr($data['MONTO1'], 0, $data['MONTO1']-2);
+                $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answer[$key]->ID_Comer = $data['ID_COMER'];
+                $answer[$key]->Term_Comer = $data['TERM_COMER'];
+                $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answer[$key]->Ln_Comer = $data['LN_COMER'];
+                $answer[$key]->Ln_Term = $data['LN_TERM'];
+                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key]->Ln_Card = $data['LN_TARJ'];
             }else {
                 $answerAllRigth[$key] = new stdClass();
                 $answerAllRigth[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -465,7 +494,18 @@ class TokenB3Controller extends Controller
                 $answerAllRigth[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answerAllRigth[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answerAllRigth[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answerAllRigth[$key] -> amount = $data['MONTO1'];
+                //Separación del decimal y el entero en el monto
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answerAllRigth[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answerAllRigth[$key]->ID_Comer = $data['ID_COMER'];
+                $answerAllRigth[$key]->Term_Comer = $data['TERM_COMER'];
+                $answerAllRigth[$key]->Fiid_Comer = $data['FIID_COMER'];
+                $answerAllRigth[$key]->Fiid_Term = $data['FIID_TERM'];
+                $answerAllRigth[$key]->Ln_Comer = $data['LN_COMER'];
+                $answerAllRigth[$key]->Ln_Term = $data['LN_TERM'];
+                $answerAllRigth[$key]->Fiid_Card = $data['FIID_TARJ'];
+                $answerAllRigth[$key]->Ln_Card = $data['LN_TARJ'];
             }
         }
         $badAnswer = array_values($answer);

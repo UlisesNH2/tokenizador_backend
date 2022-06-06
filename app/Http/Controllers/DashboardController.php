@@ -282,7 +282,10 @@ class DashboardController extends Controller
             $answer[$key] -> code_Response = $data['CODIGO_RESPUESTA'];
             $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key] -> amount = $data['MONTO'];
+            //Separación decimal y entero del monto para agregar el punto
+            $dec = substr($data["MONTO"], strlen($data['MONTO'])-2, 2);
+            $int = substr($data['MONTO'], 0, strlen($data['MONTO'])-2);
+            $answer[$key] -> amount = $int.".".$dec;
             $answer[$key] -> tx = $data['TXS'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
