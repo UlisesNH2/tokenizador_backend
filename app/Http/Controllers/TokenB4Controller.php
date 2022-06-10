@@ -24,7 +24,7 @@ class TokenB4Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
-        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND  from test where ";
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND from test where ";
 
         //Detectar cuales son los filtros que estan siendo utilizados
         if(!empty($kq2)){ $numberFilters++; $flagkq2 = true; }
@@ -267,7 +267,9 @@ class TokenB4Controller extends Controller
 
         $values = array();
         $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE','KB4_PT_SRV_ENTRY_MDE', 'KB4_TERM_ENTRY_CAP', 'KB4_LAST_EMV_STAT', 'KB4_DATA_SUSPECT', 
-        'KB4_APPL_PAN_SEQ_NUM', 'KB4_DEV_INFO', 'KB4_RSN_ONL_CDE', 'KB4_ARQC_VRFY', 'KB4_ISO_RC_IND'];
+        'KB4_APPL_PAN_SEQ_NUM', 'KB4_DEV_INFO', 'KB4_RSN_ONL_CDE', 'KB4_ARQC_VRFY', 'KB4_ISO_RC_IND', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
+
         $values[0] = $request -> Kq2;
         $values[1] = $request -> Code_Response;
         $values[2] = $request -> Entry_Mode;
@@ -280,21 +282,29 @@ class TokenB4Controller extends Controller
         $values[9] = $request -> Online_Code;
         $values[10] = $request -> ARQC_Verification;
         $values[11] = $request -> ID_Response_ISO;
+        $values[12] = $request -> ID_Comer;
+        $values[13] = $request -> Term_Comer;
+        $values[14] = $request -> Fiid_Comer;
+        $values[15] = $request -> Fiid_Term;
+        $values[16] = $request -> Ln_Comer;
+        $values[17] = $request -> Fiid_Card;
+        $values[18] = $request -> Ln_Card;
+
         $answer = array();
         $answerAllRight = array();
         $array = array();
         $response = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
-        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND, 
-        FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB4_PT_SRV_ENTRY_MDE, KB4_TERM_ENTRY_CAP, KB4_LAST_EMV_STAT, KB4_DATA_SUSPECT,
-        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND, 
-        FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
+        KB4_APPL_PAN_SEQ_NUM, KB4_DEV_INFO, KB4_RSN_ONL_CDE, KB4_ARQC_VRFY, KB4_ISO_RC_IND, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Detectar cuales son los filtros utilizados
-        for($key = 0; $key < 12; $key++){
+        for($key = 0; $key < 19; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($labels[$key]);
@@ -302,9 +312,9 @@ class TokenB4Controller extends Controller
         }
         $filteredValues = array_values($values);
         $filteredLabels = array_values($labels);
-
+        
         for($i = 0; $i < count($filteredValues); $i++){
-            for($j = 0; $j < count($filteredValues); $j++){
+            for($j = 0; $j < count($filteredValues[$i]); $j++){
                 if($filteredValues[$i][$j] === null){
                     $filteredValues[$i][$j] = " ";
                 }
@@ -416,15 +426,15 @@ class TokenB4Controller extends Controller
                     }
                 }
             }else{
-                if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 1){ $serviceEMFlag = 1; }
-                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 1){ $capTermFlag = 1; }
-                if(strlen($data['KB4_LAST_EMV_STAT']) == 1){ $evmStatFlag = 1; }
-                if(strlen($data['KB4_DATA_SUSPECT']) == 1){ $dataSusFlag = 1; }
-                if(strlen($data['KB4_APPL_PAN_SEQ_NUM']) == 1){ $panFlag = 1; }
-                if(strlen($data['KB4_DEV_INFO']) == 1){ $devinfoFlag = 1; }
-                if(strlen($data['KB4_RSN_ONL_CDE']) == 1){ $onlCodeflag = 1; }
-                if(strlen($data['KB4_ARQC_VRFY']) == 1){ $arqcVerFlag = 1; }
-                if(strlen($data['KB4_ISO_RC_IND']) == 1){ $IDrespFlag = 1; }
+                if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 0 || $data['KB4_PT_SRV_ENTRY_MDE'] == " "){ $serviceEMFlag = 1; }
+                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 0 || $data['KB4_TERM_ENTRY_CAP'] == " "){ $capTermFlag = 1; }
+                if(strlen($data['KB4_LAST_EMV_STAT']) == 0 || $data['KB4_LAST_EMV_STAT'] == " "){ $evmStatFlag = 1; }
+                if(strlen($data['KB4_DATA_SUSPECT']) == 0 || $data['KB4_DATA_SUSPECT'] == " "){ $dataSusFlag = 1; }
+                if(strlen($data['KB4_APPL_PAN_SEQ_NUM']) == 0 || $data['KB4_APPL_PAN_SEQ_NUM'] == " "){ $panFlag = 1; }
+                if(strlen($data['KB4_DEV_INFO']) == 0 || $data['KB4_DEV_INFO'] == " "){ $devinfoFlag = 1; }
+                if(strlen($data['KB4_RSN_ONL_CDE']) == 0 || $data['KB4_RSN_ONL_CDE'] == " "){ $onlCodeflag = 1; }
+                if(strlen($data['KB4_ARQC_VRFY']) == 0 || $data['KB4_ARQC_VRFY'] == " "){ $arqcVerFlag = 1; }
+                if(strlen($data['KB4_ISO_RC_IND']) == 0 || $data['KB4_ISO_RC_IND'] == " "){ $IDrespFlag = 1; }
             }
 
             if($serviceEMFlag == 0 || $capTermFlag == 0 || $evmStatFlag == 0
@@ -452,11 +462,20 @@ class TokenB4Controller extends Controller
                 $answer[$key] -> arqcVerFlag = $arqcVerFlag;
                 $answer[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
                 $answer[$key] -> IDrespFlag = $IDrespFlag;
-                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answer[$key] -> amount = $data['MONTO1'];
+                //Separación de la cifra decimal y entero del monto
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answer[$key] -> ID_Comer = $data['ID_COMER'];
+                $answer[$key] -> Term_Comer = $data['TERM_COMER'];
+                $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+                $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
+                $answer[$key] -> Ln_Comer = $data['LN_COMER'];
+                $answer[$key] -> Ln_Term = $data['LN_TERM'];
+                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+                $answer[$key] -> Ln_Card = $data['LN_TARJ'];
             }else{
                 $answerAllRight[$key] = new stdClass();
                 $answerAllRight[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -480,11 +499,20 @@ class TokenB4Controller extends Controller
                 $answerAllRight[$key] -> arqcVerFlag = $arqcVerFlag;
                 $answerAllRight[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
                 $answerAllRight[$key] -> IDrespFlag = $IDrespFlag;
-                $answerAllRight[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRight[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answerAllRight[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answerAllRight[$key] -> Number_Sec = $data['NUM_SEC'];
-                $answerAllRight[$key] -> amount = $data['MONTO1'];
+                //Separación de la cifra decimal y entera del monto
+                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+                $answerAllRight[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+                $answerAllRight[$key] -> ID_Comer = $data['ID_COMER'];
+                $answerAllRight[$key] -> Term_Comer = $data['TERM_COMER'];
+                $answerAllRight[$key] -> Fiid_Comer = $data['FIID_COMER'];
+                $answerAllRight[$key] -> Fiid_Term = $data['FIID_TERM'];
+                $answerAllRight[$key] -> Ln_Comer = $data['LN_COMER'];
+                $answerAllRight[$key] -> Ln_Term = $data['LN_TERM'];
+                $answerAllRight[$key] -> Fiid_Card = $data['FIID_TARJ'];
+                $answerAllRight[$key] -> Ln_Card = $data['LN_TARJ'];
             }
         }
         $badAnswer = array_values($answer);

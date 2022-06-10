@@ -28,8 +28,7 @@ class TokenC0Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER,
-        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
+        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -250,8 +249,7 @@ class TokenC0Controller extends Controller
             }
             default: {
                 $response = DB::select("select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER,
-                FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
+                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test");
                 $array = json_decode(json_encode($response), true);
             }
         }
@@ -261,14 +259,6 @@ class TokenC0Controller extends Controller
             $answer[$key] -> Card_Type = $data['KC0_TIPO_DE_TARJETA'];
             $answer[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
             $answer[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
-            $answer[$key] -> ID_Comer = $data['ID_COMER'];
-            $answer[$key] -> Term_Comer = $data['TERM_COMER'];
-            $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
-            $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
-            $answer[$key] -> Ln_Comer = $data['LN_COMER'];
-            $answer[$key] -> Ln_Term = $data['LN_TERM'];
-            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key] -> Ln_Card = $data['LN_TARJ'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
@@ -551,8 +541,6 @@ class TokenC0Controller extends Controller
                 $answer[$key] -> flagCVV2 = $flagCVV2;
                 $answer[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
                 $answer[$key] -> flagInfo = $flagInfo;
-                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Number_Sec = $data['NUM_SEC'];
                 //Separación del decimal y entero para agregar el punto decimal
@@ -579,9 +567,7 @@ class TokenC0Controller extends Controller
                 $answerAllRight[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
                 $answerAllRight[$key] -> flagCVV2 = $flagCVV2;
                 $answerAllRight[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
-                $answerAllRight[$key] -> flagInfo = $flagInfo;
-                $answerAllRight[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRight[$key] -> Fiid_Comerce = $data['FIID_COMER'];
+                $answerAllRight[$key] -> flagInfo = $flagInfo;;
                 $answerAllRight[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answerAllRight[$key] -> Number_Sec = $data['NUM_SEC'];
                 //Separación del decimal y entero para agregar el punto decimal

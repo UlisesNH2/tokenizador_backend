@@ -300,6 +300,14 @@ class TokenB2Controller extends Controller
         $values[15] = $request -> Issuing_App_Data;
         $values[16] = $request -> TVR;
         $values[17] = $request -> AIP;
+        $values[18] = $request -> ID_Comer;
+        $values[19] = $request -> Term_Comer;
+        $values[20] = $request -> Fiid_Comer;
+        $values[21] = $request -> Fiid_Term;
+        $values[22] = $request -> Ln_Comer;
+        $values[23] = $request -> Fiid_Card;
+        $values[24] = $request -> Ln_Card;
+
         $answer = array();
         $array = array();
         $response = array();
@@ -308,14 +316,16 @@ class TokenB2Controller extends Controller
         $answerOk = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
         KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
-        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
 
         $queryOutfilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
         KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
-        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, FIID_TARJ,FIID_COMER,NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
+        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Detectar cuales son los filtros utilizados
-        for($key = 0; $key < 18; $key++){
+        for($key = 0; $key < 25; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($label[$key]);
@@ -499,22 +509,22 @@ class TokenB2Controller extends Controller
                     }
             }
         }else{
-            if(strlen($data['KB2_BIT_MAP']) == 1){ $bitMapFlag = 1; }
-            if(strlen($data['KB2_USR_FLD1']) == 1){ $userFOFlag = 1; }
-            if(strlen($data['KB2_ARQC']) == 1){ $arqcFlag = 1; }
-            if(strlen($data['KB2_AMT_AUTH']) == 1){ $amtAuthFlag = 1; }
-            if(strlen($data['KB2_AMT_OTHER']) == 1){ $amtOtherFlag = 1; }
-            if(strlen($data['KB2_ATC']) == 1){ $atcFlag = 1; }
-            if(strlen($data['KB2_TERM_CTRY_CDE']) == 1){ $termConFlag = 1; }
-            if(strlen($data['KB2_TRAN_CRNCY_CDE']) == 1){ $termCurrFlag = 1; }
-            if(strlen($data['KB2_TRAN_DAT']) == 1){ $transDateFlag = 1; }
-            if(strlen($data['KB2_TRAN_TYPE']) == 1){ $transTypeFlag = 1; }
-            if(strlen($data['KB2_UNPREDICT_NUM']) == 1){ $umpNumFlag = 1; }
-            if(strlen($data['KB2_ISS_APPL_DATA_LGTH']) == 1){ $appDataLenFlag = 1; }
-            if(strlen($data['KB2_ISS_APPL_DATA']) == 1){ $appDataFlag = 1; }
-            if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 1){ $cryptoFlag = 1; }
-            if(strlen($data['KB2_TVR']) == 1){ $tvrFlag = 1; }
-            if(strlen($data['KB2_AIP']) == 1){ $aipFlag = 1; }
+            if(strlen($data['KB2_BIT_MAP']) == 1 || $data['KB2_BIT_MAP'] == ""){ $bitMapFlag = 1; }
+            if(strlen($data['KB2_USR_FLD1']) == 1 || $data['KB2_USR_FLD1'] == ""){ $userFOFlag = 1; }
+            if(strlen($data['KB2_ARQC']) == 1 || $data['KB2_ARQC'] == ""){ $arqcFlag = 1; }
+            if(strlen($data['KB2_AMT_AUTH']) == 1 || $data['KB2_AMT_AUTH'] == ""){ $amtAuthFlag = 1; }
+            if(strlen($data['KB2_AMT_OTHER']) == 1 || $data['KB2_AMT_OTHER'] == ""){ $amtOtherFlag = 1; }
+            if(strlen($data['KB2_ATC']) == 1 || $data['KB2_ATC'] == ""){ $atcFlag = 1; }
+            if(strlen($data['KB2_TERM_CTRY_CDE']) == 1 || $data['KB2_TERM_CTRY_CDE'] == ""){ $termConFlag = 1; }
+            if(strlen($data['KB2_TRAN_CRNCY_CDE']) == 1 || $data['KB2_TRAN_CRNCY_CDE'] == ""){ $termCurrFlag = 1; }
+            if(strlen($data['KB2_TRAN_DAT']) == 1 || $data['KB2_TRAN_DAT'] == ""){ $transDateFlag = 1; }
+            if(strlen($data['KB2_TRAN_TYPE']) == 1 || $data['KB2_TRAN_TYPE'] == ""){ $transTypeFlag = 1; }
+            if(strlen($data['KB2_UNPREDICT_NUM']) == 1 || $data['KB2_UNPREDICT_NUM'] == ""){ $umpNumFlag = 1; }
+            if(strlen($data['KB2_ISS_APPL_DATA_LGTH']) == 1 || $data['KB2_ISS_APPL_DATA_LGTH'] == ""){ $appDataLenFlag = 1; }
+            if(strlen($data['KB2_ISS_APPL_DATA']) == 1 || $data['KB2_ISS_APPL_DATA'] == ""){ $appDataFlag = 1; }
+            if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 1 || $data['KB2_CRYPTO_INFO_DATA'] = ""){ $cryptoFlag = 1; }
+            if(strlen($data['KB2_TVR']) == 1 || $data['KB2_TVR'] == ""){ $tvrFlag = 1; }
+            if(strlen($data['KB2_AIP']) == 1 || $data['KB2_AIP'] == ""){ $aipFlag = 1; }
         }
 
         if($bitMapFlag == 0 || $userFOFlag == 0 || $arqcFlag == 0 || $amtAuthFlag == 0 ||
@@ -557,11 +567,20 @@ class TokenB2Controller extends Controller
             $answer[$key] -> tvrFlag = $tvrFlag;
             $answer[$key] -> AIP = $data['KB2_AIP'];
             $answer[$key] -> aipFlag = $aipFlag;
-            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key] -> Fiid_Comerce = $data['FIID_COMER'];
             $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
             $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-            $answer[$key] -> amount = $data['MONTO1'];
+            //Separación de la cifra decimal y entero del monto
+            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+            $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+            $answer[$key] -> ID_Comer = $data['ID_COMER'];
+            $answer[$key] -> Term_Comer = $data['TERM_COMER'];
+            $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $answer[$key] -> Ln_Comer = $data['LN_COMER'];
+            $answer[$key] -> Ln_Term = $data['LN_TERM'];
+            $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key] -> Ln_Card = $data['LN_TARJ'];
         }else{
             $answerOk[$key] = new stdClass();
             $answerOk[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
@@ -598,12 +617,21 @@ class TokenB2Controller extends Controller
             $answerOk[$key] -> TVR = $data['KB2_TVR'];
             $answerOk[$key] -> tvrFlag = $tvrFlag;
             $answerOk[$key] -> AIP = $data['KB2_AIP'];
-            $answerOk[$key] -> aipFlag = $aipFlag;
-            $answerOk[$key] -> Fiid_Card = $data['FIID_TARJ'];
-            $answerOk[$key] -> Fiid_Comerce = $data['FIID_COMER'];
+            $answerOk[$key] -> aipFlag = $aipFlag;;
             $answerOk[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
             $answerOk[$key] -> Number_Sec = $data['NUM_SEC'];
-            $answerOk[$key] -> amount = $data['MONTO1'];
+            //Separación de la cifra decimal y entero del monto
+            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
+            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
+            $answerOk[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+            $answerOk[$key] -> ID_Comer = $data['ID_COMER'];
+            $answerOk[$key] -> Term_Comer = $data['TERM_COMER'];
+            $answerOk[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $answerOk[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $answerOk[$key] -> Ln_Comer = $data['LN_COMER'];
+            $answerOk[$key] -> Ln_Term = $data['LN_TERM'];
+            $answerOk[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $answerOk[$key] -> Ln_Card = $data['LN_TARJ'];
         }
         
     }

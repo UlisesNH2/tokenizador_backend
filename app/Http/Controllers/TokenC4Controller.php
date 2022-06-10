@@ -22,8 +22,7 @@ class TokenC4Controller extends Controller
         $flagEntry = false;
         $query = "select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER,
-        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -249,8 +248,7 @@ class TokenC4Controller extends Controller
             default: {
                 $response = DB::select("select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
                 KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER,
-                FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
+                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -270,14 +268,6 @@ class TokenC4Controller extends Controller
             $answer[$key]->Terminal_Activation_Cardholder = $data['KC4_CRDHLDR_ACTVT_TERM_IND'];
             $answer[$key]->ID_Terminal_Data_Transfer = $data['KC4_TERM_INPUT_CAP_IND'];
             $answer[$key]->ID_Cardholder_Method = $data['KC4_CRDHLDR_ID_METHOD'];
-            $answer[$key]->ID_Comer = $data['ID_COMER'];
-            $answer[$key]->Term_Comer = $data['TERM_COMER'];
-            $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
-            $answer[$key]->Fiid_Term = $data['FIID_TERM'];
-            $answer[$key]->Ln_Comer = $data['LN_COMER'];
-            $answer[$key]->Ln_Term = $data['LN_TERM'];
-            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key]->Ln_Card = $data['LN_TARJ'];
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
@@ -286,6 +276,7 @@ class TokenC4Controller extends Controller
     //FUNCIÓN PARA MANDAR INFORMACIÓN A LA TABLAC4 (FILTRADA)
     public function getTableFilter(Request $request)
     {
+
         $values = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KC4_TERM_ATTEND_IND', 'KC4_TERM_OPER_IND', 'KC4_TERM_LOC_IND', 
         'KC4_CRDHLDR_PRESENT_IND','KC4_CRD_PRESENT_IND', 'KC4_CRD_CAPTR_IND', 'KC4_TXN_STAT_IND', 'KC4_TXN_SEC_IND', 'KC4_TXN_RTN_IND',

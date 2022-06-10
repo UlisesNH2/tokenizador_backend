@@ -30,6 +30,9 @@ Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@
 Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filterEntryMode');
 
+//FILTROS TERMINALES
+Route::post('/terminalFilter', 'App\Http\Controllers\TerminalController@index');
+
 //RUTAS TOKEN C4
 Route::post('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos para el formulario
 Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter'); //Datos para tabla del Token
