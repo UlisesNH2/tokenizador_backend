@@ -287,8 +287,9 @@ class TokenB4Controller extends Controller
         $values[14] = $request -> Fiid_Comer;
         $values[15] = $request -> Fiid_Term;
         $values[16] = $request -> Ln_Comer;
-        $values[17] = $request -> Fiid_Card;
-        $values[18] = $request -> Ln_Card;
+        $values[17] = $request -> Ln_Term;
+        $values[18] = $request -> Fiid_Card;
+        $values[19] = $request -> Ln_Card;
 
         $answer = array();
         $answerAllRight = array();
@@ -304,7 +305,7 @@ class TokenB4Controller extends Controller
         LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
 
         //Detectar cuales son los filtros utilizados
-        for($key = 0; $key < 19; $key++){
+        for($key = 0; $key < 20; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($labels[$key]);

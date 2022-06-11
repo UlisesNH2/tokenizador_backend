@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Kq2;
-use Carbon\PHPStan\Macro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use stdClass;
@@ -280,7 +277,8 @@ class TokenB2Controller extends Controller
         $values = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE','KB2_BIT_MAP', 'KB2_USR_FLD1', 'KB2_ARQC', 'KB2_AMT_AUTH', 'KB2_AMT_OTHER', 'KB2_ATC',
         'KB2_TERM_CTRY_CDE', 'KB2_TRAN_CRNCY_CDE', 'KB2_TRAN_DAT', 'KB2_TRAN_TYPE', 'KB2_UNPREDICT_NUM',
-        'KB2_ISS_APPL_DATA_LGTH', 'KB2_ISS_APPL_DATA', 'KB2_TVR', 'KB2_AIP'];
+        'KB2_ISS_APPL_DATA_LGTH', 'KB2_ISS_APPL_DATA', 'KB2_TVR', 'KB2_AIP', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
 
         $values[0] = $request -> Kq2;
         $values[1] = $request -> Code_Response;
@@ -441,7 +439,7 @@ class TokenB2Controller extends Controller
                                 }
                             } 
                         }
-                    }else { $cryptoFlag = 0;};
+                    }
                     //Validación del campo TVR
                     if(strlen($data['KB2_TVR']) == 10){
                         $firstByteFlag = false;
@@ -522,7 +520,7 @@ class TokenB2Controller extends Controller
             if(strlen($data['KB2_UNPREDICT_NUM']) == 1 || $data['KB2_UNPREDICT_NUM'] == ""){ $umpNumFlag = 1; }
             if(strlen($data['KB2_ISS_APPL_DATA_LGTH']) == 1 || $data['KB2_ISS_APPL_DATA_LGTH'] == ""){ $appDataLenFlag = 1; }
             if(strlen($data['KB2_ISS_APPL_DATA']) == 1 || $data['KB2_ISS_APPL_DATA'] == ""){ $appDataFlag = 1; }
-            if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 1 || $data['KB2_CRYPTO_INFO_DATA'] = ""){ $cryptoFlag = 1; }
+            if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 1 || $data['KB2_CRYPTO_INFO_DATA'] == ""){ $cryptoFlag = 1; }
             if(strlen($data['KB2_TVR']) == 1 || $data['KB2_TVR'] == ""){ $tvrFlag = 1; }
             if(strlen($data['KB2_AIP']) == 1 || $data['KB2_AIP'] == ""){ $aipFlag = 1; }
         }
@@ -617,7 +615,7 @@ class TokenB2Controller extends Controller
             $answerOk[$key] -> TVR = $data['KB2_TVR'];
             $answerOk[$key] -> tvrFlag = $tvrFlag;
             $answerOk[$key] -> AIP = $data['KB2_AIP'];
-            $answerOk[$key] -> aipFlag = $aipFlag;;
+            $answerOk[$key] -> aipFlag = $aipFlag;
             $answerOk[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
             $answerOk[$key] -> Number_Sec = $data['NUM_SEC'];
             //Separación de la cifra decimal y entero del monto
