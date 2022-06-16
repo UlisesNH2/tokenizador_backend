@@ -19,8 +19,10 @@ class TerminalController extends Controller
         $flagkq2 = false;
         $flagCode = false;
         $flagEntry = false;
-        $query = "select ID_COMER, TERM_COMER, FIID_COMER,
-        FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test where ";
+        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from test as main
+        join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
+        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from test as main join
+        fiid_tarj as catTarj on main.FIID_TARJ = catTarj.FIID_TARJ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -32,6 +34,7 @@ class TerminalController extends Controller
         if(!empty($entryMode)){ $numberFilters++; $flagEntry = true;}
 
         switch($numberFilters){
+            /*
             case 1: { //Un solo filtro utilizado
                 if($flagkq2){ //Filtrado por medio de Acceso
                     for($i = 0; $i < count($kq2); $i++){
@@ -243,25 +246,31 @@ class TerminalController extends Controller
                 }
                 break;
             }
+            */
             default: {
-                $response = DB::select("select ID_COMER, TERM_COMER, FIID_COMER,
-                FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ from test");
-                $array = json_decode(json_encode($response), true);
+                $fiid_Comer_Response = DB::select($queryFIID_COMER);
+                $array_Fiid_Comer = json_decode(json_encode($fiid_Comer_Response), true);
+                foreach($array_Fiid_Comer as $key => $data){
+                    $answerFiid_Comer[$key] = new stdClass();
+                    $answerFiid_Comer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+                    $answerFiid_Comer[$key] -> Fiid_Comer_Des = $data['FIID_COMER'];
+                }
+                $responseFC = json_decode(json_encode($answerFiid_Comer), true);
+
+                $fiid_Tarj_Response = DB::select($queryFIID_TARJ);
+                $array_Fiid_Tarj = json_decode(json_encode($fiid_Tarj_Response), true);
+                foreach($array_Fiid_Tarj as $key => $data){
+                    $answerFiid_Tarj[$key] = new stdClass();
+                    $answerFiid_Tarj[$key] -> Fiid_Tarj = $data['FIID_TARJ'];
+                    $answerFiid_Tarj[$key] -> Fiid_Tarj_Des = $data['FIID_TARJ_DES'];
+                }
+                $responseFT = json_decode(json_encode($answerFiid_Tarj), true);
                 break;
             }
         }
-
-        foreach($array as $key => $data) {
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID_Comer = $data['ID_COMER'];
-            $answer[$key]->Term_Comer = $data['TERM_COMER'];
-            $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
-            $answer[$key]->Fiid_Term = $data['FIID_TERM'];
-            $answer[$key]->Ln_Comer = $data['LN_COMER'];
-            $answer[$key]->Ln_Term = $data['LN_TERM'];
-            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
-            $answer[$key]->Ln_Card = $data['LN_TARJ'];
-        }
+        $answer[0] = new stdClass();
+        $answer[0] -> Fiid_Comer_Arr = $responseFC;
+        $answer[0] -> Fiid_Tarj_Arr = $responseFT;
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
     }
