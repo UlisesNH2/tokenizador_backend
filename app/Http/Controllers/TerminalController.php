@@ -439,7 +439,7 @@ class TerminalController extends Controller
         return $answer;
     }
 
-    function getData($kq2 = array(), $codeResponse = array(), $entryMode = array(), $query, $restOfQuery, $i = 0, $j = 0, $z = 0, $numberFilters){
+    function getData($kq2, $codeResponse, $entryMode, $query, $restOfQuery, $i = 0, $j = 0, $z = 0, $numberFilters){
         $responseSub = array();
         switch($numberFilters){
             case 1:{
