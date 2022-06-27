@@ -18,7 +18,7 @@ class UserController extends Controller
     public function findUser(Request $request)
     {
         $user = DB::select('select * from user where username = ?',[$request -> username]);
-        if($user !== []){
+        if(!empty($user)){
             $arrayJson = json_decode(json_encode($user), true);
             //Verificar el password encriptado de la consulta con el request 
             if(password_verify($request -> password, $arrayJson[0]['password'])){
@@ -43,7 +43,7 @@ class UserController extends Controller
     public function createUser(Request $request)
     {
         $userExist = DB::select('select username from user where username = ?',[$request -> username]);
-        if($userExist == []){
+        if(empty($userExist)){
             $password = password_hash($request -> password, PASSWORD_BCRYPT); //Encriptación del password
             $user = DB::insert('insert into user (name, firstname, secondname, username, password, type)
             values (?,?,?,?,?,?)',[
@@ -56,5 +56,9 @@ class UserController extends Controller
             ]);
             return $user;
         }else {return -1;}
+    }
+
+    public function updateUser(Request $request){
+        
     }
 }

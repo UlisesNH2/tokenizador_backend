@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer'); //Buscar usuario en la base de datos para login
 Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a todos los usuarios
 Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
+Route::post('/updateUser', 'App\Http\Controllers\UserController@updateUser'); //Actualizar usuario
 
 Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 
