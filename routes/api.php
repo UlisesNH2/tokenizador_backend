@@ -18,6 +18,7 @@ Route::post('/userLogin', 'App\Http\Controllers\UserController@findUSer'); //Bus
 Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a todos los usuarios
 Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
 Route::post('/updateUser', 'App\Http\Controllers\UserController@updateUser'); //Actualizar usuario
+Route::post('/deleteUser', 'App\Http\Controllers\UserController@deleteUser'); //Eliminar usuario
 
 Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 
@@ -33,6 +34,7 @@ Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filter
 
 //FILTROS TERMINALES
 Route::post('/terminalFilter', 'App\Http\Controllers\TerminalController@index');
+Route::get('/getCatalogs', 'App\Http\Controllers\TerminalController@getCatalogs');
 
 //RUTAS TOKEN C4
 Route::post('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos para el formulario

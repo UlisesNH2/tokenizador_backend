@@ -59,6 +59,26 @@ class UserController extends Controller
     }
 
     public function updateUser(Request $request){
-        
+        $userExist = DB::select('select username from user where id = ?', [$request -> id]);
+        if(!empty($userExist)){
+            $user = DB::update('update user set name = ?, firstname = ?, secondname = ?,
+            username = ?, type = ? where id = ?', [
+                $request -> name,
+                $request -> firstName,
+                $request -> secondName,
+                $request -> userName,
+                $request -> type,
+                $request -> id
+            ]);
+            return $user;
+        }else { return -1; } 
+    }
+
+    public function deleteUser(Request $request){
+        $userExist = DB::select('select username from user where id = ?', [$request -> id]);
+        if(!empty($userExist)){
+            $user = DB::delete('delete from user where id = ?', [$request -> id]);
+            return $user;
+        }else { return -1; }
     }
 }

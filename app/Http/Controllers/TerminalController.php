@@ -475,4 +475,21 @@ class TerminalController extends Controller
         }
         return $responseSub;
     }
+
+    public function getCatalogs(){
+        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from test as main
+        join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
+        $response = array();
+
+        $fiidComer = DB::select($queryFIID_COMER);
+        $array = json_decode(json_encode($fiidComer), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach($arrayClened as $key => $data){
+            $response[$key] = new stdClass();
+            $response[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $response[$key] -> Fiid_Comer_Des = $data['FIID_COMER_DES'];
+        }
+        $arrayJson = json_decode(json_encode($response), true);
+        return $arrayJson;
+    }
 }
