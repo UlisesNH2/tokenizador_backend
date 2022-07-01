@@ -116,6 +116,11 @@ class DashboardController extends Controller
             $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> entry_Mode = $data['ENTRY_MODE'];
             $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $answer[$key] -> Fiid_Tarj = $data['FIID_TARJ'];
+            $answer[$key] -> Ln_Comer = $data['LN_COMER'];
+            $answer[$key] -> Ln_Term = $data['LN_TERM'];
+            $answer[$key] -> Ln_Tarj = $data['LN_TARJ'];
             //Separación decimal y entero del monto para agregar el punto
             $dec = substr($data["MONTO"], strlen($data['MONTO'])-2, 2);
             $int = substr($data['MONTO'], 0, strlen($data['MONTO'])-2);

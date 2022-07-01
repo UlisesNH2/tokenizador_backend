@@ -477,19 +477,86 @@ class TerminalController extends Controller
     }
 
     public function getCatalogs(){
+
         $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from test as main
         join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
-        $response = array();
 
-        $fiidComer = DB::select($queryFIID_COMER);
-        $array = json_decode(json_encode($fiidComer), true);
+        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from test as main 
+        join fiid_tarj as catTarj on main.FIID_TARJ = catTarj.FIID_TARJ";
+
+        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from test as main 
+        join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
+
+        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from test as main 
+        join ln_comer as catLNComer on main.LN_COMER = catLNComer.LN_COMER";
+
+        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from test as main
+        join ln_comer as catLNComer on main.LN_TERM = catLNComer.LN_COMER";
+
+        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from test as main
+        join ln_tarj as catLNTarj on main.LN_TARJ = catLNTarj.LN_TARJ";
+        $z = 0;
+
+        //Consulta para FIID_COMER
+        $responseSub = DB::select($queryFIID_COMER);
+        $array = json_decode(json_encode($responseSub), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach ($arrayClened as $key => $data) {
+            $answer[$z] = new stdClass();
+            $answer[$z]->Fiid_Comer = $data['FIID_COMER'];
+            $answer[$z]->Fiid_Comer_Des = $data['FIID_COMER_DES'];
+            $z++;
+        }
+        //Consulta para FIID_TERM
+        $responseSub = DB::select($queryFIID_TERM);
+        $array = json_decode(json_encode($responseSub), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach ($arrayClened as $key => $data) {
+            $answer[$z] = new stdClass();
+            $answer[$z]->Fiid_Term = $data['FIID_TERM'];
+            $answer[$z]->Fiid_Term_Des = $data['FIID_COMER_DES'];
+            $z++;
+        }
+        //Consulta para FIID_TARJ
+        $responseSub = DB::select($queryFIID_TARJ);
+        $array = json_decode(json_encode($responseSub), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach ($arrayClened as $key => $data) {
+            $answer[$z] = new stdClass();
+            $answer[$z]->Fiid_Tarj = $data['FIID_TARJ'];
+            $answer[$z]->Fiid_Tarj_Des = $data['FIID_TARJ_DES'];
+            $z++;
+        }
+        //Consulta para LN_COMER
+        $responseSub = DB::select($queryLN_COMER);
+        $array = json_decode(json_encode($responseSub), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach ($arrayClened as $key => $data) {
+            $answer[$z] = new stdClass();
+            $answer[$z]->Ln_Comer = $data['LN_COMER'];
+            $answer[$z]->Ln_Comer_Des = $data['LN_COMER_DES'];
+            $z++;
+        }
+        //Consulta para LN_TERM
+        $responseSub = DB::select($queryLN_TERM);
+        $array = json_decode(json_encode($responseSub), true);
+        $arrayClened = array_values(array_unique($array, SORT_REGULAR));
+        foreach ($arrayClened as $key => $data) {
+            $answer[$z] = new stdClass();
+            $answer[$z]->Ln_Term = $data['LN_TERM'];
+            $answer[$z]->Ln_Term_Des = $data['LN_COMER_DES'];
+            $z++;
+        }
+        //Consulta para LN_TARJ
+        $responseSub = DB::select($queryLN_TARJ);
+        $array = json_decode(json_encode($responseSub), true);
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach($arrayClened as $key => $data){
-            $response[$key] = new stdClass();
-            $response[$key] -> Fiid_Comer = $data['FIID_COMER'];
-            $response[$key] -> Fiid_Comer_Des = $data['FIID_COMER_DES'];
+            $answer[$z] = new stdClass();
+            $answer[$z]->Ln_Tarj = $data['LN_TARJ'];
+            $answer[$z]->Ln_Tarj_Des = $data['LN_TARJ_DES'];
+            $z++;
         }
-        $arrayJson = json_decode(json_encode($response), true);
-        return $arrayJson;
+        return $answer;
     }
 }
