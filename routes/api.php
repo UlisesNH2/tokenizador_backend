@@ -63,3 +63,6 @@ Route::post('/tokenB5Filter/main', 'App\Http\Controllers\TokenB5Controller@getDa
 //RUTAS TOKEN B6
 Route::post('/tokenB6', 'App\Http\Controllers\TokenB6Controller@index');//Traer datos para tabla principal
 Route::post('/tokenB6Filter/main', 'App\Http\Controllers\TokenB6Controller@getDataTableFilter'); //Datos para el filtro
+
+//DESGLOSADOR
+Route::post('/breaker', 'App\Http\Controllers\BreakerController@getBreakes'); 
