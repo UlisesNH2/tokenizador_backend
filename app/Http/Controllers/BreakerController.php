@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use stdClass;
 
 class BreakerController extends Controller
@@ -44,7 +45,7 @@ class BreakerController extends Controller
                         //Conversión a binario del secondary bitmap
                         $secondaryBMValue = $this -> getBinary($secondaryBitmap, 0, 16);
                         $response -> bitmap = $mainBitmap.$secondaryBitmap;
-                        $response -> secundaryBitmapValue = $secondaryBMValue;
+                        $response -> secondaryBitmapValue = $secondaryBMValue;
                         break;
                     }
                     case 2:{//Primary Account Number
@@ -332,13 +333,36 @@ class BreakerController extends Controller
                     }
                     case 63: { //Aditional Data
                         $initPos = $finalPos+1; $finalPos += 3;
+                        //Las primeras tres posiciones son la longitud del campo: TODO: validación
                         $len = $this -> getChain($message, $initPos, $finalPos);
                         $additionalData = $this -> getChain($message, $initPos+3, $finalPos + $len);
                         $response -> additionalData = $additionalData;
+
+                        //Obtención del header para la lectura y desglose de los tokens
+                        $initPos = $finalPos+1; $finalPos += 12; 
+                        $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
+                        $response -> addDataHeader = $headerAllTokens;
+                        //Validación del header
+                        if($headerAllTokens[0] === '&'){ //Eye - Catcher
+                            if($headerAllTokens[1] === ' '){ //User-filed
+                                //Obtener el número de tokens que hay en el mensaje
+                                //ltrim() -> función para quitar los caracteres deseados de la izquierda
+                                $numberOfTokens = ltrim($this -> getChain($header, 2, 6), '0'); 
+                                $initPos = $finalPos+1; $finalPos += 10; //Tamaño del token header
+                                for($i = 0; $i < $numberOfTokens +1; $i++){
+                                    $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
+                                    $idToken = $this -> getChain($tokenHeader, 2, 3);
+                                    $lenToken = $this -> getChain($tokenHeader, 4, 8);
+                                    $response -> $idToken = $tokenHeader;
+                                    $response -> len = $lenToken;
+                                }
+                            }
+                        }
                     }
                 }
             } 
         }
+        $response -> positions = $positions;
         $responseJSON = json_decode(json_encode($response), true);
         $res = array();
         $res[0] = new stdClass();
@@ -365,5 +389,27 @@ class BreakerController extends Controller
             $positions .= $binaryValues[$i];
         }
         return $positions;
+    }
+
+    public function getCatalog(Request $request){
+        $values = $request -> positions;
+        $catalog = array();
+        $response = array();
+
+        for($i = 0; $i < count($values); $i++){
+            $catalog = array_merge($catalog, DB::select("select * from data_message where ID = ?", [$values[$i]]));
+        }
+        $cat = json_decode(json_encode($catalog), true);
+
+        foreach($cat as $key => $data){
+            $response[$key] = new stdClass();
+            $response[$key] -> id = $data['ID'];
+            $response[$key] -> field = $data['CAMPO'];
+            $response[$key] -> name = $data['NOMBRE'];
+            $response[$key] -> type = $data['TIPO_DATO'];
+            $response[$key] -> len = $data['LONGITUD'];
+        }
+        $arrayJSON = json_decode(json_encode($response), true);
+        return $arrayJSON;
     }
 }

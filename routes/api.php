@@ -66,3 +66,4 @@ Route::post('/tokenB6Filter/main', 'App\Http\Controllers\TokenB6Controller@getDa
 
 //DESGLOSADOR
 Route::post('/breaker', 'App\Http\Controllers\BreakerController@getBreakes'); 
+Route::post('/getCatalogMessage', 'App\Http\Controllers\BreakerController@getCatalog');
