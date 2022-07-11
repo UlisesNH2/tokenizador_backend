@@ -216,10 +216,16 @@ class BreakerController extends Controller
                         $response -> setFeeAm = $setFeeAm;
                         break;
                     }
-                    case 30: {
+                    case 30: { //Transaction Proccesing Fee Amount
+                        $initPos = $finalPos+1; $finalPos += 8;
+                        $transFeeAmount = $this -> getChain($message, $initPos, $finalPos); //Long 8
+                        $response -> transFeeAmount = $transFeeAmount;
                         break;
                     }
-                    case 31: {
+                    case 31: { //Settlement Processing Fee Amonut
+                        $initPos = $finalPos+1; $finalPos += 8;
+                        $setProFeeAmount = $this -> getChain($message, $initPos, $finalPos); //Long 8
+                        $response -> setProFeeAmount = $setProFeeAmount;
                         break;
                     }
                     case 32:{ //Aqcuiring Institution ID Code
@@ -231,10 +237,16 @@ class BreakerController extends Controller
                         $response -> arqCode = $aqrCode;
                         break;
                     }
-                    case 33: {
+                    case 33: { //Fordwardig Institution Identification Code
+                        $initPos = $finalPos+1; $finalPos += 11;
+                        $fordCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
+                        $response -> fordwardCode = $fordCode;
                         break;
                     }
-                    case 34: {
+                    case 34: { //Extending Primary Account Number
+                        $initPos = $finalPos+1; $finalPos += 28;
+                        $extAccNum = $this -> getChain($message, $initPos, $finalPos); //Long 28
+                        $response -> extAccNumber = $extAccNum;
                         break;
                     }
                     case 35: { //Track 2 Data
@@ -246,8 +258,8 @@ class BreakerController extends Controller
                         $response -> track2Data = $track2Data;
                         break;
                     }
-                    case 36: {
-                        break;
+                    case 36: { 
+                        
                     }
                     case 37: { //Retrivel Reference Number
                         $initPos = $finalPos+1; $finalPos += 12;
@@ -255,10 +267,17 @@ class BreakerController extends Controller
                         $response -> retRefNum = $retRefNum;
                         break;
                     }
-                    case 38: {
+                    case 38: { //Autorization Identification Response
+                        $initPos = $finalPos+1; $finalPos += 6;
+                        $authIDResp = $this -> getChain($message, $initPos, $finalPos); //Long 6
+                        $response -> authIDResp = $authIDResp;
+                        break;
                         break;
                     }
-                    case 39: {
+                    case 39: { //Response Code
+                        $initPos = $finalPos+1; $finalPos += 2;
+                        $respCode = $this -> getChain($message, $initPos, $finalPos); //Long 2
+                        $response -> respCode = $respCode;
                         break;
                     }
                     case 40: {
@@ -335,7 +354,7 @@ class BreakerController extends Controller
                         $initPos = $finalPos+1; $finalPos += 3;
                         //Las primeras tres posiciones son la longitud del campo: TODO: validación
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        $additionalData = $this -> getChain($message, $initPos+3, $finalPos + $len);
+                        $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                         $response -> additionalData = $additionalData;
 
                         //Obtención del header para la lectura y desglose de los tokens
@@ -347,14 +366,23 @@ class BreakerController extends Controller
                             if($headerAllTokens[1] === ' '){ //User-filed
                                 //Obtener el número de tokens que hay en el mensaje
                                 //ltrim() -> función para quitar los caracteres deseados de la izquierda
-                                $numberOfTokens = ltrim($this -> getChain($header, 2, 6), '0'); 
+                                $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 6), '0')-1;
                                 $initPos = $finalPos+1; $finalPos += 10; //Tamaño del token header
-                                for($i = 0; $i < $numberOfTokens +1; $i++){
+                                for($x = 0; $x < $numberOfTokens; $x++){
+                                    $tokenHeader = ''; $idToken = ''; $lenToken = '';
                                     $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
-                                    $idToken = $this -> getChain($tokenHeader, 2, 3);
+
+                                    $idToken = $this -> getChain($tokenHeader, 0, 3);
+                                    $idTokenString = $this -> getChain($idToken, 2, 3);
+                                    $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
+                                    
+
                                     $lenToken = $this -> getChain($tokenHeader, 4, 8);
-                                    $response -> $idToken = $tokenHeader;
-                                    $response -> len = $lenToken;
+                                    $response -> $idTokenString = $idToken;
+                                    $response ->  $lenString = $lenToken;
+
+                                    $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
+                                    $finalPos += 10 + intval(ltrim($lenToken, '0'));
                                 }
                             }
                         }
