@@ -371,16 +371,19 @@ class BreakerController extends Controller
                                 for($x = 0; $x < $numberOfTokens; $x++){
                                     $tokenHeader = ''; $idToken = ''; $lenToken = '';
                                     $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
-
+                                    //Nombres para el objeto
                                     $idToken = $this -> getChain($tokenHeader, 0, 3);
                                     $idTokenString = $this -> getChain($idToken, 2, 3);
                                     $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
-                                    
-
+                                    $valueTokenString = $this -> getChain($idToken, 2, 3).'-Contenido';
+                                    //Valores para el objeto
                                     $lenToken = $this -> getChain($tokenHeader, 4, 8);
+                                    $value = $this -> getChain($message, $finalPos+1, $finalPos+intval(ltrim($lenToken, '0')));
+                                    //Creación del objeto
                                     $response -> $idTokenString = $idToken;
                                     $response ->  $lenString = $lenToken;
-
+                                    $response -> $valueTokenString = $value;
+                                    //Aumento en las posiciones respectivas
                                     $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
                                     $finalPos += 10 + intval(ltrim($lenToken, '0'));
                                 }
@@ -425,7 +428,7 @@ class BreakerController extends Controller
         $response = array();
 
         for($i = 0; $i < count($values); $i++){
-            $catalog = array_merge($catalog, DB::select("select * from data_message where ID = ?", [$values[$i]]));
+            $catalog = array_merge($catalog, DB::select("select * from catalog_message where ID = ?", [$values[$i]]));
         }
         $cat = json_decode(json_encode($catalog), true);
 
@@ -435,7 +438,6 @@ class BreakerController extends Controller
             $response[$key] -> field = $data['CAMPO'];
             $response[$key] -> name = $data['NOMBRE'];
             $response[$key] -> type = $data['TIPO_DATO'];
-            $response[$key] -> len = $data['LONGITUD'];
         }
         $arrayJSON = json_decode(json_encode($response), true);
         return $arrayJSON;
