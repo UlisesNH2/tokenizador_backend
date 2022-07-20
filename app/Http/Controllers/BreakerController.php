@@ -232,7 +232,7 @@ class BreakerController extends Controller
                         //Primeras dos posiciones es la longitud del campo
                         $initPos = $finalPos+3; $finalPos += 13;
                         //Obtener la longitud del campo, TODO: validación 
-                        //$len = $this -> getChain($message, $initPos, $initPos+1);
+                        $len = $this -> getChain($message, $initPos, $initPos+1);
                         $aqrCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
                         $response -> arqCode = $aqrCode;
                         break;
@@ -272,7 +272,6 @@ class BreakerController extends Controller
                         $authIDResp = $this -> getChain($message, $initPos, $finalPos); //Long 6
                         $response -> authIDResp = $authIDResp;
                         break;
-                        break;
                     }
                     case 39: { //Response Code
                         $initPos = $finalPos+1; $finalPos += 2;
@@ -286,7 +285,16 @@ class BreakerController extends Controller
                     case 41: { //Card Aceptor Terminal ID
                         $initPos = $finalPos+1; $finalPos += 16;
                         $cardAcTermID = $this -> getChain($message, $initPos, $finalPos); //Long 16
-                        $response -> cardAcTermID = $cardAcTermID;
+                        if($cardAcTermID[9] !== ' '){
+                            for($j = 9; $j < 16; $j++){
+                                $cardAcTermID[$j] = ' ';
+                            }
+                            $response -> cardAcTermID = $cardAcTermID.'-';
+                            $initPos = $finalPos-7;
+                            $finalPos -= 7;
+                        }else{
+                            $response -> cardAcTermID = $cardAcTermID;
+                        }
                         break;
                     }
                     case 42: {
@@ -296,6 +304,7 @@ class BreakerController extends Controller
                         $initPos = $finalPos+1; $finalPos += 40;
                         $cardAcName = $this -> getChain($message, $initPos, $finalPos); //Long 40
                         $response -> cardAcName = $cardAcName;
+                        break;
                     }
                     case 44:{
                         break;
@@ -311,43 +320,85 @@ class BreakerController extends Controller
                     }
                     case 48: { //Retailer Data
                         //Primeras tres posiciones indica la longitud del campo
-                        $initPos = $finalPos+3; $finalPos += 30;
-                        $retailerData = $this -> getChain($message, $initPos, $finalPos); //Long 30
-                        $response -> retailerData = $retailerData;
+                        $initPos = $finalPos+1; $finalPos += 3;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(ltrim($len, '0') <= 30){
+                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $retailerData = $this -> getChain($message, $initPos, $finalPos); //Long 30
+                            $response -> retailerData = $retailerData;
+                        }else{
+                            $response -> retailerData = '-------';
+                        }
                         break;
                     }
                     case 49: { //Transaction Currency Code
+                        $flag = 0;
                         $initPos = $finalPos+1; $finalPos += 3;
                         $currCode = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> currCode = $currCode;
+                        $code = DB::select('select CURRENCY_CODE from catalog_currency_code');
+                        $array = json_decode(json_encode($code), true);
+                        foreach ($array as $key => $data) {
+                            if($currCode === $data['CURRENCY_CODE']){ 
+                                $flag = 1; 
+                                //$code = [];
+                            }
+                        }
+                        if($flag == 1){
+                            //$initPos = $finalPos+1; $finalPos += 3;
+                            $currCode = $this -> getChain($message, $initPos, $finalPos);
+                            $response -> currCode = $currCode;
+                        }else{
+                            //$initPos = $finalPos+1; $finalPos += 3;
+                            $response -> currCode = '-------';
+                        }
                         break;
                     }
                     case 50: {
+                        
                         break;
                     }
                     //TODO 51 - 59
                     case 60: { //Terminal Data
                         $initPos = $finalPos+4; $finalPos += 19;
-                        //Las primeas tres posiciones son la longitud del campo, TODO: validación
                         //$len = $this -> getChain($message, $initPos, $initPos+3);
                         $termData = $this -> getChain($message, $initPos, $finalPos); //Long 19
                         $response -> termData = $termData;
                         break;
                     }
                     case 61: { //Response Code Data
-                        $initPos = $finalPos+4; $finalPos += 22;
-                        //Las primeras tres posiciones son la longitud del campo, TODO: validación
-                        //$len = $this -> getChain($message, $initPos, $finalPos);
-                        $respCodeData = $this -> getChain($message, $initPos, $finalPos); //Long 22
-                        $response -> respCodeData = $respCodeData;
+                        $initPos = $finalPos+1; $finalPos += 3;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(ltrim($len, '0') <= 22){
+                            if(ltrim($len, '0') == 19){
+                                $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                                $respCodeData = $this -> getChain($message, $initPos, $finalPos); //Long 22
+                                $response -> respCodeData = $respCodeData;
+                            }else{
+                                $initPos = $finalPos+1; $finalPos += 19;
+                                $respCodeData = $this -> getChain($message, $initPos, $finalPos); //Long 22
+                                $response -> respCodeData = $respCodeData.'-';
+                            }
+                            
+                        }else{
+                            $response -> respCodeData = '------';
+                        }
+                        
                         break;
                     }
                     case 62: { //Postal Code
-                        $initPos = $finalPos+4; $finalPos += 13;
-                        //Las primeras tres posiciones son la longitud del campo, TODO: validación
-                        //$len = $this -> getChain($message, $initPos, $finalPos);
-                        $postalCode = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> postalCode = $postalCode;
+                        $initPos = $finalPos+1; $finalPos += 3;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(ltrim($len, '0') <= 13){
+                            if(ltrim($len, '0') == 10){
+                                $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                                $postalCode = $this -> getChain($message, $initPos, $finalPos);
+                                $response -> postalCode = $postalCode;
+                            }else{
+                                $initPos = $finalPos+1; $finalPos += 10;
+                                $postalCode = $this -> getChain($message, $initPos, $finalPos);
+                                $response -> postalCode = $postalCode.'-';
+                            }
+                        }
                         break;
                     }
                     case 63: { //Aditional Data
@@ -356,7 +407,6 @@ class BreakerController extends Controller
                         $len = $this -> getChain($message, $initPos, $finalPos);
                         $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                         $response -> additionalData = $additionalData;
-
                         //Obtención del header para la lectura y desglose de los tokens
                         $initPos = $finalPos+1; $finalPos += 12; 
                         $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
@@ -368,7 +418,7 @@ class BreakerController extends Controller
                                 //ltrim() -> función para quitar los caracteres deseados de la izquierda
                                 $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 6), '0')-1;
                                 $initPos = $finalPos+1; $finalPos += 10; //Tamaño del token header
-                                for($x = 0; $x < $numberOfTokens; $x++){
+                                for($x = 0; $x < 9; $x++){
                                     $tokenHeader = ''; $idToken = ''; $lenToken = '';
                                     $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
                                     //Nombres para el objeto
@@ -399,6 +449,7 @@ class BreakerController extends Controller
         $res[0] = new stdClass();
         $res[0] = $responseJSON;
         return json_decode(json_encode($res), true);
+        return $responseJSON;
     }
 
     //Función para obtener el header del mensaje.
