@@ -229,12 +229,15 @@ class BreakerController extends Controller
                         break;
                     }
                     case 32:{ //Aqcuiring Institution ID Code
-                        //Primeras dos posiciones es la longitud del campo
-                        $initPos = $finalPos+3; $finalPos += 13;
-                        //Obtener la longitud del campo, TODO: validación 
-                        $len = $this -> getChain($message, $initPos, $initPos+1);
-                        $aqrCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
-                        $response -> arqCode = $aqrCode;
+                        $initPos = $finalPos+1; $finalPos += 2;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(ltrim($len, '0') <= 11){
+                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $aqrCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
+                            $response -> arqCode = str_pad($aqrCode, 11, '0', STR_PAD_LEFT);
+                        }else{
+                            $response -> arqCode = '------';
+                        }
                         break;
                     }
                     case 33: { //Fordwardig Institution Identification Code
@@ -250,12 +253,15 @@ class BreakerController extends Controller
                         break;
                     }
                     case 35: { //Track 2 Data
-                        //Primeras dos posiciones es la longitud del campo
-                        $initPos = $finalPos+3; $finalPos += 39;
-                        //Obtener la longitud del campo, TODO: validación 
-                        //$len = $this -> getChain($message, $initPos, $initPos+1);
-                        $track2Data = $this -> getChain($message, $initPos, $finalPos); //Long 37
-                        $response -> track2Data = $track2Data;
+                        $initPos = $finalPos+1; $finalPos += 2;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(intval($len) <= 37){
+                            $initPos = $finalPos+1; $finalPos += intval($len);
+                            $track2Data = $this -> getChain($message, $initPos, $finalPos); //Long 37
+                            $response -> track2Data = $track2Data;
+                        }else{
+                            $response -> track2Data = '------';
+                        }
                         break;
                     }
                     case 36: { 
@@ -418,7 +424,7 @@ class BreakerController extends Controller
                                 //ltrim() -> función para quitar los caracteres deseados de la izquierda
                                 $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 6), '0')-1;
                                 $initPos = $finalPos+1; $finalPos += 10; //Tamaño del token header
-                                for($x = 0; $x < 9; $x++){
+                                for($x = 0; $x < $numberOfTokens; $x++){
                                     $tokenHeader = ''; $idToken = ''; $lenToken = '';
                                     $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
                                     //Nombres para el objeto
