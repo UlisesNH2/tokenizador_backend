@@ -376,171 +376,14 @@ class TokenC0Controller extends Controller
         }
         foreach($array as $key => $data){
 
-            $flagEcommerce = 0; $flagCardType = 0; $flagCVV2 = 0; $flagInfo = 0;
-
-            switch($data['KQ2_ID_MEDIO_ACCESO']){
-                case '00':{ //Transacción manual
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break; 
-                    }
-                    
-                    break;
-                }
-                case '02': { //Cargos automáticos
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] > 4 && $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] < 8){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    switch($data['KC0_INDICADOR_DE_INFORMACION_A']){
-                        case " ": $flagInfo = 1; break;
-                        case 'F': $flagInfo = 1; break;
-                        case 'S': $flagInfo = 1; break;
-                    }
-                    //subcampo 8
-                    if($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'] == " "){ $flagCVV2 = 1; }
-                    break;
-                }
-                case '03': {//TPV del adquiriente
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1; }
-                     //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1;}
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '04':{ //Interred
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " " || $data['KC0_TIPO_DE_TARJETA'] == 'S'){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break; 
-                        case 1: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '08':{ //Transacciones MOTO
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 1){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break; 
-                        case 9: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '09': { //Comercio electronico
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] > 4 && $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] < 8){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " " || $data['KC0_INDICADOR_DE_INFORMACION_A'] == 'S'){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break; 
-                        case 9: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '14': { // Servidores multicaja
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 7){ $flagEcommerce = 1; }
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    if($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'] == 1){ $flagCVV2 = 1; }
-                    break;
-                }
-                case '17': { //Comercios multicaja
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1;}
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break; 
-                        case 9: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '19': {
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1;}
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    switch($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']){
-                        case " ": $flagCVV2 = 1; break;
-                        case 0: $flagCVV2 = 1; break;
-                        case 1: $flagCVV2 = 1; break; 
-                        case 9: $flagCVV2 = 1; break;
-                    }
-                    break;
-                }
-                case '20': {
-                    //subcampo 5
-                    if($data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == " " || $data['KC0_INDICADOR_DE_COMERCIO_ELEC'] == 0){ $flagEcommerce = 1;}
-                    //subcampo 6
-                    if($data['KC0_TIPO_DE_TARJETA'] == " "){ $flagCardType = 1; }
-                    //subcampo 7
-                    if($data['KC0_INDICADOR_DE_INFORMACION_A'] == " "){ $flagInfo = 1; }
-                    //subcampo 8
-                    if($data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'] == 0){  $flagCVV2 = 1; }
-                    break;
-                }
-            }
-
-            if($flagEcommerce == 0 || $flagCardType == 0 || $flagInfo == 0 || $flagCVV2 == 0){
                 $answer[$key] = new stdClass();
-                $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answer[$key] -> ID_Ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
-                $answer[$key] -> flagEcommerce = $flagEcommerce;
-                $answer[$key] -> Card_Type = $data['KC0_TIPO_DE_TARJETA'];
-                $answer[$key] -> flagCardType = $flagCardType;
-                $answer[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
-                $answer[$key] -> flagCVV2 = $flagCVV2;
-                $answer[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
-                $answer[$key] -> flagInfo = $flagInfo;
+                $answer[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answer[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+                $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+                $answer[$key] -> ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
+                $answer[$key] -> cardtp = $data['KC0_TIPO_DE_TARJETA'];
+                $answer[$key] -> cvv2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
+                $answer[$key] -> info = $data['KC0_INDICADOR_DE_INFORMACION_A'];
                 $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
                 $answer[$key] -> Number_Sec = $data['NUM_SEC'];
                 //Separación del decimal y entero para agregar el punto decimal
@@ -555,39 +398,8 @@ class TokenC0Controller extends Controller
                 $answer[$key]->Ln_Term = $data['LN_TERM'];
                 $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
                 $answer[$key]->Ln_Card = $data['LN_TARJ'];
-            }else{
-                $answerAllRight[$key] = new stdClass();
-                $answerAllRight[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answerAllRight[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answerAllRight[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answerAllRight[$key] -> ID_Ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
-                $answerAllRight[$key] -> flagEcommerce = $flagEcommerce;
-                $answerAllRight[$key] -> Card_Type = $data['KC0_TIPO_DE_TARJETA'];
-                $answerAllRight[$key] -> flagCardType = $flagCardType;
-                $answerAllRight[$key] -> ID_CVV2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
-                $answerAllRight[$key] -> flagCVV2 = $flagCVV2;
-                $answerAllRight[$key] -> ID_Information = $data['KC0_INDICADOR_DE_INFORMACION_A'];
-                $answerAllRight[$key] -> flagInfo = $flagInfo;;
-                $answerAllRight[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                $answerAllRight[$key] -> Number_Sec = $data['NUM_SEC'];
-                //Separación del decimal y entero para agregar el punto decimal
-                $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
-                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-                $answerAllRight[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-                $answerAllRight[$key]->ID_Comer = $data['ID_COMER'];
-                $answerAllRight[$key]->Term_Comer = $data['TERM_COMER'];
-                $answerAllRight[$key]->Fiid_Comer = $data['FIID_COMER'];
-                $answerAllRight[$key]->Fiid_Term = $data['FIID_TERM'];
-                $answerAllRight[$key]->Ln_Comer = $data['LN_COMER'];
-                $answerAllRight[$key]->Ln_Term = $data['LN_TERM'];
-                $answerAllRight[$key]->Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRight[$key]->Ln_Card = $data['LN_TARJ'];
-            }
         }
-        $badResponse = array_values($answer);
-        $goodResponse = array_values($answerAllRight);
-        $generalResponse = array_merge($badResponse, $goodResponse);
-        $arrayJSON = json_decode(json_encode($generalResponse), true);
+        $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
     }
 }
