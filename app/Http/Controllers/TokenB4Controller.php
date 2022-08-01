@@ -378,148 +378,35 @@ class TokenB4Controller extends Controller
             }
         }
         foreach($array as $key => $data){
-            $serviceEMFlag = 0; $capTermFlag = 0; $evmStatFlag = 0;
-            $dataSusFlag = 0; $panFlag = 0; $devinfoFlag = 0;
-            $onlCodeflag = 0; $arqcVerFlag = 0; $IDrespFlag = 0;
-
-            if($data['ENTRY_MODE'] > 49 && $data['ENTRY_MODE'] < 53 || $data['ENTRY_MODE'] > 69 && $data['ENTRY_MODE'] < 72){
-                if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 3){
-                    $serviceEMFlag = 1;
-                    if(strlen($data['KB4_TERM_ENTRY_CAP']) == 1){
-                        switch($data['KB4_TERM_ENTRY_CAP']){
-                            case 0: $capTermFlag = 1; break;
-                            case 2: $capTermFlag = 1; break;
-                            case 5: $capTermFlag = 1; break;
-                        }
-                    }
-                    if(strlen($data['KB4_LAST_EMV_STAT']) == 1){
-                        switch($data['KB4_LAST_EMV_STAT']){
-                            case 1: $evmStatFlag = 1; break;
-                            case " ": $evmStatFlag = 1; break;
-                        }
-                    }
-                    if(strlen($data['KB4_DATA_SUSPECT']) == 1){
-                        switch($data['KB4_DATA_SUSPECT']){
-                            case 0: $dataSusFlag = 1; break;
-                            case " ": $dataSusFlag = 1; break;
-                        }
-                    }
-                    if(strlen($data['KB4_APPL_PAN_SEQ_NUM']) == 2){ $panFlag = 1; }
-                    if(strlen($data['KB4_DEV_INFO']) == 6){ $devinfoFlag = 1; }
-                    if(strlen($data['KB4_RSN_ONL_CDE']) == 4){ $onlCodeflag = 1; }
-                    if(strlen($data['KB4_ARQC_VRFY']) == 1){
-                        switch($data['KB4_ARQC_VRFY']){
-                            case " ": $arqcVerFlag = 1; break;
-                            case 0: $arqcVerFlag = 1; break;
-                            case 1: $arqcVerFlag = 1; break;
-                            case 2: $arqcVerFlag = 1; break;
-                            case 3: $arqcVerFlag = 1; break;
-                            case 4: $arqcVerFlag = 1; break;
-                            case 9: $arqcVerFlag = 1; break;
-                        }
-                    }
-                    if(strlen($data['KB4_ISO_RC_IND']) == 1){
-                        switch($data['KB4_ISO_RC_IND']){
-                            case " ": $IDrespFlag = 1; break;
-                            case 0: $IDrespFlag = 1; break;
-                            case 1: $IDrespFlag = 1; break;
-                        }
-                    }
-                }
-            }else{
-                if(strlen($data['KB4_PT_SRV_ENTRY_MDE']) == 0 || $data['KB4_PT_SRV_ENTRY_MDE'] == " "){ $serviceEMFlag = 1; }
-                if(strlen($data['KB4_TERM_ENTRY_CAP']) == 0 || $data['KB4_TERM_ENTRY_CAP'] == " "){ $capTermFlag = 1; }
-                if(strlen($data['KB4_LAST_EMV_STAT']) == 0 || $data['KB4_LAST_EMV_STAT'] == " "){ $evmStatFlag = 1; }
-                if(strlen($data['KB4_DATA_SUSPECT']) == 0 || $data['KB4_DATA_SUSPECT'] == " "){ $dataSusFlag = 1; }
-                if(strlen($data['KB4_APPL_PAN_SEQ_NUM']) == 0 || $data['KB4_APPL_PAN_SEQ_NUM'] == " "){ $panFlag = 1; }
-                if(strlen($data['KB4_DEV_INFO']) == 0 || $data['KB4_DEV_INFO'] == " "){ $devinfoFlag = 1; }
-                if(strlen($data['KB4_RSN_ONL_CDE']) == 0 || $data['KB4_RSN_ONL_CDE'] == " "){ $onlCodeflag = 1; }
-                if(strlen($data['KB4_ARQC_VRFY']) == 0 || $data['KB4_ARQC_VRFY'] == " "){ $arqcVerFlag = 1; }
-                if(strlen($data['KB4_ISO_RC_IND']) == 0 || $data['KB4_ISO_RC_IND'] == " "){ $IDrespFlag = 1; }
-            }
-
-            if($serviceEMFlag == 0 || $capTermFlag == 0 || $evmStatFlag == 0
-                || $dataSusFlag == 0 || $panFlag == 0 || $devinfoFlag == 0 ||
-                $onlCodeflag == 0 || $arqcVerFlag == 0 || $IDrespFlag == 0){
-                $answer[$key] = new stdClass();
-                $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answer[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
-                $answer[$key] -> serviceEMFlag = $serviceEMFlag;
-                $answer[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
-                $answer[$key] -> capTermFlag = $capTermFlag;
-                $answer[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
-                $answer[$key] -> evmStatFlag = $evmStatFlag;
-                $answer[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
-                $answer[$key] -> dataSuspFlag = $dataSusFlag;
-                $answer[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
-                $answer[$key] -> panFlag = $panFlag;
-                $answer[$key] -> Device_Info = $data['KB4_DEV_INFO'];
-                $answer[$key] -> devinfoFlag = $devinfoFlag; 
-                $answer[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
-                $answer[$key] -> onlCodeFlag = $onlCodeflag;
-                $answer[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
-                $answer[$key] -> arqcVerFlag = $arqcVerFlag;
-                $answer[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
-                $answer[$key] -> IDrespFlag = $IDrespFlag;
-                $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-                //Separación de la cifra decimal y entero del monto
-                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
-                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-                $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-                $answer[$key] -> ID_Comer = $data['ID_COMER'];
-                $answer[$key] -> Term_Comer = $data['TERM_COMER'];
-                $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
-                $answer[$key] -> Fiid_Term = $data['FIID_TERM'];
-                $answer[$key] -> Ln_Comer = $data['LN_COMER'];
-                $answer[$key] -> Ln_Term = $data['LN_TERM'];
-                $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answer[$key] -> Ln_Card = $data['LN_TARJ'];
-            }else{
-                $answerAllRight[$key] = new stdClass();
-                $answerAllRight[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answerAllRight[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answerAllRight[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answerAllRight[$key] -> Service_EntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
-                $answerAllRight[$key] -> serviceEMFlag = $serviceEMFlag;
-                $answerAllRight[$key] -> Capacity_Terminal = $data['KB4_TERM_ENTRY_CAP'];
-                $answerAllRight[$key] -> capTermFlag = $capTermFlag;
-                $answerAllRight[$key] -> EVM_Status = $data['KB4_LAST_EMV_STAT'];
-                $answerAllRight[$key] -> evmStatFlag = $evmStatFlag;
-                $answerAllRight[$key] -> Data_Suspect = $data['KB4_DATA_SUSPECT'];
-                $answerAllRight[$key] -> dataSuspFlag = $dataSusFlag;
-                $answerAllRight[$key] -> PAN_Number = $data['KB4_APPL_PAN_SEQ_NUM'];
-                $answerAllRight[$key] -> panFlag = $panFlag;
-                $answerAllRight[$key] -> Device_Info = $data['KB4_DEV_INFO'];
-                $answerAllRight[$key] -> devinfoFlag = $devinfoFlag; 
-                $answerAllRight[$key] -> Online_Code = $data['KB4_RSN_ONL_CDE'];
-                $answerAllRight[$key] -> onlCodeFlag = $onlCodeflag;
-                $answerAllRight[$key] -> ARQC_Verification = $data['KB4_ARQC_VRFY'];
-                $answerAllRight[$key] -> arqcVerFlag = $arqcVerFlag;
-                $answerAllRight[$key] -> ID_Response_ISO = $data['KB4_ISO_RC_IND'];
-                $answerAllRight[$key] -> IDrespFlag = $IDrespFlag;
-                $answerAllRight[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                $answerAllRight[$key] -> Number_Sec = $data['NUM_SEC'];
-                //Separación de la cifra decimal y entera del monto
-                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
-                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-                $answerAllRight[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-                $answerAllRight[$key] -> ID_Comer = $data['ID_COMER'];
-                $answerAllRight[$key] -> Term_Comer = $data['TERM_COMER'];
-                $answerAllRight[$key] -> Fiid_Comer = $data['FIID_COMER'];
-                $answerAllRight[$key] -> Fiid_Term = $data['FIID_TERM'];
-                $answerAllRight[$key] -> Ln_Comer = $data['LN_COMER'];
-                $answerAllRight[$key] -> Ln_Term = $data['LN_TERM'];
-                $answerAllRight[$key] -> Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRight[$key] -> Ln_Card = $data['LN_TARJ'];
-            }
+            $answer[$key] = new stdClass();
+            $answer[$key]->kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key]->codeResp = $data['CODIGO_RESPUESTA'];
+            $answer[$key]->entryMode = $data['ENTRY_MODE'];
+            $answer[$key]->SerEntryMode = $data['KB4_PT_SRV_ENTRY_MDE'];
+            $answer[$key]->CapTerm = $data['KB4_TERM_ENTRY_CAP'];
+            $answer[$key]->EVMSts = $data['KB4_LAST_EMV_STAT'];
+            $answer[$key]->DataSus = $data['KB4_DATA_SUSPECT'];
+            $answer[$key]->PANum = $data['KB4_APPL_PAN_SEQ_NUM'];
+            $answer[$key]->DevInfo = $data['KB4_DEV_INFO'];
+            $answer[$key]->OnlCode = $data['KB4_RSN_ONL_CDE'];
+            $answer[$key]->ARQCVer = $data['KB4_ARQC_VRFY'];
+            $answer[$key]->RespISO = $data['KB4_ISO_RC_IND'];
+            $answer[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+            $answer[$key]->Number_Sec = $data['NUM_SEC'];
+            //Separación de la cifra decimal y entero del monto
+            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) - 2, 2);
+            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) - 2);
+            $answer[$key]->amount = '$' . number_format($int . '.' . $dec, 2);
+            $answer[$key]->ID_Comer = $data['ID_COMER'];
+            $answer[$key]->Term_Comer = $data['TERM_COMER'];
+            $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+            $answer[$key]->Ln_Comer = $data['LN_COMER'];
+            $answer[$key]->Ln_Term = $data['LN_TERM'];
+            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key]->Ln_Card = $data['LN_TARJ'];
         }
-        $badAnswer = array_values($answer);
-        $goodAnswer = array_values($answerAllRight);
-        $generalResponse = array_merge($badAnswer, $goodAnswer);
-        $arrayJson = json_decode(json_encode($generalResponse), true);
+        $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;
     }
 }

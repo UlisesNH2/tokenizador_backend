@@ -295,7 +295,6 @@ class TokenB3Controller extends Controller
 
         $response = array();
         $answer = array();
-        $answerAllRigth = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
         KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
@@ -380,124 +379,36 @@ class TokenB3Controller extends Controller
             }
         }
         foreach($array as $key => $data){
-            $bitMapFlag = 0; $termSerNumFlag = 0; $checkCHFlag = 0; $userFoFlag = 0;
-            $userFtFlag = 0; $termTypeFlag = 0; $appVersionFlag = 0; $cvmResFlag = 0;
-            $fileNamelenFlag = 0; $fileNameFlag = 0; 
-
-            //Validación de todos los campos
-            if(($data['ENTRY_MODE'] > 49 && $data['ENTRY_MODE'] < 53) || $data['ENTRY_MODE'] > 69 && $data['ENTRY_MODE'] < 72){
-                if(strlen($data['KB3_BIT_MAP']) == 4){
-                    $bitMapFlag = 1;
-                    if(strlen($data['KB3_TERM_SRL_NUM']) == 8){ $termSerNumFlag = 1; }
-                    if(strlen($data['KB3_EMV_TERM_CAP']) == 8){ $checkCHFlag = 1; }
-                    if(strlen($data['KB3_USR_FLD1']) == 4){ $userFoFlag = 1; }
-                    if(strlen($data['KB3_USR_FLD2']) == 8){ $userFtFlag = 1; }
-                    if(strlen($data['KB3_EMV_TERM_TYPE']) == 2){ $termTypeFlag = 1; }
-                    if(strlen($data['KB3_APP_VER_NUM']) == 4){ $appVersionFlag = 1; }
-                    if(strlen($data['KB3_CVM_RSLTS']) == 6 ){ $cvmResFlag = 1; }
-                    if(strlen($data['KB3_DF_NAME_LGTH']) == 4){ $fileNamelenFlag = 1; }
-                    if(strlen($data['KB3_DF_NAME']) == 32){ $fileNameFlag = 1; }
-                }
-            }else{
-                if(strlen($data['KB3_BIT_MAP']) == 1 || $data['KB3_BIT_MAP'] == ""){ $bitMapFlag = 1; }
-                if(strlen($data['KB3_TERM_SRL_NUM']) == 1 || $data['KB3_TERM_SRL_NUM'] == ""){ $termSerNumFlag = 1; }
-                if(strlen($data['KB3_EMV_TERM_CAP']) == 1 || $data['KB3_EMV_TERM_CAP'] == ""){ $checkCHFlag = 1; }
-                if(strlen($data['KB3_USR_FLD1']) == 1 || $data['KB3_USR_FLD1'] == ""){ $userFoFlag = 1; }
-                if(strlen($data['KB3_USR_FLD2']) == 1 || $data['KB3_USR_FLD2'] == ""){ $userFtFlag = 1; }
-                if(strlen($data['KB3_EMV_TERM_TYPE']) == 1 || $data['KB3_EMV_TERM_TYPE'] == ""){ $termTypeFlag = 1; }
-                if(strlen($data['KB3_APP_VER_NUM']) == 1 || $data['KB3_APP_VER_NUM'] == ""){ $appVersionFlag = 1; }
-                if(strlen($data['KB3_CVM_RSLTS']) == 1 || $data['KB3_CVM_RSLTS'] == ""){ $cvmResFlag = 1; }
-                if(strlen($data['KB3_DF_NAME_LGTH']) == 1 || $data['KB3_DF_NAME_LGTH'] == ""){ $fileNamelenFlag = 1; }
-                if(strlen($data['KB3_DF_NAME']) == 1 || $data['KB3_DF_NAME'] == ""){ $fileNameFlag = 1; }
-            }
-
-            if($bitMapFlag == 0 || $termSerNumFlag == 0 || $checkCHFlag == 0 || $userFoFlag == 0||
-                $userFtFlag == 0 || $termTypeFlag == 0 || $appVersionFlag == 0 || $cvmResFlag == 0 ||
-                $fileNamelenFlag == 0 || $fileNameFlag == 0){
-
-                $answer[$key] = new stdClass();
-                $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answer[$key] -> Bit_Map = $data['KB3_BIT_MAP'];
-                $answer[$key] -> bitMapFlag = $bitMapFlag;
-                $answer[$key] -> Terminal_Serial_Number = $data['KB3_TERM_SRL_NUM'];
-                $answer[$key] -> termSerNumFlag = $termSerNumFlag;
-                $answer[$key] -> Check_Cardholder = $data['KB3_EMV_TERM_CAP'];
-                $answer[$key] -> checkCHFlag = $checkCHFlag;
-                $answer[$key] -> User_Field_One = $data['KB3_USR_FLD1'];
-                $answer[$key] -> userFoFlag = $userFoFlag;
-                $answer[$key] -> User_Field_Two = $data['KB3_USR_FLD2'];
-                $answer[$key] -> userFtFlag = $userFtFlag;
-                $answer[$key] -> Terminal_Type_EMV = $data['KB3_EMV_TERM_TYPE'];
-                $answer[$key] -> termTypeFlag = $termTypeFlag;
-                $answer[$key] -> App_Version_Number = $data['KB3_APP_VER_NUM'];
-                $answer[$key] -> appVersionFlag = $appVersionFlag;
-                $answer[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
-                $answer[$key] -> cvmResFlag = $cvmResFlag;
-                $answer[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
-                $answer[$key] -> fileNamelenFlag = $fileNamelenFlag;
-                $answer[$key] -> File_Name = $data['KB3_DF_NAME'];
-                $answer[$key] -> fileNameFlag = $fileNameFlag;
-                $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                $answer[$key] -> Number_Sec = $data['NUM_SEC'];
-                //Separación del decimal y del entero en el monto
-                $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
-                $int = substr($data['MONTO1'], 0, $data['MONTO1']-2);
-                $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-                $answer[$key]->ID_Comer = $data['ID_COMER'];
-                $answer[$key]->Term_Comer = $data['TERM_COMER'];
-                $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
-                $answer[$key]->Fiid_Term = $data['FIID_TERM'];
-                $answer[$key]->Ln_Comer = $data['LN_COMER'];
-                $answer[$key]->Ln_Term = $data['LN_TERM'];
-                $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
-                $answer[$key]->Ln_Card = $data['LN_TARJ'];
-            }else {
-                $answerAllRigth[$key] = new stdClass();
-                $answerAllRigth[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-                $answerAllRigth[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-                $answerAllRigth[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-                $answerAllRigth[$key] -> Bit_Map = $data['KB3_BIT_MAP'];
-                $answerAllRigth[$key] -> bitMapFlag = $bitMapFlag;
-                $answerAllRigth[$key] -> Terminal_Serial_Number = $data['KB3_TERM_SRL_NUM'];
-                $answerAllRigth[$key] -> termSerNumFlag = $termSerNumFlag;
-                $answerAllRigth[$key] -> Check_Cardholder = $data['KB3_EMV_TERM_CAP'];
-                $answerAllRigth[$key] -> checkCHFlag = $checkCHFlag;
-                $answerAllRigth[$key] -> User_Field_One = $data['KB3_USR_FLD1'];
-                $answerAllRigth[$key] -> userFoFlag = $userFoFlag;
-                $answerAllRigth[$key] -> User_Field_Two = $data['KB3_USR_FLD2'];
-                $answerAllRigth[$key] -> userFtFlag = $userFtFlag;
-                $answerAllRigth[$key] -> Terminal_Type_EMV = $data['KB3_EMV_TERM_TYPE'];
-                $answerAllRigth[$key] -> termTypeFlag = $termTypeFlag;
-                $answerAllRigth[$key] -> App_Version_Number = $data['KB3_APP_VER_NUM'];
-                $answerAllRigth[$key] -> appVersionFlag = $appVersionFlag;
-                $answerAllRigth[$key] -> CVM_Result = $data['KB3_CVM_RSLTS'];
-                $answerAllRigth[$key] -> cvmResFlag = $cvmResFlag;
-                $answerAllRigth[$key] -> File_Name_Length = $data['KB3_DF_NAME_LGTH'];
-                $answerAllRigth[$key] -> fileNamelenFlag = $fileNamelenFlag;
-                $answerAllRigth[$key] -> File_Name = $data['KB3_DF_NAME'];
-                $answerAllRigth[$key] -> fileNameFlag = $fileNameFlag;
-                $answerAllRigth[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-                $answerAllRigth[$key] -> Number_Sec = $data['NUM_SEC'];
-                //Separación del decimal y el entero en el monto
-                $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
-                $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-                $answerAllRigth[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-                $answerAllRigth[$key]->ID_Comer = $data['ID_COMER'];
-                $answerAllRigth[$key]->Term_Comer = $data['TERM_COMER'];
-                $answerAllRigth[$key]->Fiid_Comer = $data['FIID_COMER'];
-                $answerAllRigth[$key]->Fiid_Term = $data['FIID_TERM'];
-                $answerAllRigth[$key]->Ln_Comer = $data['LN_COMER'];
-                $answerAllRigth[$key]->Ln_Term = $data['LN_TERM'];
-                $answerAllRigth[$key]->Fiid_Card = $data['FIID_TARJ'];
-                $answerAllRigth[$key]->Ln_Card = $data['LN_TARJ'];
-            }
+            $answer[$key] = new stdClass();
+            $answer[$key]->kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key]->codeResp = $data['CODIGO_RESPUESTA'];
+            $answer[$key]->entryMode = $data['ENTRY_MODE'];
+            $answer[$key]->bitMap = $data['KB3_BIT_MAP'];
+            $answer[$key]->TermNum = $data['KB3_TERM_SRL_NUM'];
+            $answer[$key]->CheckCh = $data['KB3_EMV_TERM_CAP'];
+            $answer[$key]->UsrFOne = $data['KB3_USR_FLD1'];
+            $answer[$key]->UsrFTwo = $data['KB3_USR_FLD2'];
+            $answer[$key]->TermTpEMV = $data['KB3_EMV_TERM_TYPE'];
+            $answer[$key]->AppVerNum = $data['KB3_APP_VER_NUM'];
+            $answer[$key]->CVMRes = $data['KB3_CVM_RSLTS'];
+            $answer[$key]->fileNameLen = $data['KB3_DF_NAME_LGTH'];
+            $answer[$key]->fileName = $data['KB3_DF_NAME'];
+            $answer[$key]->TermName = $data['NOMBRE_DE_TERMINAL'];
+            $answer[$key]->Number_Sec = $data['NUM_SEC'];
+            //Separación del decimal y del entero en el monto
+            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) - 2, 2);
+            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) - 2);
+            $answer[$key]->amount = '$' . number_format($int . '.' . $dec, 2);
+            $answer[$key]->ID_Comer = $data['ID_COMER'];
+            $answer[$key]->Term_Comer = $data['TERM_COMER'];
+            $answer[$key]->Fiid_Comer = $data['FIID_COMER'];
+            $answer[$key]->Fiid_Term = $data['FIID_TERM'];
+            $answer[$key]->Ln_Comer = $data['LN_COMER'];
+            $answer[$key]->Ln_Term = $data['LN_TERM'];
+            $answer[$key]->Fiid_Card = $data['FIID_TARJ'];
+            $answer[$key]->Ln_Card = $data['LN_TARJ'];
         }
-        $badAnswer = array_values($answer);
-        $goodAnswer = array_values($answerAllRigth);
-        $generalResponse = array_merge($badAnswer, $goodAnswer);
-        $arrayJson = json_decode(json_encode($generalResponse), true);
+        $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;
     }
 }
