@@ -397,174 +397,26 @@ class TokenB2Controller extends Controller
         }
 
         foreach($array as $key => $data){
-            $bitMapFlag = 0; $userFOFlag = 0; $arqcFlag = 0; $amtAuthFlag = 0;
-            $amtOtherFlag = 0; $atcFlag = 0; $termConFlag = 0; $termCurrFlag = 0;
-            $transDateFlag = 0; $transTypeFlag = 0; $umpNumFlag = 0; $tvrFlag = 0;
-            $appDataLenFlag = 0; $appDataFlag = 0; $cryptoFlag = 0; $aipFlag = 0;
-            //Conversión a binario del campo Crypto_Data, se rellenan los espacios con ceros binarios
-            $cryptoDataBinary = str_pad(base_convert($data['KB2_CRYPTO_INFO_DATA'],16,2),8,'0',STR_PAD_LEFT);
-            //Conversión del dato binario a un arreglo para su posterior validación
-            $arrayCrypto = str_split($cryptoDataBinary, 1);
-
-            $tvrDataBinary = str_pad(base_convert($data['KB2_TVR'],16,2),40,'0',STR_PAD_LEFT);
-            $arrayTvr = str_split($tvrDataBinary, 1);
-
-            $aipDataBinary = str_pad(base_convert($data['KB2_AIP'],16,2),16,'0',STR_PAD_LEFT);
-            $arrayAip = str_split($aipDataBinary, 1);
-            $fisrtCombinationNumber = base_convert('4', 10, 2);
-
-            if(($data['ENTRY_MODE'] > 49 && $data['ENTRY_MODE'] < 53) || ($data['ENTRY_MODE'] > 69 && $data['ENTRY_MODE'] < 72)){
-                if(strlen($data['KB2_BIT_MAP']) == 4){
-                    $bitMapFlag = 1;
-                    if(strlen($data['KB2_USR_FLD1']) == 4){ $userFOFlag = 1; };
-                    if(strlen($data['KB2_ARQC']) == 16) { $arqcFlag = 1; }
-                    if(strlen($data['KB2_AMT_AUTH']) == 12) { $amtAuthFlag = 1; }
-                    if(strlen($data['KB2_AMT_OTHER']) == 12) { $amtOtherFlag = 1; }
-                    if(strlen($data['KB2_ATC']) == 4) { $atcFlag = 1; }
-                    if(strlen($data['KB2_TERM_CTRY_CDE']) == 3) { $termConFlag = 1; }
-                    if(strlen($data['KB2_TRAN_CRNCY_CDE']) == 3) { $termCurrFlag = 1; }
-                    if(strlen($data['KB2_TRAN_DAT']) == 6) { $transDateFlag = 1; }
-                    if(strlen($data['KB2_TRAN_TYPE']) == 2) { $transTypeFlag = 1; }
-                    if(strlen($data['KB2_UNPREDICT_NUM']) == 8) { $umpNumFlag = 1; }
-                    if(strlen($data['KB2_ISS_APPL_DATA_LGTH']) == 4) { $appDataLenFlag = 1; }
-                    if(strlen($data['KB2_ISS_APPL_DATA']) == 64) { $appDataFlag = 1; }
-                    //Comparación con cada uno de los dígitos del campo.
-                    if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 2){
-                        if($arrayCrypto[0].$arrayCrypto[1] < $fisrtCombinationNumber){
-                            if($arrayCrypto[4] == 0 || $arrayCrypto[4] == 1){
-                                if($arrayCrypto[5] !== 0){
-                                    if(($arrayCrypto[6].$arrayCrypto[7] < $fisrtCombinationNumber)){
-                                        $cryptoFlag = 1;
-                                    }
-                                }
-                            } 
-                        }
-                    }
-                    //Validación del campo TVR
-                    if(strlen($data['KB2_TVR']) == 10){
-                        $firstByteFlag = false;
-                        $secondByteFlag = false;
-                        $thirdBtyeFlag = false;
-                        $fourthByteFlag = false;
-                        $fifthByteFlag = false;
-                        //Validación del primer byte (8 primeras posiciones) del campo TVR
-                        //Solo se valida de la posición 0 a 4 (0-7)
-                        for($i = 0; $i < 5; $i++){
-                            if($arrayTvr[$i] == 0 || $arrayTvr[$i] == 1){
-                                $firstByteFlag = true;
-                            }else{ $firstByteFlag = false; $i = 6;}
-                        }
-                        //Validación del segundo byte (8 segundas posiciones)
-                        //Sólo se valida de la posición 0 a 4 (8-15)
-                        if($firstByteFlag){
-                            for($i = 8; $i < 13; $i++){
-                                if($arrayTvr[$i] == 0 || $arrayTvr[$i] == 1){
-                                    $secondByteFlag = true;
-                                }else { $secondByteFlag = false; $i = 14;}
-                            }
-                        }
-                        //Validación del tercer byte (8 terceras posiciones)
-                        //Sólo se valida de la posición 0 a 5 (16-23)
-                        if($secondByteFlag){
-                            for($i = 16; $i < 22; $i++){
-                                if($arrayTvr[$i] == 0 || $arrayTvr[$i] == 1){
-                                    $thirdBtyeFlag = true;
-                                }else { $thirdBtyeFlag = false; $i = 23;}
-                            }
-                        }
-                        //Validación del cuarto byte (8 cuartas posiciones)
-                        //Solo se valida de la posición 0 a 4 (24-31)
-                        if($thirdBtyeFlag){
-                            for($i = 24; $i < 29; $i++){
-                                if($arrayTvr[$i] == 0 || $arrayTvr[$i] == 1){
-                                    $fourthByteFlag = true;
-                                }else { $fourthByteFlag = false; $i = 30;}
-                            }
-                        }
-                        //Validación del quinto byte (8 quintas posiciones)
-                        //Solo se valida de la posición 0 a 3 (32-39)
-                        if($fourthByteFlag){
-                            for($i = 32; $i < 35; $i++){
-                                if($arrayTvr[$i] == 0 || $arrayTvr[$i] == 1){
-                                    $fifthByteFlag = true;
-                                }else { $fifthByteFlag = false; $i = 36;}
-                            }
-                        }
-                        if($fifthByteFlag){ $tvrFlag = 1;} 
-                    }
-    
-                    //Validación del campo AIP
-                    if(strlen($data['KB2_AIP']) == 4){
-                        //Validación del primer byte (8 primeras posiciones)
-                        //Solo se valida de la posición 0 a 5
-                        $byteFlag = false;
-                        for($i = 0; $i < 6; $i++){
-                            if($arrayAip[$i] == 0 || $arrayAip[$i] == 1){
-                                $byteFlag = true;
-                            }else { $byteFlag = false;  $i = 7;}
-                        }
-                        if($byteFlag){ $aipFlag = 1; }
-                    }
-            }
-        }else{
-            if(strlen($data['KB2_BIT_MAP']) == 1 || $data['KB2_BIT_MAP'] == ""){ $bitMapFlag = 1; }
-            if(strlen($data['KB2_USR_FLD1']) == 1 || $data['KB2_USR_FLD1'] == ""){ $userFOFlag = 1; }
-            if(strlen($data['KB2_ARQC']) == 1 || $data['KB2_ARQC'] == ""){ $arqcFlag = 1; }
-            if(strlen($data['KB2_AMT_AUTH']) == 1 || $data['KB2_AMT_AUTH'] == ""){ $amtAuthFlag = 1; }
-            if(strlen($data['KB2_AMT_OTHER']) == 1 || $data['KB2_AMT_OTHER'] == ""){ $amtOtherFlag = 1; }
-            if(strlen($data['KB2_ATC']) == 1 || $data['KB2_ATC'] == ""){ $atcFlag = 1; }
-            if(strlen($data['KB2_TERM_CTRY_CDE']) == 1 || $data['KB2_TERM_CTRY_CDE'] == ""){ $termConFlag = 1; }
-            if(strlen($data['KB2_TRAN_CRNCY_CDE']) == 1 || $data['KB2_TRAN_CRNCY_CDE'] == ""){ $termCurrFlag = 1; }
-            if(strlen($data['KB2_TRAN_DAT']) == 1 || $data['KB2_TRAN_DAT'] == ""){ $transDateFlag = 1; }
-            if(strlen($data['KB2_TRAN_TYPE']) == 1 || $data['KB2_TRAN_TYPE'] == ""){ $transTypeFlag = 1; }
-            if(strlen($data['KB2_UNPREDICT_NUM']) == 1 || $data['KB2_UNPREDICT_NUM'] == ""){ $umpNumFlag = 1; }
-            if(strlen($data['KB2_ISS_APPL_DATA_LGTH']) == 1 || $data['KB2_ISS_APPL_DATA_LGTH'] == ""){ $appDataLenFlag = 1; }
-            if(strlen($data['KB2_ISS_APPL_DATA']) == 1 || $data['KB2_ISS_APPL_DATA'] == ""){ $appDataFlag = 1; }
-            if(strlen($data['KB2_CRYPTO_INFO_DATA']) == 1 || $data['KB2_CRYPTO_INFO_DATA'] == ""){ $cryptoFlag = 1; }
-            if(strlen($data['KB2_TVR']) == 1 || $data['KB2_TVR'] == ""){ $tvrFlag = 1; }
-            if(strlen($data['KB2_AIP']) == 1 || $data['KB2_AIP'] == ""){ $aipFlag = 1; }
-        }
-
-        if($bitMapFlag == 0 || $userFOFlag == 0 || $arqcFlag == 0 || $amtAuthFlag == 0 ||
-        $amtOtherFlag == 0 || $atcFlag == 0 || $termConFlag == 0 || $termCurrFlag == 0 ||
-        $transDateFlag == 0 || $transTypeFlag == 0 || $umpNumFlag == 0 || $tvrFlag == 0 ||
-        $appDataLenFlag == 0 || $appDataFlag == 0 || $cryptoFlag == 0 || $aipFlag == 0){
             $answer[$key] = new stdClass();
-            $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key] -> Bit_Map = $data['KB2_BIT_MAP'];
-            $answer[$key] -> bitMapFlag = $bitMapFlag;
-            $answer[$key] -> User_Field_One = $data['KB2_USR_FLD1'];
-            $answer[$key] -> userFOFlag = $userFOFlag;
-            $answer[$key] -> Crypto_Data = $data['KB2_CRYPTO_INFO_DATA'];
-            $answer[$key] -> cryptoFlag = $cryptoFlag;
+            $answer[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+            $answer[$key] -> bitMap = $data['KB2_BIT_MAP'];
+            $answer[$key] -> UsrFO = $data['KB2_USR_FLD1'];
+            $answer[$key] -> CrypData = $data['KB2_CRYPTO_INFO_DATA'];
             $answer[$key] -> ARQC = $data['KB2_ARQC'];
-            $answer[$key] -> arqcFlag = $arqcFlag;
-            $answer[$key] -> AMT_Auth = $data['KB2_AMT_AUTH'];
-            $answer[$key] -> amtAuthFlag = $amtAuthFlag;
-            $answer[$key] -> AMT_Other = $data['KB2_AMT_OTHER'];
-            $answer[$key] -> amtOtherFlag = $amtOtherFlag;
+            $answer[$key] -> AMTAuth = $data['KB2_AMT_AUTH'];
+            $answer[$key] -> AMTOther = $data['KB2_AMT_OTHER'];
             $answer[$key] -> ATC = $data['KB2_ATC'];
-            $answer[$key] -> atcFlag = $atcFlag;
-            $answer[$key] -> Terminal_Country_Code = $data['KB2_TERM_CTRY_CDE'];
-            $answer[$key] -> termConFlag = $termConFlag;
-            $answer[$key] -> Terminal_Currency_Code = $data['KB2_TRAN_CRNCY_CDE'];
-            $answer[$key] -> termCurrFlag = $termCurrFlag;
-            $answer[$key] -> Transaction_Date = $data['KB2_TRAN_DAT'];
-            $answer[$key] -> transDateFlag = $transDateFlag;
-            $answer[$key] -> Transaction_Type = $data['KB2_TRAN_TYPE'];
-            $answer[$key] -> transTypeFlag = $transTypeFlag; 
-            $answer[$key] -> Umpedict_Number = $data['KB2_UNPREDICT_NUM'];
-            $answer[$key] -> umpNumFlag = $umpNumFlag;
-            $answer[$key] -> Issuing_App_Data_Length = $data['KB2_ISS_APPL_DATA_LGTH'];
-            $answer[$key] -> appDataLenFlag = $appDataLenFlag;
-            $answer[$key] -> Issuing_App_Data = $data['KB2_ISS_APPL_DATA'];
-            $answer[$key] -> appDataFlag = $appDataFlag;
+            $answer[$key] -> TermCounCode = $data['KB2_TERM_CTRY_CDE'];
+            $answer[$key] -> TermCurrCode = $data['KB2_TRAN_CRNCY_CDE'];
+            $answer[$key] -> TranDate = $data['KB2_TRAN_DAT'];
+            $answer[$key] -> TranType = $data['KB2_TRAN_TYPE'];
+            $answer[$key] -> UmpNum = $data['KB2_UNPREDICT_NUM'];
+            $answer[$key] -> IssAppDataLen = $data['KB2_ISS_APPL_DATA_LGTH'];
+            $answer[$key] -> IssAppData = $data['KB2_ISS_APPL_DATA'];
             $answer[$key] -> TVR = $data['KB2_TVR'];
-            $answer[$key] -> tvrFlag = $tvrFlag;
             $answer[$key] -> AIP = $data['KB2_AIP'];
-            $answer[$key] -> aipFlag = $aipFlag;
             $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
             $answer[$key] -> Number_Sec = $data['NUM_SEC'];
             //Separación de la cifra decimal y entero del monto
@@ -579,64 +431,8 @@ class TokenB2Controller extends Controller
             $answer[$key] -> Ln_Term = $data['LN_TERM'];
             $answer[$key] -> Fiid_Card = $data['FIID_TARJ'];
             $answer[$key] -> Ln_Card = $data['LN_TARJ'];
-        }else{
-            $answerOk[$key] = new stdClass();
-            $answerOk[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answerOk[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answerOk[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answerOk[$key] -> Bit_Map = $data['KB2_BIT_MAP'];
-            $answerOk[$key] -> bitMapFlag = $bitMapFlag;
-            $answerOk[$key] -> User_Field_One = $data['KB2_USR_FLD1'];
-            $answerOk[$key] -> userFOFlag = $userFOFlag;
-            $answerOk[$key] -> Crypto_Data = $data['KB2_CRYPTO_INFO_DATA'];
-            $answerOk[$key] -> cryptoFlag = $cryptoFlag;
-            $answerOk[$key] -> ARQC = $data['KB2_ARQC'];
-            $answerOk[$key] -> arqcFlag = $arqcFlag;
-            $answerOk[$key] -> AMT_Auth = $data['KB2_AMT_AUTH'];
-            $answerOk[$key] -> amtAuthFlag = $amtAuthFlag;
-            $answerOk[$key] -> AMT_Other = $data['KB2_AMT_OTHER'];
-            $answerOk[$key] -> amtOtherFlag = $amtOtherFlag;
-            $answerOk[$key] -> ATC = $data['KB2_ATC'];
-            $answerOk[$key] -> atcFlag = $atcFlag;
-            $answerOk[$key] -> Terminal_Country_Code = $data['KB2_TERM_CTRY_CDE'];
-            $answerOk[$key] -> termConFlag = $termConFlag;
-            $answerOk[$key] -> Terminal_Currency_Code = $data['KB2_TRAN_CRNCY_CDE'];
-            $answerOk[$key] -> termCurrFlag = $termCurrFlag;
-            $answerOk[$key] -> Transaction_Date = $data['KB2_TRAN_DAT'];
-            $answerOk[$key] -> transDateFlag = $transDateFlag;
-            $answerOk[$key] -> Transaction_Type = $data['KB2_TRAN_TYPE'];
-            $answerOk[$key] -> transTypeFlag = $transTypeFlag; 
-            $answerOk[$key] -> Umpedict_Number = $data['KB2_UNPREDICT_NUM'];
-            $answerOk[$key] -> umpNumFlag = $umpNumFlag;
-            $answerOk[$key] -> Issuing_App_Data_Length = $data['KB2_ISS_APPL_DATA_LGTH'];
-            $answerOk[$key] -> appDataLenFlag = $appDataLenFlag;
-            $answerOk[$key] -> Issuing_App_Data = $data['KB2_ISS_APPL_DATA'];
-            $answerOk[$key] -> appDataFlag = $appDataFlag;
-            $answerOk[$key] -> TVR = $data['KB2_TVR'];
-            $answerOk[$key] -> tvrFlag = $tvrFlag;
-            $answerOk[$key] -> AIP = $data['KB2_AIP'];
-            $answerOk[$key] -> aipFlag = $aipFlag;
-            $answerOk[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-            $answerOk[$key] -> Number_Sec = $data['NUM_SEC'];
-            //Separación de la cifra decimal y entero del monto
-            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
-            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-            $answerOk[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
-            $answerOk[$key] -> ID_Comer = $data['ID_COMER'];
-            $answerOk[$key] -> Term_Comer = $data['TERM_COMER'];
-            $answerOk[$key] -> Fiid_Comer = $data['FIID_COMER'];
-            $answerOk[$key] -> Fiid_Term = $data['FIID_TERM'];
-            $answerOk[$key] -> Ln_Comer = $data['LN_COMER'];
-            $answerOk[$key] -> Ln_Term = $data['LN_TERM'];
-            $answerOk[$key] -> Fiid_Card = $data['FIID_TARJ'];
-            $answerOk[$key] -> Ln_Card = $data['LN_TARJ'];
-        }
-        
     }
-    $badResponse = array_values($answer);
-    $goodResponse = array_values($answerOk);
-    $generalResponse = array_merge($badResponse, $goodResponse);
-    $arrayJson = json_decode(json_encode($generalResponse), true);
+    $arrayJson = json_decode(json_encode($answer), true);
     return $arrayJson;
     }
 }
