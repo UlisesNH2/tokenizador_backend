@@ -393,7 +393,7 @@ class BreakerController extends Controller
                         $initPos = $finalPos+1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
                         if(ltrim($len, '0') <= 22){
-                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
                             $respCodeData = $this -> getChain($message, $initPos, $finalPos); //Long 22
                             $response -> respCodeData = $respCodeData;
                         }else{

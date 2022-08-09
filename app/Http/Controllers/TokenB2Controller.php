@@ -401,7 +401,7 @@ class TokenB2Controller extends Controller
             $answer[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
             $answer[$key] -> entryMode = $data['ENTRY_MODE'];
-            $answer[$key] -> bitMap = $data['KB2_BIT_MAP'];
+            $answer[$key] -> bitMapB2 = $data['KB2_BIT_MAP'];
             $answer[$key] -> UsrFO = $data['KB2_USR_FLD1'];
             $answer[$key] -> CrypData = $data['KB2_CRYPTO_INFO_DATA'];
             $answer[$key] -> ARQC = $data['KB2_ARQC'];
