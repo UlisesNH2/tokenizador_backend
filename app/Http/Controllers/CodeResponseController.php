@@ -58,7 +58,7 @@ class codeResponseController extends Controller
         $firstQuery = "select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES, sum(main.MONTO1) AS MONTO, count(*) as TXS 
         from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
         where ";
-        $secondQuery = " group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
+        $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
         $totalTX = 0;
 
         //Eliminar filtros no seleccionados
@@ -123,8 +123,7 @@ class codeResponseController extends Controller
                     }
                 }
                 //Consulta del query obtenido por los filtros y los valores elegidos
-                return $firstQuery.$secondQuery;
-                $response = DB::select($firstQuery, [...$arrayValues]);
+                $response = DB::select($firstQuery.$secondQuery, [...$arrayValues]);
                 $array = json_decode(json_encode($response), true);
             }
         }        
