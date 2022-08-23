@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         $values = array();
         $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
-        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ', 'FECHA_TRANS'];
         
         $values[0] = $request -> kq2;
         $values[1] = $request -> codeResponse;
@@ -30,6 +30,8 @@ class DashboardController extends Controller
         $values[8] = $request -> Ln_Term;
         $values[9] = $request -> Fiid_Card;
         $values[10] = $request -> Ln_Card;  
+        //$values[11] = $request -> startDate;
+        //$values[12] = $request -> finishDate;
 
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM,
         LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, sum(MONTO1) AS MONTO, count(*) as TXS from test 
@@ -106,6 +108,7 @@ class DashboardController extends Controller
                     }
                 }
                 //Consulta del query obtenido por los filtros y los valores elegidos
+                return $query."and (FECHA_TRANS between '210314' and '210330')";
                 $response = DB::select($query, [...$arrayValues]);
                 $array = json_decode(json_encode($response), true);
             }

@@ -530,7 +530,7 @@ class BreakerController extends Controller
                                     }else{
                                         $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
                                         if($x === $numberOfTokens -1){
-                                            $finalPos+=0;
+                                            $finalPos+= intval(ltrim($lenToken, '0'));
                                         }else{
                                             $finalPos += 10 + intval(ltrim($lenToken, '0'));
                                         }
@@ -540,15 +540,27 @@ class BreakerController extends Controller
                         }
                         break;
                     }
+                    case 90: {  //Original Data Elements
+                        $initPos = $finalPos+1; $finalPos += 42;
+                        $ogDataElm = $this -> getChain($message, $initPos, $finalPos);
+                        $response -> ogDataElm = $ogDataElm;
+                        break;
+                    }
+                    case 95: { //Replacement Amounts
+                        $initPos = $finalPos+1; $finalPos += 42;
+                        $repAmount = $this -> getChain($message, $initPos, $finalPos);
+                        $response -> reoAmount = $repAmount;
+                        break;
+                    }
                     case 100: { //Receiving Institution ID Code ***
                         $initPos = $finalPos+1; $finalPos+=2;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 11){
-                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                        if($len <= 11){
+                            $initPos = $finalPos+1; $finalPos += intval($len);
                             $recInstIDCode = $this -> getChain($message, $initPos, $finalPos);
                             $response -> recInstIDCode = $recInstIDCode;
                         }else{
-                            $response -> recInstIDCode = '-----';
+                            $response -> recInstIDCode = 'error';
                         }
                         break;
                     }
@@ -560,7 +572,7 @@ class BreakerController extends Controller
                             $accID1 = $this -> getChain($message, $initPos, $finalPos);
                             $response -> accID1 = $accID1;
                         }else{
-                            $response -> accID1 = '-----';
+                            $response -> accID1 = 'error';
                         }
                         break;
                     }
@@ -572,7 +584,7 @@ class BreakerController extends Controller
                             $accID2 = $this -> getChain($message, $initPos, $finalPos);
                             $response -> accID2 = $accID2;
                         }else{
-                            $response -> accID2 = '-----';
+                            $response -> accID2 = 'error';
                         }
                         break;
                     }
@@ -584,19 +596,19 @@ class BreakerController extends Controller
                             $adminToken = $this -> getChain($message, $initPos, $finalPos);
                             $response -> adminToken = $adminToken;
                         }else{
-                            $response -> adminToken = '-----';
+                            $response -> adminToken = 'error';
                         }
                         break;
                     }
                     case 121: { //AuthInd ***
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(intval($len) <= 23){
+                        if(is_numeric($len) && intval($len) <= 23){
                             $initPos = $finalPos+1; $finalPos += intval($len);
                             $authID = $this -> getChain($message, $initPos, $finalPos);
                             $response -> authID = $authID;
                         }else{
-                            $response -> authID = '-----';
+                            $response -> authID = 'error';
                         }
                         break;
                     }
@@ -608,7 +620,7 @@ class BreakerController extends Controller
                             $cryptoServMess = $this -> getChain($message, $initPos, $finalPos);
                             $response -> cryptoSerMes = $cryptoServMess;
                         }else{
-                            $response -> cryptoSerMes = '-----';
+                            $response -> cryptoSerMes = 'error';
                         }
                         break;
                     }
@@ -639,6 +651,11 @@ class BreakerController extends Controller
                     case 126: { //Base 24 - Additional Data
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
+                        if(intval($len) === 0){
+                            $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
+                            $response -> addDataB24 = $additionalData;
+                            break;
+                        }
                         if($len <= 800){
                             $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len)-3);
                             $response -> addDataB24 = $addDataB24;
