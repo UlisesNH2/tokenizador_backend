@@ -638,52 +638,97 @@ class BreakerController extends Controller
                         break;
                     }
                     case 50: {
-                        
                         break;
-                    } /*
+                    }
+                    case 51: {
+                        break;
+                    }
                     case 52: {  //PIN
                         $initPos = $finalPos+1; $finalPos += 16;
                         $pin = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> pin = $pin;
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $pin;
+                        break;
+                    }
+                    case 53: {
+                        break;
+                    }
+                    case 54: {
+                        break;
+                    }
+                    case 55: {
+                        break;
+                    }
+                    case 56: {
+                        break;
+                    }
+                    case 57: {
+                        break;
+                    }
+                    case 58: {
+                        break;
+                    }
+                    case 59: {
                         break;
                     }
                     //TODO 51 - 59
                     case 60: { //Terminal Data
                         $initPos = $finalPos+1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 19){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 19){
                             $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
                             $termData = $this -> getChain($message, $initPos, $finalPos); //Long 19
-                            $response -> termData = $termData;
+                            $response[$counter] -> $value = $termData;
                         }else{
-                            $response -> termData = '-------';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 61: { //Response Code Data
                         $initPos = $finalPos+1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 22){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 22){
                             $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
                             $respCodeData = $this -> getChain($message, $initPos, $finalPos); //Long 22
-                            $response -> respCodeData = $respCodeData;
+                            $response[$counter] -> $value = $respCodeData;
                         }else{
-                            $response -> respCodeData = '-------';
+                            $response[$counter] -> $value = 'eeror - tipo de dato no válido';
                         }
                         break;
                     }
                     case 62: { //Postal Code
                         $initPos = $finalPos+1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 13){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 13){
                             if(ltrim($len, '0') == 10){
                                 $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
                                 $postalCode = $this -> getChain($message, $initPos, $finalPos);
-                                $response -> postalCode = $postalCode;
+                                $response[$counter] -> $value = $postalCode;
                             }else{
-                                $initPos = $finalPos+1; $finalPos += 10;
-                                $postalCode = $this -> getChain($message, $initPos, $finalPos);
-                                $response -> postalCode = $postalCode.'-';
+                                $response[$counter] -> $value = 'error - tipo de dato no válido';
                             }
                         }
                         break;
@@ -692,315 +737,354 @@ class BreakerController extends Controller
                         $initPos = $finalPos+1; $finalPos += 3;
                         //Las primeras tres posiciones son la longitud del campo: TODO: validación
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 0){
+
+                        //Creación del objeto para la additional data
+                        $counter++; $id++; 
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 0){
                             $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
-                            $response -> additionalData = $additionalData;
+                            $response[$counter] -> $value = $additionalData;
                             break;
+                        }else{
+                            $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
+                            $response[$counter] -> $value = $additionalData;
                         }
-                        $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
-                        $response -> additionalData = $additionalData;
                         //Obtención del header para la lectura y desglose de los tokens
                         $initPos = $finalPos+1; $finalPos += 12; 
                         $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> addDataHeader = $headerAllTokens;
+                        //Creación del objeto para el header
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = 'P-63.0';
+                        $response[$counter] -> $name = 'Additional Data Header';
+                        $response[$counter] -> $type = 'ANS(12)';
+                        $response[$counter] -> $value = $headerAllTokens;
                         //Validación del header
-                        if($headerAllTokens[0] === '&'){ //Eye - Catcher
-                            if($headerAllTokens[1] === ' '){ //User-filed
+                        if($headerAllTokens[0] === '&' && $headerAllTokens[1] === ' '){ //Eye - Catcher
                                 //Obtener el número de tokens que hay en el mensaje
-                                //ltrim() -> función para quitar los caracteres deseados de la izquierda
-                                $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 6), '0')-1;
-                                $initPos = $finalPos+1; $finalPos += 10; //Tamaño del token header
-                                for($x = 0; $x < $numberOfTokens; $x++){
-                                    $tokenHeader = ''; $idToken = ''; $lenToken = '';
-                                    $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
+                                $numberOfTokens = ltrim($this->getChain($headerAllTokens, 2, 6), '0') - 1;
+                                $initPos = $finalPos + 1;
+                                $finalPos += 10; //Tamaño del token header
+                                //Se recorre la cadena del mensaje para la obtención de los tokens y desglosarlos
+                                $counterField = '0'; //contador auxiliar para el desglose de los 'field' en los tokens
+                                for ($x = 0; $x < $numberOfTokens; $x++) {
+                                    $tokenHeader = '';
+                                    $idToken = '';
+                                    $lenToken = '';
+                                    $tokenHeader = $this->getChain($message, $initPos, $finalPos);
                                     //Nombres para el objeto
-                                    $idToken = $this -> getChain($tokenHeader, 0, 3);
-                                    $idTokenString = $this -> getChain($idToken, 2, 3);
-                                    $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
-                                    $valueTokenString = $this -> getChain($idToken, 2, 3).'-Contenido';
+                                    $idToken = $this->getChain($tokenHeader, 0, 3);
+                                    $idTokenString = $this->getChain($idToken, 2, 3);
+                                    $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
+                                    $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
                                     //Valores para el objeto
-                                    $lenToken = $this -> getChain($tokenHeader, 4, 8);
-                                    $value = $this -> getChain($message, $finalPos+1, $finalPos+intval(ltrim($lenToken, '0')));
-                                    //Creación del objeto
-                                    $response -> $idTokenString = $idToken;
-                                    $response -> $lenString = $lenToken;
-                                    $response -> $valueTokenString = $value;
-                                    //Aumento en las posiciones respectivas
-                                    if(strpos($value, '!')){
-                                        for($y = 1; $y < strlen($value); $y++){
-                                            if($value[$y] === '!'){
-                                                $dif = strlen($value) - $y;
-                                                $firstPart = substr($message, 0, $finalPos + $y);
-                                                for($w = 0; $w < $dif; $w++){
-                                                    $firstPart .= 'X';
-                                                }
-                                                $secondPart = substr($message, $finalPos + $y);
-                                                $message = $firstPart.$secondPart;
-                                                $x--;
-                                            }
-                                        }
-                                    }else{
-                                        $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
-                                        if($x === $numberOfTokens -1){
-                                            $finalPos+= intval(ltrim($lenToken, '0'));
-                                        }else{
+                                    $lenToken = $this->getChain($tokenHeader, 4, 8);
+                                    $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
+                                    //Creación del objeto para los tokens
+                                    //Primer campo -> identificador del token
+                                    $counterField++; $counter++; $id++;
+                                    $response[$counter] = new stdClass();
+                                    $response[$counter]->$number = $id;
+                                    $response[$counter]->$field = 'P-63.' . $counterField;
+                                    $response[$counter]->$name = $idTokenString;
+                                    $response[$counter]->$type = '-';
+                                    $response[$counter]->$value = $idToken;
+                                    //Segundo campo -> longitud del token
+                                    $counter++;$id++;
+                                    $response[$counter] = new stdClass();
+                                    $response[$counter]->$number = $id;
+                                    $response[$counter]->$field = 'P-63.' . $counterField;
+                                    $response[$counter]->$name = $lenString;
+                                    $response[$counter]->$type = 'N(4)';
+                                    $response[$counter]->$value = $lenToken;
+                                    //Tercer campo -> valor del token
+                                    $counter++;$id++;
+                                    $response[$counter] = new stdClass();
+                                    $response[$counter]->$number = $id;
+                                    $response[$counter]->$field = 'P-63.' . $counterField;
+                                    $response[$counter]->$name = $valueTokenString;
+                                    $response[$counter]->$type = 'ANS';
+                                    //Aumento en las posiciones respectivas (en caso de que exista algún error para continuar con la lectura)
+                                    if (strpos($valueToken, '!')) {
+                                        $response[$counter]->$value = $valueToken.' error - contenido del token';
+                                        break;
+                                    } else {
+                                        $response[$counter]->$value = $valueToken;
+                                        $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
+                                        if ($x === $numberOfTokens - 1) {
+                                            $finalPos += intval(ltrim($lenToken, '0'));
+                                        } else {
                                             $finalPos += 10 + intval(ltrim($lenToken, '0'));
                                         }
                                     }
                                 }
-                            }else{
-                                //Obtener el número de tokens que hay en el mensaje
-                                //ltrim() -> función para quitar los caracteres deseados de la izquierda
-                                $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 5), '0')-1;
-                                $initPos = $finalPos; $finalPos += 10; //Tamaño del token header
-                                for($x = 0; $x < $numberOfTokens; $x++){
-                                    $tokenHeader = ''; $idToken = ''; $lenToken = '';
-                                    $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
-                                    //Nombres para el objeto
-                                    $idToken = $this -> getChain($tokenHeader, 0, 3);
-                                    $idTokenString = $this -> getChain($idToken, 2, 3);
-                                    $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
-                                    $valueTokenString = $this -> getChain($idToken, 2, 3).'-Contenido';
-                                    //Valores para el objeto
-                                    $lenToken = $this -> getChain($tokenHeader, 4, 8);
-                                    $value = $this -> getChain($message, $finalPos+1, $finalPos+intval(ltrim($lenToken, '0')));
-                                    //Creación del objeto
-                                    $response -> $idTokenString = $idToken;
-                                    $response -> $lenString = $lenToken;
-                                    $response -> $valueTokenString = $value;
-                                    //Aumento en las posiciones respectivas
-                                    if(strpos($value, '!')){
-                                        for($y = 1; $y < strlen($value); $y++){
-                                            if($value[$y] === '!'){
-                                                $dif = strlen($value) - $y;
-                                                $firstPart = substr($message, 0, $finalPos + $y);
-                                                for($w = 0; $w < $dif; $w++){
-                                                    $firstPart .= 'X';
-                                                }
-                                                $secondPart = substr($message, $finalPos + $y);
-                                                $message = $firstPart.$secondPart;
-                                                $x--;
-                                            }
-                                        }
-                                    }else{
-                                        $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
-                                        if($x === $numberOfTokens -1){
-                                            $finalPos+= intval(ltrim($lenToken, '0'));
-                                        }else{
-                                            $finalPos += 10 + intval(ltrim($lenToken, '0'));
-                                        }
-                                    }
-                                }
-                            }
                         }
                         break;
                     }
                     case 90: {  //Original Data Elements
                         $initPos = $finalPos+1; $finalPos += 42;
                         $ogDataElm = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> ogDataElm = $ogDataElm;
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $ogDataElm;
                         break;
                     }
                     case 95: { //Replacement Amounts
                         $initPos = $finalPos+1; $finalPos += 42;
                         $repAmount = $this -> getChain($message, $initPos, $finalPos);
-                        $response -> reoAmount = $repAmount;
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $repAmount;
                         break;
                     }
                     case 100: { //Receiving Institution ID Code ***
                         $initPos = $finalPos+1; $finalPos+=2;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if($len <= 11){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && $len <= 11){
                             $initPos = $finalPos+1; $finalPos += intval($len);
                             $recInstIDCode = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> recInstIDCode = $recInstIDCode;
+                            $response[$counter] -> $value = $recInstIDCode;
                         }else{
-                            $response -> recInstIDCode = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 102: { //Account ID 1
                         $initPos = $finalPos+1; $finalPos+=2;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 28){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 28){
                             $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
                             $accID1 = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> accID1 = $accID1;
+                            $response[$counter] -> $value = $accID1;
                         }else{
-                            $response -> accID1 = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 103: { //Account ID 2
                         $initPos = $finalPos+1; $finalPos+=2;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(ltrim($len, '0') <= 28){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 28){
                             $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
                             $accID2 = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> accID2 = $accID2;
+                            $response[$counter] -> $value = $accID2;
                         }else{
-                            $response -> accID2 = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 120: { //Administrative Token ***
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if($len <= 153){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && $len <= 153){
                             $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
                             $adminToken = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> adminToken = $adminToken;
+                            $response[$counter] -> $value = $adminToken;
                         }else{
-                            $response -> adminToken = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 121: { //AuthInd ***
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && intval($len) <= 23){
                             $initPos = $finalPos+1; $finalPos += intval($len);
                             $authID = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> authID = $authID;
+                            $response[$counter] -> $value = $authID;
                         }else{
-                            $response -> authID = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 123: { //Crypto Service Message
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if($len <= 553){
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && $len <= 553){
                             $initPos = $finalPos+1; $finalPos += intval($len);
                             $cryptoServMess = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> cryptoSerMes = $cryptoServMess;
+                            $response[$counter] -> $value = $cryptoServMess;
                         }else{
-                            $response -> cryptoSerMes = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 124: { //Depository Type ***
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && $len <= 687){
                             $initPos = $finalPos+1; $finalPos+= intval($len);
                             $depType = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> depType = $depType;
+                            $response[$counter] -> $value = $depType;
                         }else{
-                            $response -> depType = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 125: { //POS Settlment Data ***
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && intval($len) <= 375){
                             $initPos = $finalPos+1; $finalPos += intval($len);
                             $posSetData = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> posSetData = $posSetData;
+                            $response[$counter] -> $value = $posSetData;
                         }else{
-                            $response -> posSetData = 'error';
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }
                         break;
                     }
                     case 126: { //Base 24 - Additional Data
                         $initPos = $finalPos+1; $finalPos+=3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        if(intval($len) === 0){
+                        //Creación del additional data 126
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && intval($len) === 0){
                             $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
-                            $response -> addDataB24 = $additionalData;
+                            $response[$counter] -> $value = $additionalData;
                             break;
                         }
-                        if($len <= 800){
+                        if(is_numeric($len) && $len <= 800){
                             $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len)-3);
-                            $response -> addDataB24 = $addDataB24;
+                            $response[$counter] -> $value = $addDataB24;
+                            //Creación del objeto header de los tokens
                             $initPos = $finalPos+1; $finalPos += 12; 
                             $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
-                            $response -> AdditionalDataHeader = $headerAllTokens;
-                            if($headerAllTokens[0] === '&'){
-                                if($headerAllTokens[1] === ' '){
-                                    $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 6), '0') -1;
-                                    $initPos = $finalPos+1; $finalPos += 10;
-                                    for($p = 0; $p < $numberOfTokens; $p++){
-                                        $tokenHeader = ''; $idToken = ''; $lenToken = '';
-                                        $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
-                                        $idToken = $this -> getChain($tokenHeader, 0, 3);
-                                        $idTokenString = $this -> getChain($idToken, 2, 3);
-                                        $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
-                                        $valueTokenString = $this -> getChain($idToken, 2, 3).'-Contenido';
-                                        $lenToken = $this -> getChain($tokenHeader, 4, 8);
-                                        $value = $this -> getChain($message, $finalPos+1, $finalPos + intval(ltrim($lenToken, '0')));
-                                        if($idTokenString === '25' || $idTokenString === '30'){
-                                            $response -> $idToken = $idToken;
-                                        }
-                                        else{
-                                            $response -> $idTokenString = $idToken;
-                                        }
-                                        $response -> $lenString = $lenToken;
-                                        $response -> $valueTokenString = $value;
-                                        if(strpos($value, '!')){
-                                            for($b = 0; $b < strlen($value); $b++){
-                                                if($value[$b] === '!'){
-                                                    $dif = strlen($value) - $b;
-                                                    $firstPart = substr($message, 0, $finalPos + $b);
-                                                    for($f = 0; $f < $dif; $f++){
-                                                        $firstPart .= 'X';
-                                                    }
-                                                    $secondPart = substr($message, $finalPos + $b);
-                                                    $message = $firstPart.$secondPart;
-                                                    $p--;
-                                                }
-                                            }
-                                        }else{
-                                            $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
+                            $counter++; $id++;
+                            $response[$counter] = new stdClass();
+                            $response[$counter] -> $number = $id;
+                            $response[$counter] -> $field = 'S-126.0';
+                            $response[$counter] -> $name = 'Additional Data Header';
+                            $response[$counter] -> $type = 'ANS(12)';
+                            //Validación del header de los tokens
+                            if($headerAllTokens[0] === '&' && $headerAllTokens[1] === ' '){
+                                    $response[$counter]->$value = $headerAllTokens;
+                                    $numberOfTokens = ltrim($this->getChain($headerAllTokens, 2, 6), '0') - 1;
+                                    $initPos = $finalPos + 1;
+                                    $finalPos += 10;
+                                    $counterField = '0'; //Auxiliar para la contrucción del objeto
+                                    for ($p = 0; $p < $numberOfTokens; $p++) {
+                                        $tokenHeader = '';
+                                        $idToken = '';
+                                        $lenToken = '';
+                                        $tokenHeader = $this->getChain($message, $initPos, $finalPos);
+                                        $idToken = $this->getChain($tokenHeader, 0, 3);
+                                        $idTokenString = $this->getChain($idToken, 2, 3);
+                                        $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
+                                        $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
+                                        $lenToken = $this->getChain($tokenHeader, 4, 8);
+                                        $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
+                                        //Contrucción de los objetos de los tokens
+                                        //Primer campo -> Identificador del token
+                                        $counter++;
+                                        $id++;
+                                        $counterField++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'S-126.' . $counterField;
+                                        $response[$counter]->$name = $idTokenString;
+                                        $response[$counter]->$type = '-';
+                                        $response[$counter]->$value = $idToken;
+                                        //Segundo campo -> longitud del token
+                                        $counter++;
+                                        $id++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'S-126.' . $counterField;
+                                        $response[$counter]->$name = $lenString;
+                                        $response[$counter]->$type = 'N(4)';
+                                        $response[$counter]->$value = $lenToken;
+                                        //Tercer campo -> valor del token
+                                        $counter++;
+                                        $id++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'S-126.' . $counterField;
+                                        $response[$counter]->$name = $valueTokenString;
+                                        $response[$counter]->$type = 'ANS';
+                                        if (strpos($valueToken, '!')) {
+                                            $response[$counter]->$value = $valueToken . ' error - contenido del token';
+                                            break;
+                                        } else {
+                                            $response[$counter]->$value = $valueToken;
+                                            $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
                                             $finalPos += 10 + intval(ltrim($lenToken, '0'));
                                         }
                                     }
-                                }else{
-                                    $numberOfTokens = ltrim($this -> getChain($headerAllTokens, 2, 5), '0')-1;
-                                    $initPos = $finalPos; $finalPos += 10;
-                                    for($p = 0; $p < $numberOfTokens; $p++){
-                                        $tokenHeader = ''; $idToken = ''; $lenToken = '';
-                                        $tokenHeader = $this -> getChain($message, $initPos, $finalPos);
-                                        $idToken = $this -> getChain($tokenHeader, 0, 3);
-                                        $idTokenString = $this -> getChain($idToken, 2, 3);
-                                        $lenString = $this -> getChain($idToken, 2, 3).'-Longitud';
-                                        $valueTokenString = $this -> getChain($idToken, 2, 3).'-Contenido';
-                                        $lenToken = $this -> getChain($tokenHeader, 4, 8);
-                                        $value = $this -> getChain($message, $finalPos+1, $finalPos + intval(ltrim($lenToken, '0')));
-                                        $response -> $idTokenString = $idToken;
-                                        $response -> $lenString = $lenString;
-                                        $response -> $valueTokenString = $value;
-                                        if(strpos($value, '!')){
-                                            for($b = 0; $b < strlen($value); $b++){
-                                                if($value[$b] === '!'){
-                                                    $dif = strlen($value) - $b;
-                                                    $firstPart = substr($message, 0, $finalPos + $b);
-                                                    for($f = 0; $f < $dif; $f++){
-                                                        $firstPart .= 'X';
-                                                    }
-                                                }
-                                                $secondPart = substr($message, $finalPos + $b);
-                                                $message = $firstPart.$secondPart;
-                                                $p--;
-                                            }
-                                        }else{
-                                            $initPos = $finalPos + intval(ltrim($lenToken, '0'))+1;
-                                            $finalPos += 10 + intval(ltrim($lenToken, '0'));
-                                        }
-                                    }
-                                }
+                            }else{
+                                $response[$counter] -> $value = $headerAllTokens.' error - contenido del header';
                             }
-                        }else{
-                            $response -> addData24 = '-----';
                         }
                         break;
                     }
-                    */
                 }
             }
         }
-        //$response -> positions = $positions;
         $responseJSON = json_decode(json_encode($response), true);
         return $responseJSON;
     }
