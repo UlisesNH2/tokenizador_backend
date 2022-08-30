@@ -16,8 +16,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $values = array();
+        $valuesExtra = array();
         $labels = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
-        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ', 'FECHA_TRANS'];
+        'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
         
         $values[0] = $request -> kq2;
         $values[1] = $request -> codeResponse;
@@ -29,19 +30,25 @@ class DashboardController extends Controller
         $values[7] = $request -> Ln_Comer;
         $values[8] = $request -> Ln_Term;
         $values[9] = $request -> Fiid_Card;
-        $values[10] = $request -> Ln_Card;  
-        //$values[11] = $request -> startDate;
-        //$values[12] = $request -> finishDate;
+        $values[10] = $request -> Ln_Card; 
+
+        $valuesExtra[0] = $request -> startDate;
+        $valuesExtra[1] = $request -> finishDate;
+        $valuesExtra[2] = $request -> startHour;
+        $valuesExtra[3] = $request -> finishHour; 
 
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM,
-        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, sum(MONTO1) AS MONTO, count(*) as TXS from test 
+        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, sum(MONTO1) AS MONTO, count(*) as TXS, FECHA_TRANS, HORA_TRANS from test 
         group by KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM,
-        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ having ";
+        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, FECHA_TRANS, HORA_TRANS having ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM,
-        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, sum(MONTO1) AS MONTO, count(*) as TXS from test group by KQ2_ID_MEDIO_ACCESO, 
+        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, sum(MONTO1) AS MONTO, count(*) as TXS, FECHA_TRANS, HORA_TRANS from test group by KQ2_ID_MEDIO_ACCESO, 
         CODIGO_RESPUESTA, ENTRY_MODE, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM,
-        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ";
+        LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, FECHA_TRANS, HORA_TRANS";
+
+        $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
+        $queryDateTimeOutFilters = " having (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
         $response = array();
         $array = array();
         $arrayValues = array();
@@ -57,18 +64,9 @@ class DashboardController extends Controller
         $filteredLabels = array_values($labels);
 
         if(empty($filteredValues)){
-            $response = DB::select($queryOutFilters);
+            $response = DB::select($queryOutFilters.$queryDateTimeOutFilters, [...$valuesExtra]);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) <= 1){
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        $response = array_merge($response, DB::select($query.$filteredLabels[$i]." = ?",
-                        [$filteredValues[$i][$j]]));
-                    }
-                }
-                $array = json_decode(json_encode($response), true);
-            }else{
                 //Ingresar todos los valores elegidos en el filtro dentro de un solo arreglo. (Valores para la consulta)
                 for($i = 0; $i < count($filteredValues); $i++){
                     for($j = 0; $j < count($filteredValues[$i]); $j++){
@@ -108,11 +106,10 @@ class DashboardController extends Controller
                     }
                 }
                 //Consulta del query obtenido por los filtros y los valores elegidos
-                return $query."and (FECHA_TRANS between '210314' and '210330')";
-                $response = DB::select($query, [...$arrayValues]);
+                $response = DB::select($query.$queryDateTime, [...$arrayValues, ...$valuesExtra]);
                 $array = json_decode(json_encode($response), true);
-            }
         }
+        $answer = array();
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
             $answer[$key] -> code_Response = $data['CODIGO_RESPUESTA'];
