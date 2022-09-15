@@ -268,10 +268,13 @@ class TokenB3Controller extends Controller
     }
 
     public function getDataTableFilter(Request $request){
+
         $values = array();
+        $valuesDate = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KB3_BIT_MAP', 'KB3_TERM_SRL_NUM', 'KB3_EMV_TERM_CAP', 'KB3_USR_FLD1', 'KB3_USR_FLD2',
         'KB3_EMV_TERM_TYPE', 'KB3_APP_VER_NUM', 'KB3_CVM_RSLTS', 'KB3_DF_NAME_LGTH', 'KB3_DF_NAME', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
         'LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
+
         $values[0] = $request -> Kq2;
         $values[1] = $request -> Code_Response;
         $values[2] = $request -> Entry_Mode;
@@ -293,16 +296,25 @@ class TokenB3Controller extends Controller
         $values[18] = $request -> Fiid_Card;
         $values[19] = $request -> Ln_Card; 
 
+        $valuesDate[0] = $request -> startDate;
+        $valuesDate[1] = $request -> finishDate;
+        $valuesDate[2] = $request -> startHour;
+        $valuesDate[3] = $request -> finishHour;
+
         $response = array();
         $answer = array();
         $arrayValues = array();
+
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
         KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
         LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
         KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
+        (HORA_TRANS >= ? and HORA_TRANS <= ?)";
+
+        $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         //Detectar cuales son los filtros utilizados
         for($key = 0; $key < 20; $key++){
@@ -324,61 +336,51 @@ class TokenB3Controller extends Controller
         }
 
         if(empty($filteredValues)){ //En caso de que no se utilicen los filtros
-            $response = DB::select($queryOutFilters);
+            $response = DB::select($queryOutFilters, [...$valuesDate]);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) <= 1){ //Solo se utiliza un filtro
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        $response = array_merge($response, DB::select($query.$filteredLabels[$i]."= ?", 
-                        [$filteredValues[$i][$j]]));
-                    }
+            //Ingresar todos los $filteredValues en un solo arreglo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
                 }
-                $array = json_decode(json_encode($response), true);
-            }else{ //En caso de existir más valores dentro del arreglo de $filteredValues
-                //Ingresar todos los $filteredValues en un solo arreglo
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        array_push($arrayValues, $filteredValues[$i][$j]);
-                    }
-                }
-                $z = 1; //variable para el control de la longitud del query
-                //Construcción del query varias consultas al mismo tiempo
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        if($j == count($filteredValues[$i]) -1){
-                            if($j == 0){
-                                if($z == count($arrayValues)){
-                                    $query .= "(".$filteredLabels[$i]." = ?)";
-                                }else{
-                                    $query .= "(".$filteredLabels[$i]." = ?) and ";
-                                }
-                                $z++;
-                            }else{
-                                if($z == count($arrayValues)){
-                                    $query .= $filteredLabels[$i]." = ?)";
-                                    $z = 1;
-                                }else{
-                                    $query .= $filteredLabels[$i]." = ?) and ";
-                                    $z++;
-                                }
+            }
+            $z = 1; //variable para el control de la longitud del query
+            //Construcción del query varias consultas al mismo tiempo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
                             }
-                        }else{
-                            if($j == 0){
-                                $query .= "(".$filteredLabels[$i]." = ? or ";
-                                $z++;
-                            }else{
-                                $query .= $filteredLabels[$i]." = ? or ";
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $query .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $query .= $filteredLabels[$i] . " = ?) and ";
                                 $z++;
                             }
                         }
+                    } else {
+                        if ($j == 0) {
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $query .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
                     }
                 }
-                $response = DB::select($query, [...$arrayValues]);
-                $array = json_decode(json_encode($response), true);
             }
+            $response = DB::select($query.$queryDateTime, [...$arrayValues, ...$valuesDate]);
+            $array = json_decode(json_encode($response), true);
         }
-        foreach($array as $key => $data){
+        foreach ($array as $key => $data) {
             $answer[$key] = new stdClass();
             $answer[$key]->kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
             $answer[$key]->codeResp = $data['CODIGO_RESPUESTA'];

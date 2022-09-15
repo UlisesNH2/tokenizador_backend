@@ -263,13 +263,19 @@ class BreakerController extends Controller
                     case 18:{ //Merchant Type
                         $initPos = $finalPos+1; $finalPos += 4;
                         $merchantType = $this -> getChain($message, $initPos, $finalPos); //Long 4
+                        $flag = DB::select('select id from merchant_type_catalog where id = ?', [$merchantType]);
                         $counter++; $id++;
                         $response[$counter] = new stdClass();
                         $response[$counter] -> $number = $id;
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
-                        $response[$counter] -> $value = $merchantType;
+                        if(count($flag) !== 0){
+                            $response[$counter] -> $value = $merchantType;
+                        
+                        }else{
+                            $response[$counter] -> $value = $merchantType." error - este código no existe dentro del catálogo";
+                        }
                         break;
                     }
                     case 19: { //Aqcuiring Institution Country Code

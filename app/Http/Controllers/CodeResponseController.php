@@ -32,6 +32,7 @@ class codeResponseController extends Controller
     public function filterCodeResponse(Request $request)
     {
         $values = array();
+        $valuesExtra = array();
         $labels = ['main.KQ2_ID_MEDIO_ACCESO', 'main.CODIGO_RESPUESTA', 'main.ENTRY_MODE', 'main.ID_COMER', 'main.TERM_COMER', 
         'main.FIID_COMER', 'main.FIID_TERM', 'main.LN_COMER', 'main.LN_TERM', 'main.FIID_TARJ', 'main.LN_TARJ'];
 
@@ -46,6 +47,10 @@ class codeResponseController extends Controller
         $values[8] = $request -> Ln_Term;
         $values[9] = $request -> Fiid_Card;
         $values[10] = $request -> Ln_Card; 
+        $valuesExtra[0] = $request -> startDate;
+        $valuesExtra[1] = $request -> finishDate;
+        $valuesExtra[2] = $request -> startHour;
+        $valuesExtra[3] = $request -> finishHour;
 
         $array = array();
         $response = array();
@@ -53,11 +58,14 @@ class codeResponseController extends Controller
         $response = array();
         $arrayValues = array();
         $queryOutFilters = "select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES, sum(main.MONTO1) AS MONTO, count(*) as TXS 
-        from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA 
+        from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
+        where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
+
         $firstQuery = "select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES, sum(main.MONTO1) AS MONTO, count(*) as TXS 
         from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
-        where ";
+        where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
+
         $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
         $totalTX = 0;
 
@@ -72,60 +80,50 @@ class codeResponseController extends Controller
         $filteredLabels = array_values($labels);
 
         if(empty($filteredValues)){
-            $response = DB::select($queryOutFilters);
+            $response = DB::select($queryOutFilters, [...$valuesExtra]);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) <= 1){
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        $response = array_merge($response, DB::select($firstQuery.$filteredLabels[$i]." = ?".$secondQuery,
-                        [$filteredValues[$i][$j]]));
-                    }
+            //Ingresar todos los valores elegidos en el filtro dentro de un solo arreglo. (Valores para la consulta)
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
                 }
-                $array = json_decode(json_encode($response), true);
-            }else{
-                //Ingresar todos los valores elegidos en el filtro dentro de un solo arreglo. (Valores para la consulta)
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        array_push($arrayValues, $filteredValues[$i][$j]);
-                    }
-                }
-                $z = 1; //Variable 'controladora' de el largo del query
-                //Constructor del query (Varias consultas al mismo tiempo)
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        if($j == count($filteredValues[$i]) -1){
-                            if($j == 0){
-                                if($z == count($arrayValues)){
-                                    $firstQuery .= "(".$filteredLabels[$i]." = ?)";
-                                }else{
-                                    $firstQuery .= "(".$filteredLabels[$i]." = ?) and ";
-                                }
-                                $z++;
-                            }else{
-                                if($z == count($arrayValues)){
-                                    $firstQuery .= $filteredLabels[$i]." = ?)";
-                                    $z = 1;
-                                }else{
-                                    $firstQuery .= $filteredLabels[$i]." = ?) and ";
-                                    $z++;
-                                }
+            }
+            $z = 1; //Variable 'controladora' de el largo del query
+            //Constructor del query (Varias consultas al mismo tiempo)
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $firstQuery .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $firstQuery .= "(" . $filteredLabels[$i] . " = ?) and ";
                             }
-                        }else{
-                            if($j == 0){
-                                $firstQuery .= "(".$filteredLabels[$i]." = ? or ";
-                                $z++;
-                            }else{
-                                $firstQuery .= $filteredLabels[$i]." = ? or ";
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $firstQuery .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $firstQuery .= $filteredLabels[$i] . " = ?) and ";
                                 $z++;
                             }
                         }
+                    } else {
+                        if ($j == 0) {
+                            $firstQuery .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $firstQuery .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
                     }
                 }
-                //Consulta del query obtenido por los filtros y los valores elegidos
-                $response = DB::select($firstQuery.$secondQuery, [...$arrayValues]);
-                $array = json_decode(json_encode($response), true);
             }
+            //Consulta del query obtenido por los filtros y los valores elegidos
+            $response = DB::select($firstQuery . $secondQuery, [...$valuesExtra, ...$arrayValues]);
+            $array = json_decode(json_encode($response), true);
         }        
         foreach($array as $key => $data){
             $totalTX += $data['TXS'];
