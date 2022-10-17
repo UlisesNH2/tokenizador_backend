@@ -67,6 +67,8 @@ class codeResponseController extends Controller
         where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
 
         $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
+
+        
         $totalTX = 0;
 
         //Eliminar filtros no seleccionados

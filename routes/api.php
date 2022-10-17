@@ -43,6 +43,10 @@ Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTa
 //RUTAS TOKEN C0
 Route::post('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer datos para tabla principal
 Route::post('/tokenC0Filter/main', 'App\Http\Controllers\TokenC0Controller@getDataTableFilter'); //Datos para el filtro
+//Rutas catalogo para token C0
+Route::get('/tokenC0Catalog', 'App\Http\Controllers\TokenC0Controller@getCatalog'); //Obtener el catálogo token C0
+
+Route::get('/tokenC0CatValidator', 'App\Http\Controllers\TokenC0Controller@getCatalogValidator'); //Obtener el catalogo de los valores validos por Q2
 
 //RUTAS TOKEN B3
 Route::post('/tokenB3', 'App\Http\Controllers\TokenB3Controller@index'); //Traer datos para la tabla principal
@@ -67,3 +71,10 @@ Route::post('/tokenB6Filter/main', 'App\Http\Controllers\TokenB6Controller@getDa
 //DESGLOSADOR
 Route::post('/breaker', 'App\Http\Controllers\BreakerController@getBreakes'); 
 Route::post('/getCatalogMessage', 'App\Http\Controllers\BreakerController@getCatalog');
+
+//CATALOGO HEADER ISO
+Route::post('/catalogo/hdrISO', 'App\Http\Controllers\HeaderISOController@getCatalogHdrMess'); //Obtener el catalogo de acuerdo al tipo de mensaje
+
+//CATALOGO DE TIPO DE MENSAJES
+Route::get('/catalogo/getMessTypes', 'App\Http\Controllers\MessageType@index');
+Route::post('/catalogo/messType', 'App\Http\Controllers\MessageType@getCatalogTypeMessage');

@@ -741,9 +741,8 @@ class BreakerController extends Controller
                     }
                     case 63: { //Aditional Data
                         $initPos = $finalPos+1; $finalPos += 3;
-                        //Las primeras tres posiciones son la longitud del campo: TODO: validación
+                        //Las primeras tres posiciones son la longitud del campo.
                         $len = $this -> getChain($message, $initPos, $finalPos);
-
                         //Creación del objeto para la additional data
                         $counter++; $id++; 
                         $response[$counter] = new stdClass();
@@ -777,59 +776,90 @@ class BreakerController extends Controller
                                 $initPos = $finalPos + 1;
                                 $finalPos += 10; //Tamaño del token header
                                 //Se recorre la cadena del mensaje para la obtención de los tokens y desglosarlos
-                                $counterField = '0'; //contador auxiliar para el desglose de los 'field' en los tokens
-                                for ($x = 0; $x < $numberOfTokens; $x++) {
-                                    $tokenHeader = '';
-                                    $idToken = '';
-                                    $lenToken = '';
-                                    $tokenHeader = $this->getChain($message, $initPos, $finalPos);
-                                    //Nombres para el objeto
-                                    $idToken = $this->getChain($tokenHeader, 0, 3);
-                                    $idTokenString = $this->getChain($idToken, 2, 3);
-                                    $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
-                                    $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
-                                    //Valores para el objeto
-                                    $lenToken = $this->getChain($tokenHeader, 4, 8);
-                                    $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
-                                    //Creación del objeto para los tokens
-                                    //Primer campo -> identificador del token
-                                    $counterField++; $counter++; $id++;
-                                    $response[$counter] = new stdClass();
-                                    $response[$counter]->$number = $id;
-                                    $response[$counter]->$field = 'P-63.' . $counterField;
-                                    $response[$counter]->$name = $idTokenString;
-                                    $response[$counter]->$type = '-';
-                                    $response[$counter]->$value = $idToken;
-                                    //Segundo campo -> longitud del token
-                                    $counter++;$id++;
-                                    $response[$counter] = new stdClass();
-                                    $response[$counter]->$number = $id;
-                                    $response[$counter]->$field = 'P-63.' . $counterField;
-                                    $response[$counter]->$name = $lenString;
-                                    $response[$counter]->$type = 'N(4)';
-                                    $response[$counter]->$value = $lenToken;
-                                    //Tercer campo -> valor del token
-                                    $counter++;$id++;
-                                    $response[$counter] = new stdClass();
-                                    $response[$counter]->$number = $id;
-                                    $response[$counter]->$field = 'P-63.' . $counterField;
-                                    $response[$counter]->$name = $valueTokenString;
-                                    $response[$counter]->$type = 'ANS';
-                                    //Aumento en las posiciones respectivas (en caso de que exista algún error para continuar con la lectura)
-                                    if (strpos($valueToken, '!')) {
-                                        $response[$counter]->$value = $valueToken.' error - contenido del token';
-                                        break;
-                                    } else {
-                                        $response[$counter]->$value = $valueToken;
-                                        $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
-                                        if ($x === $numberOfTokens - 1) {
-                                            $finalPos += intval(ltrim($lenToken, '0'));
-                                        } else {
-                                            $finalPos += 10 + intval(ltrim($lenToken, '0'));
-                                        }
+                                $counterField = '0'; //contador auxiliar para el desglose de los 'field' en los 
+                                $counterTokens = 0;
+                                //Obtener el numero de tokens 'reales' en el mensaje
+                                for($h = 0; $h < strlen($additionalData); $h++){
+                                    if($additionalData[$h] == "!"){
+                                        $counterTokens++;
                                     }
                                 }
+
+                                if($numberOfTokens == $counterTokens){
+                                    for ($x = 0; $x < $numberOfTokens; $x++) {
+                                        $tokenHeader = '';
+                                        $idToken = '';
+                                        $lenToken = '';
+                                        $tokenHeader = $this->getChain($message, $initPos, $finalPos);
+                                        //Nombres para el objeto
+                                        $idToken = $this->getChain($tokenHeader, 0, 3);
+                                        $idTokenString = $this->getChain($idToken, 2, 3);
+                                        $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
+                                        $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
+                                        //Valores para el objeto
+                                        $lenToken = $this->getChain($tokenHeader, 4, 8);
+                                        $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
+                                        //Creación del objeto para los tokens
+                                        //Primer campo -> identificador del token
+                                        $counterField++; $counter++; $id++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'P-63.' . $counterField;
+                                        $response[$counter]->$name = $idTokenString;
+                                        $response[$counter]->$type = '-';
+                                        $response[$counter]->$value = $idToken;
+                                        //Segundo campo -> longitud del token
+                                        $counter++;$id++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'P-63.' . $counterField;
+                                        $response[$counter]->$name = $lenString;
+                                        $response[$counter]->$type = 'N(4)';
+                                        $response[$counter]->$value = $lenToken;
+                                        //Tercer campo -> valor del token
+                                        $counter++;$id++;
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'P-63.' . $counterField;
+                                        $response[$counter]->$name = $valueTokenString;
+                                        $response[$counter]->$type = 'ANS';
+                                        //Aumento en las posiciones respectivas (en caso de que exista algún error para continuar con la lectura)
+                                        if (strpos($valueToken, '!')) {
+                                            $response[$counter]->$value = $valueToken.' error - contenido del token';
+                                            break;
+                                        } else {
+                                            $response[$counter]->$value = $valueToken;
+                                            $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
+                                            if ($x === $numberOfTokens - 1) {
+                                                $finalPos += intval(ltrim($lenToken, '0'));
+                                            } else {
+                                                $finalPos += 10 + intval(ltrim($lenToken, '0'));
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    $response[$counter] = new stdClass();
+                                    $response[$counter]->$number = $id;
+                                    $response[$counter]->$field = 'Error';
+                                    $response[$counter]->$name = '----';
+                                    $response[$counter]->$type = '----';
+                                    $response[$counter]->$value = 'Error: El número de tokens identificados no corresponde con lo que manifiesta el mensaje: Número Esperado: '.$numberOfTokens.' Número Obtenido: '.$counterTokens;
+                                    $i = 200; //Romper el ciclo for
+                                    break;
+                                }
                         }
+                        break;
+                    }
+                    case 70: { //Network Managment Info Code
+                        $initPos = $finalPos+1; $finalPos += 3;
+                        $netManagment = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $netManagment;
                         break;
                     }
                     case 90: {  //Original Data Elements
@@ -1010,9 +1040,10 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
+                        $addDataB24 = "";
                         if(is_numeric($len) && intval($len) === 0){
-                            $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
-                            $response[$counter] -> $value = $additionalData;
+                            $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
+                            $response[$counter] -> $value = $addDataB24;
                             break;
                         }
                         if(is_numeric($len) && $len <= 800){
@@ -1034,54 +1065,73 @@ class BreakerController extends Controller
                                     $initPos = $finalPos + 1;
                                     $finalPos += 10;
                                     $counterField = '0'; //Auxiliar para la contrucción del objeto
-                                    for ($p = 0; $p < $numberOfTokens; $p++) {
-                                        $tokenHeader = '';
-                                        $idToken = '';
-                                        $lenToken = '';
-                                        $tokenHeader = $this->getChain($message, $initPos, $finalPos);
-                                        $idToken = $this->getChain($tokenHeader, 0, 3);
-                                        $idTokenString = $this->getChain($idToken, 2, 3);
-                                        $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
-                                        $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
-                                        $lenToken = $this->getChain($tokenHeader, 4, 8);
-                                        $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
-                                        //Contrucción de los objetos de los tokens
-                                        //Primer campo -> Identificador del token
-                                        $counter++;
-                                        $id++;
-                                        $counterField++;
-                                        $response[$counter] = new stdClass();
-                                        $response[$counter]->$number = $id;
-                                        $response[$counter]->$field = 'S-126.' . $counterField;
-                                        $response[$counter]->$name = $idTokenString;
-                                        $response[$counter]->$type = '-';
-                                        $response[$counter]->$value = $idToken;
-                                        //Segundo campo -> longitud del token
-                                        $counter++;
-                                        $id++;
-                                        $response[$counter] = new stdClass();
-                                        $response[$counter]->$number = $id;
-                                        $response[$counter]->$field = 'S-126.' . $counterField;
-                                        $response[$counter]->$name = $lenString;
-                                        $response[$counter]->$type = 'N(4)';
-                                        $response[$counter]->$value = $lenToken;
-                                        //Tercer campo -> valor del token
-                                        $counter++;
-                                        $id++;
-                                        $response[$counter] = new stdClass();
-                                        $response[$counter]->$number = $id;
-                                        $response[$counter]->$field = 'S-126.' . $counterField;
-                                        $response[$counter]->$name = $valueTokenString;
-                                        $response[$counter]->$type = 'ANS';
-                                        if (strpos($valueToken, '!')) {
-                                            $response[$counter]->$value = $valueToken . ' error - contenido del token';
-                                            break;
-                                        } else {
-                                            $response[$counter]->$value = $valueToken;
-                                            $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
-                                            $finalPos += 10 + intval(ltrim($lenToken, '0'));
+                                    $counterTokens = 0;
+                                    //Obtener el numero de tokens 'reales' en el mensaje
+                                    for($h = 0; $h < strlen($addDataB24); $h++){
+                                        if($addDataB24[$h] == "!"){
+                                            $counterTokens++;
                                         }
                                     }
+                                    if($counterTokens == $numberOfTokens){
+                                        for ($p = 0; $p < $numberOfTokens; $p++) {
+                                            $tokenHeader = '';
+                                            $idToken = '';
+                                            $lenToken = '';
+    
+                                            $tokenHeader = $this->getChain($message, $initPos, $finalPos);
+                                            $idToken = $this->getChain($tokenHeader, 0, 3);
+                                            $idTokenString = $this->getChain($idToken, 2, 3);
+                                            $lenString = $this->getChain($idToken, 2, 3) . '-Longitud';
+                                            $valueTokenString = $this->getChain($idToken, 2, 3) . '-Contenido';
+                                            $lenToken = $this->getChain($tokenHeader, 4, 8);
+                                            $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
+                                            //Contrucción de los objetos de los tokens
+                                            //Primer campo -> Identificador del token
+                                            $counter++;
+                                            $id++;
+                                            $counterField++;
+                                            $response[$counter] = new stdClass();
+                                            $response[$counter]->$number = $id;
+                                            $response[$counter]->$field = 'S-126.' . $counterField;
+                                            $response[$counter]->$name = $idTokenString;
+                                            $response[$counter]->$type = '-';
+                                            $response[$counter]->$value = $idToken;
+                                            //Segundo campo -> longitud del token
+                                            $counter++;
+                                            $id++;
+                                            $response[$counter] = new stdClass();
+                                            $response[$counter]->$number = $id;
+                                            $response[$counter]->$field = 'S-126.' . $counterField;
+                                            $response[$counter]->$name = $lenString;
+                                            $response[$counter]->$type = 'N(4)';
+                                            $response[$counter]->$value = $lenToken;
+                                            //Tercer campo -> valor del token
+                                            $counter++;
+                                            $id++;
+                                            $response[$counter] = new stdClass();
+                                            $response[$counter]->$number = $id;
+                                            $response[$counter]->$field = 'S-126.' . $counterField;
+                                            $response[$counter]->$name = $valueTokenString;
+                                            $response[$counter]->$type = 'ANS';
+                                            if (strpos($valueToken, '!')) {
+                                                $response[$counter]->$value = $valueToken . ' error - contenido del token';
+                                                break;
+                                            } else {
+                                                $response[$counter]->$value = $valueToken;
+                                                $initPos = $finalPos + intval(ltrim($lenToken, '0')) + 1;
+                                                $finalPos += 10 + intval(ltrim($lenToken, '0'));
+                                            }
+                                        }
+                                    }else{
+                                        $response[$counter] = new stdClass();
+                                        $response[$counter]->$number = $id;
+                                        $response[$counter]->$field = 'Error';
+                                        $response[$counter]->$name = '----';
+                                        $response[$counter]->$type = '----';
+                                        $response[$counter]->$value = 'Error: El número de tokens identificados no corresponde con lo que manifiesta el mensaje: Número Esperado: '.$numberOfTokens.' Número Obtenido: '.$counterTokens;
+                                        break;
+                                    }
+                                    
                             }else{
                                 $response[$counter] -> $value = $headerAllTokens.' error - contenido del header';
                             }
@@ -1090,6 +1140,8 @@ class BreakerController extends Controller
                     }
                 }
             }
+        }else{
+            return '-1';
         }
         $responseJSON = json_decode(json_encode($response), true);
         return $responseJSON;

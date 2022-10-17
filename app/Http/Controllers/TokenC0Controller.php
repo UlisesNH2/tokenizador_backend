@@ -398,4 +398,67 @@ class TokenC0Controller extends Controller
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
     }
+
+    public function getCatalog(){
+        $answer = array(); 
+        $ansVal = array();
+        $values = array();
+        $responseValues = array();
+
+        //Obtención de los datos con el ID y los valores válidos para todos los subcampos del token C0
+        $response = DB::select('select * from catalog_tokenC0');
+        $respJson = json_decode(json_encode($response), true);
+
+        //Se comienza la contrucción de la answer (respuesta principal), se incluye, por ahora el ID
+        //Además, se alimenta la variable 'values' donde se alojan en forma de arreglo (gracias a la función explode) todos los
+        //valores válidos guardados en la base de datos.
+        foreach($respJson as $key => $data){
+            $answer[$key] = new stdClass();
+            $answer[$key] -> id = $data['ID'];
+            $values[$key] = explode(',', $data['VALUES']); 
+        }
+        //Una vez se obtienen los valores válidos, estos pasan a ser comparados con otra tabla que contiene, ahora si, el catálogo
+        //de todos los subcampos de token. El id obtenido anteriormente, se utiliza como identificador de la tabla en cuestión.
+        for($i = 0; $i < count($values); $i++){
+            for($j = 0; $j < count($values[$i]); $j++){
+                 //En caso de que venga un espacio vacío se cambia a una 'V', por comodidad y cuestiones de la base de datos
+                if($values[$i][$j] === '' || $values[$i][$j] === ' '){ $values[$i][$j] = 'V'; } 
+                $responseValues = array_merge($responseValues, DB::select("select * from catalog_tokenc0_".$answer[$i] -> id.
+                " where ID = ?", [$values[$i][$j]]));
+            }
+            $respValuesJson = json_decode(json_encode($responseValues), true);
+            //Creación del arreglo de la variable que contiene tanto el valor como una label para la contrucción de los formularios
+            //en la parte del frontend ( [{ value: 'xx', label: 'xx-yyyyy' }] )
+            foreach($respValuesJson as $key => $data){
+                $ansVal[$key] = new stdClass();
+                $ansVal[$key] -> value = $data['ID'];
+                $ansVal[$key] -> label = $data['ID'].' - '.$data['DESCRIPTION'];
+            }   
+            $answer[$i] -> desp = $ansVal; //Asignación del arreglo anteiror a la parte desp del objeto principal
+            //Purga de los arreglos auxiliares para el control y contrucción de los objetos y arreglos principales.
+            $ansVal = []; 
+            $responseValues = [];
+        }
+        $resp = json_decode(json_encode($answer), true);
+        return $resp;
+    }
+
+    public function getCatalogValidator(){
+        $answer = array();
+        $response = DB::select('select * from catalog_tokenc0_validator');
+        $respJson = json_decode(json_encode($response), true);
+
+        foreach($respJson as $key => $data){
+            $answer[$key] = new stdClass();
+            $answer[$key] -> idQ2 = $data['ID_KQ2'];
+            $answer[$key] -> id_Ecom = explode(',', $data['KC0_INDICADOR_DE_COMERCIO_ELEC']);
+            $answer[$key] -> id_Cvv = explode(',', $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE']);
+            $answer[$key] -> crd_tp = explode(',', $data['KC0_TIPO_DE_TARJETA']);
+            $answer[$key] -> saf = explode(',', $data['KC0_SAF']);
+        }
+        $responseJSON = json_decode(json_encode($answer), true);
+        return $responseJSON;
+    }
+
+    
 }
