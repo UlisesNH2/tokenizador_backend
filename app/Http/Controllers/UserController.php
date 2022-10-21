@@ -81,4 +81,35 @@ class UserController extends Controller
             return $user;
         }else { return -1; }
     }
+
+    public function updatePersonalData(Request $request){
+        $userExist = DB::select('select username from user where id = ?', [$request -> id]);
+        if(!empty($userExist)){
+            $user = DB::update('update user set name = ?, firstname = ?, secondname = ?, username = ? where id = ?',[
+                $request -> name,
+                $request -> firstname,
+                $request -> secondname,
+                $request -> username,
+                $request -> id
+            ]);
+            return $user;
+        }else { return -1; }
+    }
+
+    public function updatePassword(Request $request){
+        $userExist = DB::select('select password from user where id = ?', [$request -> id]);
+        $response = json_decode(json_encode($userExist), true);
+        if(!empty($userExist)){
+            if(!password_verify($request -> password, $response[0]['password'])){
+                $password = password_hash($request -> password, PASSWORD_BCRYPT); //Encriptación del password
+                $user = DB::update('update user set password = ? where id = ?', [
+                    $password,
+                    $request -> id
+                ]);
+            }else{
+                return -2;
+            }
+            return $user;
+        }else{ return -1; }
+    }
 }

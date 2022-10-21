@@ -55,7 +55,6 @@ class BreakerController extends Controller
             //Se obtiene el catalogo de acuerdo a las posiciones obtenidas en el bitmap
             $catalog = $this -> getCatalog($positions);
             $number = 'number'; $field = 'field'; $name = 'name'; $type = 'type'; $value = 'value'; $id = 3;
-
             for($i = 0; $i < count($positions); $i++){
                 switch($positions[$i]){
                     case 1:{ //Secondary bitmap
@@ -1040,6 +1039,7 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = ' ';
                         $addDataB24 = "";
                         if(is_numeric($len) && intval($len) === 0){
                             $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
@@ -1058,6 +1058,7 @@ class BreakerController extends Controller
                             $response[$counter] -> $field = 'S-126.0';
                             $response[$counter] -> $name = 'Additional Data Header';
                             $response[$counter] -> $type = 'ANS(12)';
+                            $response[$counter] -> $value = ' ';
                             //Validación del header de los tokens
                             if($headerAllTokens[0] === '&' && $headerAllTokens[1] === ' '){
                                     $response[$counter]->$value = $headerAllTokens;
@@ -1113,6 +1114,7 @@ class BreakerController extends Controller
                                             $response[$counter]->$field = 'S-126.' . $counterField;
                                             $response[$counter]->$name = $valueTokenString;
                                             $response[$counter]->$type = 'ANS';
+                                            $response[$counter]->$value = '';
                                             if (strpos($valueToken, '!')) {
                                                 $response[$counter]->$value = $valueToken . ' error - contenido del token';
                                                 break;

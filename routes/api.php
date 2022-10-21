@@ -19,6 +19,8 @@ Route::post('/users', 'App\Http\Controllers\UserController@index');//Traer a tod
 Route::post('/createUser', 'App\Http\Controllers\UserController@createUser'); //Crear usuario 
 Route::post('/updateUser', 'App\Http\Controllers\UserController@updateUser'); //Actualizar usuario
 Route::post('/deleteUser', 'App\Http\Controllers\UserController@deleteUser'); //Eliminar usuario
+Route::post('/updatePersonalData', 'App\Http\Controllers\UserController@updatePersonalData'); //Actualizar información personal
+Route::post('/updatePassword', 'App\Http\Controllers\UserController@updatePassword'); //Actualizar contraseña
 
 Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 
@@ -45,8 +47,9 @@ Route::post('/tokenC0', 'App\Http\Controllers\TokenC0Controller@index');//Traer 
 Route::post('/tokenC0Filter/main', 'App\Http\Controllers\TokenC0Controller@getDataTableFilter'); //Datos para el filtro
 //Rutas catalogo para token C0
 Route::get('/tokenC0Catalog', 'App\Http\Controllers\TokenC0Controller@getCatalog'); //Obtener el catálogo token C0
-
 Route::get('/tokenC0CatValidator', 'App\Http\Controllers\TokenC0Controller@getCatalogValidator'); //Obtener el catalogo de los valores validos por Q2
+//Rutas CRUD para catálogo de token C0
+
 
 //RUTAS TOKEN B3
 Route::post('/tokenB3', 'App\Http\Controllers\TokenB3Controller@index'); //Traer datos para la tabla principal
