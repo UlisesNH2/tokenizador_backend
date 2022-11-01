@@ -24,7 +24,7 @@ class TokenB3Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, 
-        KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME from test where ";
+        KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME from ".$request -> bd." where ";
 
         //Detectar cuales filtros son los que están siendo utilizados
         if(!empty($kq2)){ $numberFilters++; $flagKq2 = true; }
@@ -244,7 +244,7 @@ class TokenB3Controller extends Controller
             }
             default:{
                 $response = DB::select("select KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, 
-                KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME from test");
+                KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME from ".$request -> bd);
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -307,11 +307,11 @@ class TokenB3Controller extends Controller
 
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
         KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB3_BIT_MAP, KB3_TERM_SRL_NUM, KB3_EMV_TERM_CAP, KB3_USR_FLD1, KB3_USR_FLD2, KB3_EMV_TERM_TYPE, KB3_APP_VER_NUM, 
         KB3_CVM_RSLTS, KB3_DF_NAME_LGTH, KB3_DF_NAME, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
         (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
@@ -401,6 +401,7 @@ class TokenB3Controller extends Controller
             $dec = substr($data['MONTO1'], strlen($data['MONTO1']) - 2, 2);
             $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) - 2);
             $answer[$key]->amount = '$' . number_format($int . '.' . $dec, 2);
+            $answer[$key]->type = $data['TIPO'];
             $answer[$key]->ID_Comer = $data['ID_COMER'];
             $answer[$key]->Term_Comer = $data['TERM_COMER'];
             $answer[$key]->Fiid_Comer = $data['FIID_COMER'];

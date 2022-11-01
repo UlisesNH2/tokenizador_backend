@@ -28,7 +28,7 @@ class TokenC0Controller extends Controller
         $flagEntry = false;
         $response = array();
         $query = "select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test where ";
+        KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from ".$request -> bd." where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -249,7 +249,7 @@ class TokenC0Controller extends Controller
             }
             default: {
                 $response = DB::select("select KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
-                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from test");
+                KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A from ".$request -> bd);
                 $array = json_decode(json_encode($response), true);
             }
         }
@@ -299,11 +299,11 @@ class TokenC0Controller extends Controller
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
         KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1  from test where ";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1  from ".$request -> bd." where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC0_INDICADOR_DE_COMERCIO_ELEC,KC0_TIPO_DE_TARJETA, 
         KC0_INDICADOR_DE_CVV2_CVC2_PRE, KC0_INDICADOR_DE_INFORMACION_A, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from ".$request -> bd." where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
         (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";

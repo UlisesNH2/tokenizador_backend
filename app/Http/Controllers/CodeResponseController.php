@@ -13,10 +13,10 @@ class codeResponseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $codeResponse = DB::select("select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES 
-        from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA 
+        from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA 
         group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES");
         $array = json_decode(json_encode($codeResponse), true); //Codificar un array asociativo
         $answer = array();
@@ -58,12 +58,12 @@ class codeResponseController extends Controller
         $response = array();
         $arrayValues = array();
         $queryOutFilters = "select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES, sum(main.MONTO1) AS MONTO, count(*) as TXS 
-        from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
+        from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
         where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
 
         $firstQuery = "select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES, sum(main.MONTO1) AS MONTO, count(*) as TXS 
-        from test as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
+        from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
         where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
 
         $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";

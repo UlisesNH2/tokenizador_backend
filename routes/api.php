@@ -25,13 +25,13 @@ Route::post('/updatePassword', 'App\Http\Controllers\UserController@updatePasswo
 Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
 
 //PRINCIPALES FILTROS
-Route::get('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
+Route::post('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
 Route::post('/kq2Filter', 'App\Http\Controllers\Kq2Controller@filterKq2');
 
-Route::get('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
+Route::post('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
 Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@filterCodeResponse');
 
-Route::get('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
+Route::post('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filterEntryMode');
 
 //FILTROS TERMINALES
@@ -81,3 +81,8 @@ Route::post('/catalogo/hdrISO', 'App\Http\Controllers\HeaderISOController@getCat
 //CATALOGO DE TIPO DE MENSAJES
 Route::get('/catalogo/getMessTypes', 'App\Http\Controllers\MessageType@index');
 Route::post('/catalogo/messType', 'App\Http\Controllers\MessageType@getCatalogTypeMessage');
+
+//PROYECTOS
+Route::post('/createProject', 'App\Http\Controllers\ProjectController@uploadProject'); //Subir un nuevo proyecto a la base de datos
+Route::post('/getProjectsByUser', 'App\Http\Controllers\ProjectController@getProjects'); //Obtener todos los proyectos almacenados por usuario
+Route::post('/getDateTime', 'App\Http\Controllers\ProjectController@getDateAndTime'); //Obtener las fechas y horas mínimas y máximas de un proyecto en específico

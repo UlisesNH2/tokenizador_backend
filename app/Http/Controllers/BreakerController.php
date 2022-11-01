@@ -913,7 +913,8 @@ class BreakerController extends Controller
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && ltrim($len, '0') <= 28){
-                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $initPos = $finalPos+1; 
+                            $finalPos += $len;
                             $accID1 = $this -> getChain($message, $initPos, $finalPos);
                             $response[$counter] -> $value = $accID1;
                         }else{
@@ -1153,6 +1154,7 @@ class BreakerController extends Controller
     function getChain($message, $initPos, $finalPos){
         $chain = '';
         for($i = $initPos; $i < $finalPos+1; $i++){
+            if( !isset($message[$i]) ) $message[$i] = '*' ;
             $chain .= $message[$i];
         }
         return $chain;

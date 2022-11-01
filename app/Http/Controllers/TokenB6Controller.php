@@ -20,7 +20,7 @@ class TokenB6Controller extends Controller
         $response = array();
         $answer = array();
         $array = array();
-        $query = "select KB6_ISS_SCRIPT_DATA_LGTH, KB6_ISS_SCRIPT_DATA from test where ";
+        $query = "select KB6_ISS_SCRIPT_DATA_LGTH, KB6_ISS_SCRIPT_DATA from ".$request -> bd." where ";
 
         //Detectar cuales son los filtros utilizados
         if(!empty($kq2)){ $numberFilters++; $flagKq2 = true; }
@@ -237,9 +237,9 @@ class TokenB6Controller extends Controller
         $response = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB6_ISS_SCRIPT_DATA_LGTH, KB6_ISS_SCRIPT_DATA, ID_COMER, TERM_COMER, 
-        FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where ";
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB6_ISS_SCRIPT_DATA_LGTH, KB6_ISS_SCRIPT_DATA, ID_COMER, TERM_COMER, 
-        FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
+        FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd;
         
         //Detectar cuales son los filtros utilizados
         for($key = 0; $key < 13; $key++){
@@ -309,11 +309,11 @@ class TokenB6Controller extends Controller
         
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
-            $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key] -> dataLength = $data['KB6_ISS_SCRIPT_DATA_LGTH'];
-            $answer[$key] -> scriptData = $data['KB6_ISS_SCRIPT_DATA'];
+            $answer[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+            $answer[$key] -> issScripDataLen = $data['KB6_ISS_SCRIPT_DATA_LGTH'];
+            $answer[$key] -> issScripData = $data['KB6_ISS_SCRIPT_DATA'];
             $answer[$key] -> ID_Comer = $data['ID_COMER'];
             $answer[$key] -> Term_Comer = $data['TERM_COMER'];
             $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
@@ -328,6 +328,7 @@ class TokenB6Controller extends Controller
             $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
             $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
             $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+            $answer[$key] -> type = $data['TIPO'];
         }
         $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;

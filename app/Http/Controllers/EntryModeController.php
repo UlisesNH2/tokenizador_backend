@@ -13,13 +13,13 @@ class EntryModeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $entryMode = DB::select("select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES FROM 
-            (select main.ENTRY_MODE, entry.Entry_Mode_Des  from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+            (select main.ENTRY_MODE, entry.Entry_Mode_Des  from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
             where main.CODIGO_RESPUESTA < '010' group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
             inner join
-            (select main.ENTRY_MODE, entry.Entry_Mode_Des from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+            (select main.ENTRY_MODE, entry.Entry_Mode_Des from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
             where main.CODIGO_RESPUESTA >= '010'group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE;");
         $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
 
@@ -65,22 +65,22 @@ class EntryModeController extends Controller
 
         $queryOutFilters = "select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.ENTRY_MODE, entry.Entry_Mode_Des,sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
         where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
         inner join
         (select main.ENTRY_MODE, entry.Entry_Mode_Des, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
         where main.CODIGO_RESPUESTA >= '010'and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE";
 
         $firstQuery = "select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.ENTRY_MODE, entry.Entry_Mode_Des,sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
         where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
         $secondQuery = " group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
         inner join ( select main.ENTRY_MODE, entry.Entry_Mode_Des, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from entrymode as entry inner join test as main on entry.entry_mode = main.ENTRY_MODE
+        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
         where main.CODIGO_RESPUESTA >= '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
         $thirthQuery = " group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE";
 

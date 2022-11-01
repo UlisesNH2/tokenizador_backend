@@ -20,7 +20,7 @@ class TokenB5Controller extends Controller
         $answer = array();
         $array = array(); //quitar despues
         $query = "select KB5_ISS_AUTH_DATA_LGTH, KB5_ARPC, KB5_CRD_STAT_UPDT, KB5_ADDL_DATA, KB5_SEND_CRD_BLK, KB5_SEND_PUT_DATA
-        from test where ";
+        from ".$request -> bd."where ";
 
         //Detectar los filtros que son utilizados
         if(!empty($kq2)){ $numberFilters++; $flagkq2 = true;}
@@ -202,7 +202,7 @@ class TokenB5Controller extends Controller
             }
             default:{
                 $response = DB::select("select KB5_ISS_AUTH_DATA_LGTH, KB5_ARPC, KB5_CRD_STAT_UPDT, KB5_ADDL_DATA, KB5_SEND_CRD_BLK, KB5_SEND_PUT_DATA
-                from test");
+                from ".$request -> bd);
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -222,7 +222,9 @@ class TokenB5Controller extends Controller
     }
 
     public function getDataTableFilter(Request $request){
+
         $values = array();
+        $valuesDate = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE', 'KB5_ISS_AUTH_DATA_LGTH', 'KB5_ARPC', 'KB5_CRD_STAT_UPDT', 'KB5_ADDL_DATA', 'KB5_SEND_CRD_BLK', 'KB5_SEND_PUT_DATA', 
         'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM','LN_COMER', 'LN_TERM', 'FIID_TARJ', 'LN_TARJ'];
 
@@ -244,17 +246,23 @@ class TokenB5Controller extends Controller
         $values[15] = $request -> Fiid_Card;
         $values[16] = $request -> Ln_Card;
 
+        $valuesDate[0] = $request -> startDate;
+        $valuesDate[1] = $request -> finishDate;
+        $valuesDate[2] = $request -> startHour;
+        $valuesDate[3] = $request -> finishHour;
+
         $answer = array();
-        $answerAllRigth = array();
         $array = array();
         $response = array();
         $arrayValues = array();
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB5_ISS_AUTH_DATA_LGTH, KB5_ARPC, KB5_CRD_STAT_UPDT, KB5_ADDL_DATA, KB5_SEND_CRD_BLK, KB5_SEND_PUT_DATA, 
-        ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 
-        from test where ";
+        ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO
+        from ".$request -> bd." where ";
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB5_ISS_AUTH_DATA_LGTH, KB5_ARPC, KB5_CRD_STAT_UPDT, KB5_ADDL_DATA, KB5_SEND_CRD_BLK, KB5_SEND_PUT_DATA, 
-        ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 
-        from test";
+        ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER, LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO
+        from ".$request -> bd." where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
+
+        $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         //Detectar cuales son los filtros utilizados
         for($key = 0; $key < 17; $key++){
@@ -274,78 +282,69 @@ class TokenB5Controller extends Controller
             }
         }
         if(empty($filteredValues)){
-            $response = DB::select($queryOutFilters);
+            $response = DB::select($queryOutFilters, [...$valuesDate]);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) <= 1){
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        $response = array_merge($response, DB::select($query.$filteredLabels[$i]." = ?",
-                        [$filteredValues[$i][$j]]));
-                    }
+            //Ingresar todos los valores de $filteredValues en un solo arreglo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
                 }
-                $array = json_decode(json_encode($response), true);
-            }else{
-                //Ingresar todos los valores de $filteredValues en un solo arreglo
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        array_push($arrayValues, $filteredValues[$i][$j]);
-                    }
-                }
-                $z = 1; //Variable para el control de la longitud del query
-                //Construcción del query de acuerdo a los filtros seleccionados
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        if($j == count($filteredValues[$i]) -1){
-                            if($j == 0){
-                                if($z == count($arrayValues)){
-                                    $query .= "(".$filteredLabels[$i]." = ?)";
-                                }else{
-                                    $query .= "(".$filteredLabels[$i]." = ?) and ";
-                                }
-                                $z++;
-                            }else{
-                                if($z == count($arrayValues)){
-                                    $query .= $filteredLabels[$i]." = ?)";
-                                    $z = 1;
-                                }else{
-                                    $query .= $filteredLabels[$i]." = ?) and ";
-                                    $z++;
-                                }
+            }
+            $z = 1; //Variable para el control de la longitud del query
+            //Construcción del query de acuerdo a los filtros seleccionados
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
                             }
-                        }else{
-                            if($j == 0){
-                                $query .= "(".$filteredLabels[$i]." = ? or ";
-                                $z++;
-                            }else{
-                                $query .= $filteredLabels[$i]." = ? or ";
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $query .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $query .= $filteredLabels[$i] . " = ?) and ";
                                 $z++;
                             }
                         }
+                    } else {
+                        if ($j == 0) {
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $query .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
                     }
                 }
-                $response = DB::select($query, [...$arrayValues]);
-                $array = json_decode(json_encode($response), true);
             }
+            $response = DB::select($query.$queryDateTime, [...$arrayValues, ...$valuesDate]);
+            $array = json_decode(json_encode($response), true);
         }
 
         foreach($array as $key => $data){
             $answer[$key] = new stdClass();
-            $answer[$key] -> ID_Access_Mode = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> ID_Code_Response = $data['CODIGO_RESPUESTA'];
-            $answer[$key] -> ID_Entry_Mode = $data['ENTRY_MODE'];
-            $answer[$key] -> Iss_Auth_Data = $data['KB5_ISS_AUTH_DATA_LGTH'];
-            $answer[$key] -> arpc = $data['KB5_ARPC'];
+            $answer[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $answer[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $answer[$key] -> entryMode = $data['ENTRY_MODE'];
+            $answer[$key] -> issAuthDataLen = $data['KB5_ISS_AUTH_DATA_LGTH'];
+            $answer[$key] -> ARPC = $data['KB5_ARPC'];
             $answer[$key] -> Card_update = $data['KB5_CRD_STAT_UPDT'];
-            $answer[$key] -> Addl_Data = $data['KB5_ADDL_DATA'];
-            $answer[$key] -> Send_Card = $data['KB5_SEND_CRD_BLK'];
-            $answer[$key] -> Send_Data = $data['KB5_SEND_PUT_DATA'];
+            $answer[$key] -> ADDLdata = $data['KB5_ADDL_DATA'];
+            $answer[$key] -> sendCrdBlk = $data['KB5_SEND_CRD_BLK'];
+            $answer[$key] -> sendPutData = $data['KB5_SEND_PUT_DATA'];
             $answer[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
             $answer[$key] -> Number_Sec = $data['NUM_SEC'];
             //Separación de la cifra decimal y entero del monto
             $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
             $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
             $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+            $answer[$key] -> type = $data['TIPO'];
             $answer[$key] -> ID_Comer = $data['ID_COMER'];
             $answer[$key] -> Term_Comer = $data['TERM_COMER'];
             $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];

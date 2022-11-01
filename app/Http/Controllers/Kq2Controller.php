@@ -13,15 +13,15 @@ class Kq2Controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $kq2 = DB::select("select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA < '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
         inner join
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
         on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO ORDER BY accepted.KQ2_ID_MEDIO_ACCESO");
         $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
@@ -66,12 +66,12 @@ class Kq2Controller extends Controller
         //Query en caso de que no exista algún filtro
         $queryOutFilters = "select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
         inner join
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA >= '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
         group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
         on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO";
@@ -79,12 +79,12 @@ class Kq2Controller extends Controller
         //Query modificado para obtener los valores decuerdo al filtro
         $firstQuery = "select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
         $secondQuery = " group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
         inner join
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from medioacceso as kq2 inner join test as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
         where  main.CODIGO_RESPUESTA >= '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and "; 
         $thirthQuery = " group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
         on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO";

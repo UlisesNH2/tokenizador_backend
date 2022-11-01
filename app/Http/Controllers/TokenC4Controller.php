@@ -22,7 +22,7 @@ class TokenC4Controller extends Controller
         $flagEntry = false;
         $query = "select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test where ";
+        KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from ".$request -> bd." where ";
 
         /*
         Detectar cual de lso filtros está siendo utilizad.
@@ -248,7 +248,7 @@ class TokenC4Controller extends Controller
             default: {
                 $response = DB::select("select KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
                 KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
-                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from test");
+                KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD from ".$request -> bd);
                 $array = json_decode(json_encode($response), true);
                 break;
             }
@@ -320,12 +320,12 @@ class TokenC4Controller extends Controller
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
         KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where ";
 
         $queryOutFilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KC4_TERM_ATTEND_IND,KC4_TERM_OPER_IND,KC4_TERM_LOC_IND,
         KC4_CRDHLDR_PRESENT_IND,KC4_CRD_PRESENT_IND,KC4_CRD_CAPTR_IND,KC4_TXN_STAT_IND,KC4_TXN_SEC_IND,KC4_TXN_RTN_IND,
         KC4_CRDHLDR_ACTVT_TERM_IND,KC4_TERM_INPUT_CAP_IND,KC4_CRDHLDR_ID_METHOD, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
         (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
@@ -416,6 +416,7 @@ class TokenC4Controller extends Controller
             $dec = substr($data['MONTO1'], strlen($data['MONTO1']) - 2, 2);
             $int =  substr($data['MONTO1'], 0, strlen($data['MONTO1']) - 2);
             $answer[$key]->amount = '$' . number_format($int . '.' . $dec, 2);
+            $answer[$key]->type = $data['TIPO'];
             $answer[$key]->ID_Comer = $data['ID_COMER'];
             $answer[$key]->Term_Comer = $data['TERM_COMER'];
             $answer[$key]->Fiid_Comer = $data['FIID_COMER'];

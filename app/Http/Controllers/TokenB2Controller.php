@@ -24,7 +24,7 @@ class TokenB2Controller extends Controller
         $answer = array();
         $query = "select KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
         KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
-        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP from test where ";
+        KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP from ".$request -> id." where ";
 
         //Detectar los filtros utilizados
         if(!empty($kq2)){ $numberFilters++; $flagkq2 = true; }
@@ -245,7 +245,7 @@ class TokenB2Controller extends Controller
             default:{
                 $response = DB::select("select KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
                 KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
-                KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP from test");
+                KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP from ".$request -> bd);
                 $array = json_decode(json_encode($response), true);
             }
         }
@@ -274,7 +274,9 @@ class TokenB2Controller extends Controller
     }
 
     public function getDataTableFilter(Request $request){
+
         $values = array();
+        $valuesDate = array();
         $label = ['KQ2_ID_MEDIO_ACCESO', 'CODIGO_RESPUESTA', 'ENTRY_MODE','KB2_BIT_MAP', 'KB2_USR_FLD1', 'KB2_ARQC', 'KB2_AMT_AUTH', 'KB2_AMT_OTHER', 'KB2_ATC',
         'KB2_TERM_CTRY_CDE', 'KB2_TRAN_CRNCY_CDE', 'KB2_TRAN_DAT', 'KB2_TRAN_TYPE', 'KB2_UNPREDICT_NUM',
         'KB2_ISS_APPL_DATA_LGTH', 'KB2_ISS_APPL_DATA', 'KB2_TVR', 'KB2_AIP', 'ID_COMER', 'TERM_COMER', 'FIID_COMER', 'FIID_TERM',
@@ -306,21 +308,29 @@ class TokenB2Controller extends Controller
         $values[23] = $request -> Fiid_Card;
         $values[24] = $request -> Ln_Card;
 
+        $valuesDate[0] = $request -> startDate;
+        $valuesDate[1] = $request -> finishDate;
+        $valuesDate[2] = $request -> startHour;
+        $valuesDate[3] = $request -> finishHour;
+
         $answer = array();
         $array = array();
         $response = array();
         $arrayValues = array();
         $answer = array();
-        $answerOk = array();
+
         $query = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
         KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
         KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test where ";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where ";
 
         $queryOutfilters = "select KQ2_ID_MEDIO_ACCESO, CODIGO_RESPUESTA, ENTRY_MODE, KB2_BIT_MAP,KB2_USR_FLD1,KB2_ARQC,KB2_AMT_AUTH,KB2_AMT_OTHER, KB2_ATC,KB2_TERM_CTRY_CDE,
         KB2_TRAN_CRNCY_CDE,KB2_TRAN_DAT,KB2_TRAN_TYPE,KB2_UNPREDICT_NUM,KB2_ISS_APPL_DATA_LGTH,KB2_ISS_APPL_DATA,
         KB2_CRYPTO_INFO_DATA,KB2_TVR,KB2_AIP, ID_COMER, TERM_COMER, FIID_COMER, FIID_TERM, LN_COMER,
-        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1 from test";
+        LN_TERM, FIID_TARJ, LN_TARJ, NOMBRE_DE_TERMINAL, NUM_SEC, MONTO1, TIPO from ".$request -> bd." where (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and 
+        (HORA_TRANS >= ? and HORA_TRANS <= ?)";
+
+        $queryDateTime = " and (FECHA_TRANS >= ? and FECHA_TRANS <= ?) and (HORA_TRANS >= ? and HORA_TRANS <= ?)";
 
         //Detectar cuales son los filtros utilizados
         for($key = 0; $key < 25; $key++){
@@ -341,59 +351,49 @@ class TokenB2Controller extends Controller
         }
 
         if(empty($filteredValues)){
-            $response = DB::select($queryOutfilters);
+            $response = DB::select($queryOutfilters, [...$valuesDate]);
             $array = json_decode(json_encode($response), true);
         }else{
-            if(count($filteredValues) <= 1){
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        $response = array_merge($response, DB::select($query.$filteredLabels[$i]." = ?",
-                        [$filteredValues[$i][$j]]));
-                    }
+            //Ingresar todos los valores de $filteredValues en un solo arreglo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
                 }
-                $array = json_decode(json_encode($response), true);
-            }else{
-                //Ingresar todos los valores de $filteredValues en un solo arreglo
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        array_push($arrayValues, $filteredValues[$i][$j]);
-                    }
-                }
-                $z = 1; //Variable para el control de la longitud del query
-                //Construcción del query de acuerdo a los filtros seleccionados
-                for($i = 0; $i < count($filteredValues); $i++){
-                    for($j = 0; $j < count($filteredValues[$i]); $j++){
-                        if($j == count($filteredValues[$i]) -1){
-                            if($j == 0){
-                                if($z == count($arrayValues)){
-                                    $query .= "(".$filteredLabels[$i]." = ?)";
-                                }else{
-                                    $query .= "(".$filteredLabels[$i]." = ?) and ";
-                                }
-                                $z++;
-                            }else{
-                                if($z == count($arrayValues)){
-                                    $query .= $filteredLabels[$i]." = ?)";
-                                    $z = 1;
-                                }else{
-                                    $query .= $filteredLabels[$i]." = ?) and ";
-                                    $z++;
-                                }
+            }
+            $z = 1; //Variable para el control de la longitud del query
+            //Construcción del query de acuerdo a los filtros seleccionados
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
                             }
-                        }else{
-                            if($j == 0){
-                                $query .= "(".$filteredLabels[$i]." = ? or ";
-                                $z++;
-                            }else{
-                                $query .= $filteredLabels[$i]." = ? or ";
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $query .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $query .= $filteredLabels[$i] . " = ?) and ";
                                 $z++;
                             }
                         }
+                    } else {
+                        if ($j == 0) {
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $query .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
                     }
                 }
-                $response = DB::select($query, [...$arrayValues]);
-                $array = json_decode(json_encode($response), true);
             }
+            $response = DB::select($query.$queryDateTime, [...$arrayValues, ...$valuesDate]);
+            $array = json_decode(json_encode($response), true);
         }
 
         foreach($array as $key => $data){
@@ -423,6 +423,7 @@ class TokenB2Controller extends Controller
             $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
             $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
             $answer[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
+            $answer[$key] -> type = $data['TIPO'];
             $answer[$key] -> ID_Comer = $data['ID_COMER'];
             $answer[$key] -> Term_Comer = $data['TERM_COMER'];
             $answer[$key] -> Fiid_Comer = $data['FIID_COMER'];
