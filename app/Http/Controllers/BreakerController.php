@@ -386,7 +386,7 @@ class BreakerController extends Controller
                         break;
                     }
                     case 28: { //Transaction Fee Amount
-                        $initPos = $finalPos+1; $finalPos += 8;
+                        $initPos = $finalPos+1; $finalPos += 9;
                         $tranFeeAm = $this -> getChain($message, $initPos, $finalPos); //Long 8
                         $counter++; $id++;
                         $response[$counter] = new stdClass();
@@ -625,7 +625,7 @@ class BreakerController extends Controller
                         $code = DB::select('select CURRENCY_CODE from catalog_currency_code');
                         $array = json_decode(json_encode($code), true);
                         foreach ($array as $key => $data) {
-                            if($currCode === $data['CURRENCY_CODE']){ $flag = 1;}
+                            if($currCode == $data['CURRENCY_CODE']){ $flag = 1;}
                         }
                         $counter++; $id++;
                         $response[$counter] = new stdClass();
@@ -638,7 +638,7 @@ class BreakerController extends Controller
                             $response[$counter] -> $value = $currCode;
                         }else{
                             //$initPos = $finalPos+1; $finalPos += 3;
-                            $response[$counter] -> $value = 'error - no existe el dato';
+                            $response[$counter] -> $value = $currCode.' error - no existe el dato';
                         }
                         break;
                     }
@@ -932,7 +932,7 @@ class BreakerController extends Controller
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && ltrim($len, '0') <= 28){
-                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $initPos = $finalPos+1; $finalPos += $len;
                             $accID2 = $this -> getChain($message, $initPos, $finalPos);
                             $response[$counter] -> $value = $accID2;
                         }else{

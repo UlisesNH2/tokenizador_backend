@@ -85,4 +85,5 @@ Route::post('/catalogo/messType', 'App\Http\Controllers\MessageType@getCatalogTy
 //PROYECTOS
 Route::post('/createProject', 'App\Http\Controllers\ProjectController@uploadProject'); //Subir un nuevo proyecto a la base de datos
 Route::post('/getProjectsByUser', 'App\Http\Controllers\ProjectController@getProjects'); //Obtener todos los proyectos almacenados por usuario
+Route::post('/updateProject', 'App\Http\Controllers\ProjectController@updateProject'); //Actualizar registro de un proyecto
 Route::post('/getDateTime', 'App\Http\Controllers\ProjectController@getDateAndTime'); //Obtener las fechas y horas mínimas y máximas de un proyecto en específico
