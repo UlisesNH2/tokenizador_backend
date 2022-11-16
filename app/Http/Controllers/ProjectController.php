@@ -15,8 +15,8 @@ class ProjectController extends Controller
         $projectExist = DB::select('select * from projects where ID_PROJECT = ?', [$request -> idProject]);
         if(empty($projectExist)){
             //Se registra el proyecto en la tabla 'projects' de la base de datos
-            $createProject = DB::insert('insert into projects (ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, ID_USUARIO, FECHA_MODIFICACION)
-            values (?,?,?,?)',[ 
+            $createProject = DB::insert('insert into projects (ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO )
+            values (?,?,?,?,?)',[ 
             $request -> idProject, 
             $request -> name,
             $request -> date,
@@ -46,7 +46,6 @@ class ProjectController extends Controller
                 }
                 if($conn -> query($queryCreateTable)){ mysqli_close($conn); $flag = true; } 
                 else { mysqli_close($conn); }
-
                 if($flag){
                     $queryValues = "insert into ".$request->idProject." ".$columns . " values ";
                     for($i = 1; $i < count($data); $i++){
@@ -62,6 +61,7 @@ class ProjectController extends Controller
                         }
                     }
                 }
+                return $queryValues;
                 $insertValues = DB::insert($queryValues);
                 return $insertValues;
             }
@@ -147,6 +147,28 @@ class ProjectController extends Controller
             }
         }else{
             return -4;
+        }
+    }
+
+    public function deleteProject(Request $request){
+        $existProject = DB::select('select ID_PROJECT from projects');
+        if(!empty($existProject)){
+            //Por jerarquía, se eliminará primero la tabla que contiene el proyecto dentro de la base de datos
+            $host = "pyjcproas.duckdns.org";
+            //host = "localhost";
+            $user = "token_user";
+            $pass = "";
+            $db = "prosa_test";
+            $conn = new mysqli($host, $user, $pass, $db, 3306);
+            if($conn -> query("drop table ".$request -> id)){
+                $deleteProject = DB::delete('delete from projects where ID_PROJECT = ?', [$request -> id]);
+                mysqli_close($conn);
+                return $deleteProject;
+            }else{
+                return -1;
+            }
+        }else{
+            return -2;
         }
     }
 

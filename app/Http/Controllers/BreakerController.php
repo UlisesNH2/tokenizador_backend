@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\Break_;
 use SebastianBergmann\LinesOfCode\Counter;
 use stdClass;
 
@@ -55,6 +56,7 @@ class BreakerController extends Controller
             //Se obtiene el catalogo de acuerdo a las posiciones obtenidas en el bitmap
             $catalog = $this -> getCatalog($positions);
             $number = 'number'; $field = 'field'; $name = 'name'; $type = 'type'; $value = 'value'; $id = 3;
+            //return $positions;
             for($i = 0; $i < count($positions); $i++){
                 switch($positions[$i]){
                     case 1:{ //Secondary bitmap
@@ -443,11 +445,15 @@ class BreakerController extends Controller
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && ltrim($len, '0') <= 11){
+                            $initPos = $finalPos+1; $finalPos += $len;
+                            $aqrCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
+                            $response[$counter] -> $value = $aqrCode;
+                        }else{
                             $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
                             $aqrCode = $this -> getChain($message, $initPos, $finalPos); //Long 11
-                            $response[$counter] -> $value = str_pad($aqrCode, 11, '0', STR_PAD_LEFT);
-                        }else{
-                            $response[$counter] -> $value = 'error tipo de dato no válido';
+                            $response[$counter] -> $value = 'error tipo de dato no válido ->'.$aqrCode;
+                            $i = 300;
+                            break;
                         }
                         break;
                     }
@@ -594,6 +600,17 @@ class BreakerController extends Controller
                         break;
                     }
                     case 46: {
+                        $initPos = $finalPos + 1; $finalPos += 3;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
+                        $ISOAdd = $this -> getChain($message, $initPos, $finalPos );
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $ISOAdd;
                         break;
                     }
                     case 47: {
@@ -660,7 +677,16 @@ class BreakerController extends Controller
                         $response[$counter] -> $value = $pin;
                         break;
                     }
-                    case 53: {
+                    case 53: { //Security Related Control Information
+                        $initPos = $finalPos+1; $finalPos += 16;
+                        $ContronInfo = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $ContronInfo;
                         break;
                     }
                     case 54: {
@@ -692,7 +718,7 @@ class BreakerController extends Controller
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
                         if(is_numeric($len) && ltrim($len, '0') <= 19){
-                            $initPos = $finalPos+1; $finalPos += ltrim($len, '0');
+                            $initPos = $finalPos+1; $finalPos += $len;
                             $termData = $this -> getChain($message, $initPos, $finalPos); //Long 19
                             $response[$counter] -> $value = $termData;
                         }else{
@@ -749,6 +775,7 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
+                        $additionalData = '';
                         if(is_numeric($len) && ltrim($len, '0') <= 0){
                             $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                             $response[$counter] -> $value = $additionalData;
@@ -757,6 +784,11 @@ class BreakerController extends Controller
                             $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                             $response[$counter] -> $value = $additionalData;
                         }
+                        /*
+                        if($additionalData[0] === ' ' && $additionalData[1] === ' '){
+                            $finalPos += intval($len);
+                            break;
+                        }*/
                         //Obtención del header para la lectura y desglose de los tokens
                         $initPos = $finalPos+1; $finalPos += 12; 
                         $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
@@ -800,13 +832,26 @@ class BreakerController extends Controller
                                         $valueToken = $this->getChain($message, $finalPos + 1, $finalPos + intval(ltrim($lenToken, '0')));
                                         //Creación del objeto para los tokens
                                         //Primer campo -> identificador del token
-                                        $counterField++; $counter++; $id++;
-                                        $response[$counter] = new stdClass();
-                                        $response[$counter]->$number = $id;
-                                        $response[$counter]->$field = 'P-63.' . $counterField;
-                                        $response[$counter]->$name = $idTokenString;
-                                        $response[$counter]->$type = '-';
-                                        $response[$counter]->$value = $idToken;
+                                        if($idToken[0] == '!' && $idToken[1] == ' '){
+                                            $counterField++; $counter++; $id++;
+                                            $response[$counter] = new stdClass();
+                                            $response[$counter]->$number = $id;
+                                            $response[$counter]->$field = 'P-63.' . $counterField;
+                                            $response[$counter]->$name = $idTokenString;
+                                            $response[$counter]->$type = '-';
+                                            $response[$counter]->$value = $idToken;
+                                        }else{
+                                            $counterField++; $counter++; $id++;
+                                            $response[$counter] = new stdClass();
+                                            $response[$counter]->$number = $id;
+                                            $response[$counter]->$field = 'P-63.' . $counterField;
+                                            $response[$counter]->$name = 'Error Token';
+                                            $response[$counter]->$type = '-';
+                                            $response[$counter]->$value = "Error en Token: Existe un error en la estructura del header identificador del token ->'".$idToken."'";
+                                            $x = 300; //Ciclo del desglose del token
+                                            $i = 300; //ciclo general
+                                        }
+                                        
                                         //Segundo campo -> longitud del token
                                         $counter++;$id++;
                                         $response[$counter] = new stdClass();
@@ -825,6 +870,7 @@ class BreakerController extends Controller
                                         //Aumento en las posiciones respectivas (en caso de que exista algún error para continuar con la lectura)
                                         if (strpos($valueToken, '!')) {
                                             $response[$counter]->$value = $valueToken.' error - contenido del token';
+                                            $i = 300;
                                             break;
                                         } else {
                                             $response[$counter]->$value = $valueToken;
@@ -846,6 +892,14 @@ class BreakerController extends Controller
                                     $i = 200; //Romper el ciclo for
                                     break;
                                 }
+                        }else{
+                            $response[$counter] = new stdClass();
+                            $response[$counter]->$number = $id;
+                            $response[$counter]->$field = 'Error';
+                            $response[$counter]->$name = '----';
+                            $response[$counter]->$type = '----';
+                            $response[$counter]->$value = 'Error: Existe un error dentro del header de los tokens ->'.$headerAllTokens;
+                            $i = 300;
                         }
                         break;
                     }
@@ -1040,7 +1094,7 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
-                        $response[$counter] -> $value = ' ';
+                        $response[$counter] -> $value = '';
                         $addDataB24 = "";
                         if(is_numeric($len) && intval($len) === 0){
                             $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
@@ -1048,18 +1102,21 @@ class BreakerController extends Controller
                             break;
                         }
                         if(is_numeric($len) && $len <= 800){
-                            $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len)-3);
+                            $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                             $response[$counter] -> $value = $addDataB24;
                             //Creación del objeto header de los tokens
                             $initPos = $finalPos+1; $finalPos += 12; 
                             $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);
                             $counter++; $id++;
+                            if($headerAllTokens[0].$headerAllTokens[1].$headerAllTokens[2] === '000'){
+                                break;
+                            }
                             $response[$counter] = new stdClass();
                             $response[$counter] -> $number = $id;
                             $response[$counter] -> $field = 'S-126.0';
                             $response[$counter] -> $name = 'Additional Data Header';
                             $response[$counter] -> $type = 'ANS(12)';
-                            $response[$counter] -> $value = ' ';
+                            $response[$counter] -> $value = '';
                             //Validación del header de los tokens
                             if($headerAllTokens[0] === '&' && $headerAllTokens[1] === ' '){
                                     $response[$counter]->$value = $headerAllTokens;
@@ -1092,12 +1149,24 @@ class BreakerController extends Controller
                                             $counter++;
                                             $id++;
                                             $counterField++;
-                                            $response[$counter] = new stdClass();
-                                            $response[$counter]->$number = $id;
-                                            $response[$counter]->$field = 'S-126.' . $counterField;
-                                            $response[$counter]->$name = $idTokenString;
-                                            $response[$counter]->$type = '-';
-                                            $response[$counter]->$value = $idToken;
+                                            if($idToken[0] === '!' && $idToken[1] === ' '){
+                                                $response[$counter] = new stdClass();
+                                                $response[$counter]->$number = $id;
+                                                $response[$counter]->$field = 'S-126.' . $counterField;
+                                                $response[$counter]->$name = $idTokenString;
+                                                $response[$counter]->$type = '-';
+                                                $response[$counter]->$value = $idToken;
+                                            }else{
+                                                $response[$counter] = new stdClass();
+                                                $response[$counter]->$number = $id;
+                                                $response[$counter]->$field = 'Error Token';
+                                                $response[$counter]->$name = '-';
+                                                $response[$counter]->$type = '-';
+                                                $response[$counter]->$value = "Existe un error dentro de la estructura del header de identificación del token '".$idToken."'";
+                                                $i = 300;
+                                                $p = 300;
+                                            }
+                                            
                                             //Segundo campo -> longitud del token
                                             $counter++;
                                             $id++;
@@ -1135,7 +1204,8 @@ class BreakerController extends Controller
                                         break;
                                     }
                                     
-                            }else{
+                            }
+                            else{
                                 $response[$counter] -> $value = $headerAllTokens.' error - contenido del header';
                             }
                         }

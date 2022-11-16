@@ -17,26 +17,26 @@ class TerminalController extends Controller
         $flagkq2 = false;
         $flagCode = false;
         $flagEntry = false;
-        $queryID_COMER = "select ID_COMER from test";
+        $queryID_COMER = "select ID_COMER from ".$request -> bd;
 
-        $queryTERM_COMER = "select TERM_COMER from test";
+        $queryTERM_COMER = "select TERM_COMER from ".$request -> bd;
 
-        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from test as main
+        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from ".$request -> bd." as main
         join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
 
-        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from test as main 
+        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from ".$request -> bd." as main 
         join fiid_tarj as catTarj on main.FIID_TARJ = catTarj.FIID_TARJ";
 
-        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from test as main 
+        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from ".$request -> bd." as main 
         join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
 
-        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from test as main 
+        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from ".$request -> bd." as main 
         join ln_comer as catLNComer on main.LN_COMER = catLNComer.LN_COMER";
 
-        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from test as main
+        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from ".$request -> bd." as main
         join ln_comer as catLNComer on main.LN_TERM = catLNComer.LN_COMER";
 
-        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from test as main
+        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from ".$request -> bd." as main
         join ln_tarj as catLNTarj on main.LN_TARJ = catLNTarj.LN_TARJ";
 
         /*
