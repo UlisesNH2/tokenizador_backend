@@ -324,7 +324,12 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
-                        $response[$counter] -> $value = $posEmode;
+                        $emExist = DB::select("select * from entrymode where entry_mode = ?", [$posEmode]);
+                        if(!empty($emExist)){
+                            $response[$counter] -> $value = $posEmode;
+                        }else{
+                            $response[$counter] -> $value = "Error: No existe el valor dentro del catálogo de Entry Mode -> '".$posEmode."'";
+                        }
                         break;
                     }
                     case 23: { //Card Sequence Number 
@@ -815,7 +820,6 @@ class BreakerController extends Controller
                                         $counterTokens++;
                                     }
                                 }
-
                                 if($numberOfTokens == $counterTokens){
                                     for ($x = 0; $x < $numberOfTokens; $x++) {
                                         $tokenHeader = '';
@@ -888,7 +892,8 @@ class BreakerController extends Controller
                                     $response[$counter]->$field = 'Error';
                                     $response[$counter]->$name = '----';
                                     $response[$counter]->$type = '----';
-                                    $response[$counter]->$value = 'Error: El número de tokens identificados no corresponde con lo que manifiesta el mensaje: Número Esperado: '.$numberOfTokens.' Número Obtenido: '.$counterTokens;
+                                    $response[$counter]->$value = "Error: El número de tokens identificados no corresponde con lo que manifiesta el mensaje: \n".
+                                    'Tokens identificados -> '.$counterTokens.' Tokens que indica el header -> '.$numberOfTokens;
                                     $i = 200; //Romper el ciclo for
                                     break;
                                 }
@@ -1101,6 +1106,7 @@ class BreakerController extends Controller
                             $response[$counter] -> $value = $addDataB24;
                             break;
                         }
+                        
                         if(is_numeric($len) && $len <= 800){
                             $addDataB24 = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                             $response[$counter] -> $value = $addDataB24;
@@ -1111,14 +1117,13 @@ class BreakerController extends Controller
                             if($headerAllTokens[0].$headerAllTokens[1].$headerAllTokens[2] === '000'){
                                 break;
                             }
-                            $response[$counter] = new stdClass();
-                            $response[$counter] -> $number = $id;
-                            $response[$counter] -> $field = 'S-126.0';
-                            $response[$counter] -> $name = 'Additional Data Header';
-                            $response[$counter] -> $type = 'ANS(12)';
-                            $response[$counter] -> $value = '';
                             //Validación del header de los tokens
                             if($headerAllTokens[0] === '&' && $headerAllTokens[1] === ' '){
+                                    $response[$counter] = new stdClass();
+                                    $response[$counter] -> $number = $id;
+                                    $response[$counter] -> $field = 'S-126.0';
+                                    $response[$counter] -> $name = 'Additional Data Header';
+                                    $response[$counter] -> $type = 'ANS(12)';
                                     $response[$counter]->$value = $headerAllTokens;
                                     $numberOfTokens = ltrim($this->getChain($headerAllTokens, 2, 6), '0') - 1;
                                     $initPos = $finalPos + 1;
@@ -1206,7 +1211,7 @@ class BreakerController extends Controller
                                     
                             }
                             else{
-                                $response[$counter] -> $value = $headerAllTokens.' error - contenido del header';
+                                break;
                             }
                         }
                         break;

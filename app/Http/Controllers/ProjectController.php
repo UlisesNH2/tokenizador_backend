@@ -61,7 +61,6 @@ class ProjectController extends Controller
                         }
                     }
                 }
-                return $queryValues;
                 $insertValues = DB::insert($queryValues);
                 return $insertValues;
             }
