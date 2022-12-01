@@ -55,6 +55,7 @@ class BreakerController extends Controller
             }
             //Se obtiene el catalogo de acuerdo a las posiciones obtenidas en el bitmap
             $catalog = $this -> getCatalog($positions);
+            //return $positions;
             $number = 'number'; $field = 'field'; $name = 'name'; $type = 'type'; $value = 'value'; $id = 3;
             //return $positions;
             for($i = 0; $i < count($positions); $i++){
@@ -695,6 +696,17 @@ class BreakerController extends Controller
                         break;
                     }
                     case 54: {
+                        $initPos = $finalPos+1; $finalPos += 3;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        $initPos = $finalPos+1; $finalPos += $len;
+                        $AddAmounts = $this -> getChain($message, $initPos, $finalPos);
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $AddAmounts;
                         break;
                     }
                     case 55: {

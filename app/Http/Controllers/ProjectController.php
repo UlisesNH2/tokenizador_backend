@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use mysqli;
 use stdClass;
 
@@ -68,7 +66,7 @@ class ProjectController extends Controller
     }
 
     public function getProjects(Request $request){
-        $projects = DB::select('select ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO from projects where ID_USUARIO = ?', [
+        $projects = DB::select('select ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO, TIPO from projects where ID_USUARIO = ?', [
             $request -> userId
         ]);
         $proArr = json_decode(json_encode($projects), true);
@@ -80,6 +78,7 @@ class ProjectController extends Controller
             $ans[$key] -> pro_name = $data['NOMBRE_PROYECTO'];
             $ans[$key] -> date = $data['FECHA_CREACION'];
             $ans[$key] -> date_up = $data['FECHA_MODIFICACION'];
+            $ans[$key] -> tp = $data['TIPO'];
         }
 
         $proJSON = json_decode(json_encode($ans), true);
@@ -154,7 +153,7 @@ class ProjectController extends Controller
         if(!empty($existProject)){
             //Por jerarquía, se eliminará primero la tabla que contiene el proyecto dentro de la base de datos
             $host = "pyjcproas.duckdns.org";
-            //host = "localhost";
+            //$host = "localhost";
             $user = "token_user";
             $pass = "";
             $db = "prosa_test";

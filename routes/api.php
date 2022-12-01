@@ -38,6 +38,10 @@ Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filter
 Route::post('/terminalFilter', 'App\Http\Controllers\TerminalController@index');
 Route::get('/getCatalogs', 'App\Http\Controllers\TerminalController@getCatalogs');
 
+//RUTAS TODOS LOS TOKENS
+Route::post('/allTokensKM', 'App\Http\Controllers\AllTokensController@getKM');
+Route::post('/allTokensPTLF', 'App\Http\Controllers\AllTokensController@getPTLF');
+
 //RUTAS TOKEN C4
 Route::post('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos para el formulario
 Route::post('/tokenC4Filter/main', 'App\Http\Controllers\TokenC4Controller@getTableFilter'); //Datos para tabla del Token
