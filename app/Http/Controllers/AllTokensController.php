@@ -270,12 +270,104 @@ class AllTokensController extends Controller
 
     public function getPTLF(Request $request){
 
-        $responseTC0 = array(); $responseTCZ = array();
-        $query = "select TKN_Q2_ID_ACCESO, PEM, RESPUESTA, MENSAJE, SECUENCIA, LN, EMISOR, RED, APROBACION,
-        C0_05, C0_06, C0_07, C0_08, TKN_CZ from ".$request -> bd;
+        $responseTC0 = array(); $responseTCZ = array(); $responseTC4 = array();
+        $responseTB2 = array(); $responseTB3 = array();
+        $responseTB4 = array(); $responseTB5 = array();
+        $responseTB6 = array(); $values = array();
 
-        $data = DB::select($query);
-        $datajson = json_decode(json_encode($data), true);
+        $labels = ['TKN_Q2_ID_ACCESO', 'RESPUESTA', 'PEM'];
+
+        $arrayValues = array();
+
+        $queryOutFilters = "select TKN_Q2_ID_ACCESO, PEM, RESPUESTA, MENSAJE, SECUENCIA, LN, ADQUIRENTE, EMISOR, RED, APROBACION,
+        C0_05, C0_06, C0_07, C0_08, TKN_CZ, TKN_C4,
+        B2_BIT_MAP, B2_USER_FLD1, B2_CRYPTO_INFO_DATA, B2_ARQC, B2_AMT_AUTH, B2_AMT_OTHER,
+        B2_ATC, B2_TERM_CNTRY_CDE, B2_TRAN_CRNCY_CDE, B2_TRAN_DAT, B2_TRAN_TYPE, B2_UNPREDICT_NUM, 
+        B2_ISS_APPL_DATA_LGTH, B2_ISS_APPL_DATA, B2_TVR, B2_AIP,
+        B3_BIT_MAP, B3_TERM_SERL_NUM, B3_EMV_TERM_CAP, B3_USER_FLD1, 
+        B3_USER_FLD2, B3_EMV_TERM_TYPE, B3_APPL_VER_NUM, B3_CVM_RSLTS, 
+        B3_DF_NAME_LGTH, B3_DF_NAME, 
+        B4_PT_SRV_ENTRY_MDE, B4_TERM_ENTRY_CAP, B4_LAST_EMV_STAT, 
+        B4_DATA_SUSPECT, B4_APPL_PAN_SEQ_NUM, B4_DEV_INFO, 
+        B4_RSN_ONL_CDE, B4_ARQC_VRFY, B4_USER_FLD1,
+        B5_ISS_AUTH_DATA_LGTH, B5_ARPC, B5_ADDL_DATA, B5_SEND_CRD_BLK, 
+        B5_SEND_PUT_DATA,
+        B6_ISS_SCRIPT_DATA_LGTH, B6_ISS_SCRIPT_DATA from ".$request -> bd;
+
+        $query = "select TKN_Q2_ID_ACCESO, PEM, RESPUESTA, MENSAJE, SECUENCIA, LN, ADQUIRENTE, EMISOR, RED, APROBACION,
+        C0_05, C0_06, C0_07, C0_08, TKN_CZ, TKN_C4,
+        B2_BIT_MAP, B2_USER_FLD1, B2_CRYPTO_INFO_DATA, B2_ARQC, B2_AMT_AUTH, B2_AMT_OTHER,
+        B2_ATC, B2_TERM_CNTRY_CDE, B2_TRAN_CRNCY_CDE, B2_TRAN_DAT, B2_TRAN_TYPE, B2_UNPREDICT_NUM, 
+        B2_ISS_APPL_DATA_LGTH, B2_ISS_APPL_DATA, B2_TVR, B2_AIP,
+        B3_BIT_MAP, B3_TERM_SERL_NUM, B3_EMV_TERM_CAP, B3_USER_FLD1, 
+        B3_USER_FLD2, B3_EMV_TERM_TYPE, B3_APPL_VER_NUM, B3_CVM_RSLTS, 
+        B3_DF_NAME_LGTH, B3_DF_NAME, 
+        B4_PT_SRV_ENTRY_MDE, B4_TERM_ENTRY_CAP, B4_LAST_EMV_STAT, 
+        B4_DATA_SUSPECT, B4_APPL_PAN_SEQ_NUM, B4_DEV_INFO, 
+        B4_RSN_ONL_CDE, B4_ARQC_VRFY, B4_USER_FLD1,
+        B5_ISS_AUTH_DATA_LGTH, B5_ARPC, B5_ADDL_DATA, B5_SEND_CRD_BLK, 
+        B5_SEND_PUT_DATA,
+        B6_ISS_SCRIPT_DATA_LGTH, B6_ISS_SCRIPT_DATA from ".$request -> bd." where ";
+
+        $values[0] = $request -> kq2; 
+        $values[1] = $request -> codeResponse;
+        $values[2] = $request -> entryMode;
+
+        //Eliminar filtros no seleccionados
+        for($key = 0; $key < 3; $key++){
+            if(empty($values[$key])){
+                unset($values[$key]);
+                unset($labels[$key]);
+            }
+        }
+        $filteredValues = array_values($values);
+        $filteredLabels = array_values($labels);
+
+        if(empty($filteredValues)){
+            $response = DB::select($queryOutFilters);
+            $datajson = json_decode(json_encode($response), true);
+        }else{
+            //Ingresar todos los valores de $filteredValues en un solo arreglo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
+                }
+            }
+            $z = 1; //Variable para el control de la longitud del query
+            //Construcción del query de acuerdo a los filtros seleccionados
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
+                            }
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $query .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $query .= $filteredLabels[$i] . " = ?) and ";
+                                $z++;
+                            }
+                        }
+                    } else {
+                        if ($j == 0) {
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $query .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
+                    }
+                }
+            }
+            $response = DB::select($query, [...$arrayValues]);
+            $datajson = json_decode(json_encode($response), true);
+        }
 
         foreach($datajson as $key => $data){
             $responseTC0[$key] = new stdClass();
@@ -287,6 +379,7 @@ class AllTokensController extends Controller
             $responseTC0[$key] -> ln = $data['LN'];
             $responseTC0[$key] -> trans = $data['EMISOR'];
             $responseTC0[$key] -> network = $data['RED'];
+            $responseTC0[$key] -> adq = $data['ADQUIRENTE'];
             $responseTC0[$key] -> aprov = $data['APROBACION'];
             //Token C0
             $responseTC0[$key] -> idTokenC0 = 'C0';
@@ -294,6 +387,22 @@ class AllTokensController extends Controller
             $responseTC0[$key] -> cardtp = $data['C0_06'];
             $responseTC0[$key] -> cvv2 = $data['C0_08'];
             $responseTC0[$key] -> info = $data['C0_07'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTC4[$key] = new stdClass();
+            $responseTC4[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
+            $responseTC4[$key] -> entryMode = $data['PEM'];
+            $responseTC4[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTC4[$key] -> mess = $data['MENSAJE'];
+            $responseTC4[$key] -> sec = $data['SECUENCIA'];
+            $responseTC4[$key] -> ln = $data['LN'];
+            $responseTC4[$key] -> trans = $data['EMISOR'];
+            $responseTC4[$key] -> network = $data['RED'];
+            $responseTC4[$key] -> adq = $data['ADQUIRENTE'];
+            $responseTC4[$key] -> aprov = $data['APROBACION'];
+            //Token C4
+            $responseTC4[$key] -> idTokenC4 = 'C4';
+            $responseTC4[$key] -> c4 = $data['TKN_C4'];
         }
         foreach($datajson as $key => $data){
             $responseTCZ[$key] = new stdClass();
@@ -305,15 +414,141 @@ class AllTokensController extends Controller
             $responseTCZ[$key] -> ln = $data['LN'];
             $responseTCZ[$key] -> trans = $data['EMISOR'];
             $responseTCZ[$key] -> network = $data['RED'];
+            $responseTCZ[$key] -> adq = $data['ADQUIRENTE'];
             $responseTCZ[$key] -> aprov = $data['APROBACION'];
             //tokenCZ
             $responseTCZ[$key] -> idTokenCZ = 'CZ';
             $responseTCZ[$key] -> cz = $data['TKN_CZ'];
         }
+        foreach($datajson as $key => $data){
+            $responseTB2[$key] = new stdClass();
+            $responseTB2[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
+            $responseTB2[$key] -> entryMode = $data['PEM'];
+            $responseTB2[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTB2[$key] -> mess = $data['MENSAJE'];
+            $responseTB2[$key] -> sec = $data['SECUENCIA'];
+            $responseTB2[$key] -> ln = $data['LN'];
+            $responseTB2[$key] -> trans = $data['EMISOR'];
+            $responseTB2[$key] -> network = $data['RED'];
+            $responseTB2[$key] -> adq = $data['ADQUIRENTE'];
+            $responseTB2[$key] -> aprov = $data['APROBACION'];
+            //tokenB2
+            $responseTB2[$key] -> idTokenB2 = 'B2';
+            $responseTB2[$key] -> bitMapB2 = $data['B2_BIT_MAP'];
+            $responseTB2[$key] -> UsrFO = $data['B2_USER_FLD1'];
+            $responseTB2[$key] -> CrypData = $data['B2_CRYPTO_INFO_DATA'];
+            $responseTB2[$key] -> ARQC = $data['B2_ARQC'];
+            $responseTB2[$key] -> AMTAuth = $data['B2_AMT_AUTH'];
+            $responseTB2[$key] -> AMTOther = $data['B2_AMT_OTHER'];
+            $responseTB2[$key] -> ATC = $data['B2_ATC'];
+            $responseTB2[$key] -> TermCounCode = $data['B2_TERM_CNTRY_CDE'];
+            $responseTB2[$key] -> TermCurrCode = $data['B2_TRAN_CRNCY_CDE'];
+            $responseTB2[$key] -> TranDate = $data['B2_TRAN_DAT'];
+            $responseTB2[$key] -> TranType = $data['B2_TRAN_TYPE'];
+            $responseTB2[$key] -> UmpNum = $data['B2_UNPREDICT_NUM'];
+            $responseTB2[$key] -> IssAppDataLen = $data['B2_ISS_APPL_DATA_LGTH'];
+            $responseTB2[$key] -> IssAppData = $data['B2_ISS_APPL_DATA'];
+            $responseTB2[$key] -> TVR = $data['B2_TVR'];
+            $responseTB2[$key] -> AIP = $data['B2_AIP'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTB3[$key] = new stdClass();
+            $responseTB3[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
+            $responseTB3[$key] -> entryMode = $data['PEM'];
+            $responseTB3[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTB3[$key] -> mess = $data['MENSAJE'];
+            $responseTB3[$key] -> sec = $data['SECUENCIA'];
+            $responseTB3[$key] -> ln = $data['LN'];
+            $responseTB3[$key] -> trans = $data['EMISOR'];
+            $responseTB3[$key] -> network = $data['RED'];
+            $responseTB3[$key] -> aprov = $data['APROBACION'];
+            $responseTB3[$key] -> adq = $data['ADQUIRENTE'];
+            //token B3
+            $responseTB3[$key] -> idTokenB3 = 'B3';
+            $responseTB3[$key]->bitMap = $data['B3_BIT_MAP'];
+            $responseTB3[$key]->TermNum = $data['B3_TERM_SERL_NUM'];
+            $responseTB3[$key]->CheckCh = $data['B3_EMV_TERM_CAP'];
+            $responseTB3[$key]->UsrFOne = $data['B3_USER_FLD1'];
+            $responseTB3[$key]->UsrFTwo = $data['B3_USER_FLD2'];
+            $responseTB3[$key]->TermTpEMV = $data['B3_EMV_TERM_TYPE'];
+            $responseTB3[$key]->AppVerNum = $data['B3_APPL_VER_NUM'];
+            $responseTB3[$key]->CVMRes = $data['B3_CVM_RSLTS'];
+            $responseTB3[$key]->fileNameLen = $data['B3_DF_NAME_LGTH'];
+            $responseTB3[$key]->fileName = $data['B3_DF_NAME'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTB4[$key] = new stdClass();
+            $responseTB4[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; //
+            $responseTB4[$key] -> entryMode = $data['PEM'];
+            $responseTB4[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTB4[$key] -> mess = $data['MENSAJE'];
+            $responseTB4[$key] -> sec = $data['SECUENCIA'];
+            $responseTB4[$key] -> ln = $data['LN'];
+            $responseTB4[$key] -> trans = $data['EMISOR'];
+            $responseTB4[$key] -> network = $data['RED'];
+            $responseTB4[$key] -> aprov = $data['APROBACION'];
+            $responseTB4[$key] -> adq = $data['ADQUIRENTE'];
+            //Token B4
+            $responseTB4[$key] -> idTokenB4 = 'B4';
+            $responseTB4[$key]->SerEntryMode = $data['B4_PT_SRV_ENTRY_MDE'];
+            $responseTB4[$key]->CapTerm = $data['B4_TERM_ENTRY_CAP'];
+            $responseTB4[$key]->EVMSts = $data['B4_LAST_EMV_STAT'];
+            $responseTB4[$key]->DataSus = $data['B4_DATA_SUSPECT'];
+            $responseTB4[$key]->PANum = $data['B4_APPL_PAN_SEQ_NUM'];
+            $responseTB4[$key]->DevInfo = $data['B4_DEV_INFO'];
+            $responseTB4[$key]->OnlCode = $data['B4_RSN_ONL_CDE'];
+            $responseTB4[$key]->ARQCVer = $data['B4_ARQC_VRFY'];
+            $responseTB4[$key]->RespISO = $data['B4_USER_FLD1'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTB5[$key] = new stdClass();
+            $responseTB5[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; //
+            $responseTB5[$key] -> entryMode = $data['PEM'];
+            $responseTB5[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTB5[$key] -> mess = $data['MENSAJE'];
+            $responseTB5[$key] -> sec = $data['SECUENCIA'];
+            $responseTB5[$key] -> ln = $data['LN'];
+            $responseTB5[$key] -> trans = $data['EMISOR'];
+            $responseTB5[$key] -> network = $data['RED'];
+            $responseTB5[$key] -> aprov = $data['APROBACION'];
+            $responseTB5[$key] -> adq = $data['ADQUIRENTE'];
+            //Token B5
+            $responseTB5[$key] -> idTokenB5 = 'B5';
+            $responseTB5[$key] -> issAuthDataLen = $data['B5_ISS_AUTH_DATA_LGTH'];
+            $responseTB5[$key] -> ARPC = $data['B5_ARPC'];
+            $responseTB5[$key] -> Card_update = '';
+            $responseTB5[$key] -> ADDLdata = $data['B5_ADDL_DATA'];
+            $responseTB5[$key] -> sendCrdBlk = $data['B5_SEND_CRD_BLK'];
+            $responseTB5[$key] -> sendPutData = $data['B5_SEND_PUT_DATA'];
+        }
+
+        foreach($datajson as $key => $data){
+            $responseTB6[$key] = new stdClass();
+            $responseTB6[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; 
+            $responseTB6[$key] -> entryMode = $data['PEM'];
+            $responseTB6[$key] -> codeResp = $data['RESPUESTA'];
+            $responseTB6[$key] -> mess = $data['MENSAJE'];
+            $responseTB6[$key] -> sec = $data['SECUENCIA'];
+            $responseTB6[$key] -> ln = $data['LN'];
+            $responseTB6[$key] -> trans = $data['EMISOR'];
+            $responseTB6[$key] -> network = $data['RED'];
+            $responseTB6[$key] -> aprov = $data['APROBACION'];
+            $responseTB6[$key] -> adq = $data['ADQUIRENTE'];
+            //Token B6
+            $responseTB6[$key] -> idTokenB6 = 'B6';
+            $responseTB6[$key] -> issScripDataLen = $data['B6_ISS_SCRIPT_DATA_LGTH'];
+            $responseTB6[$key] -> issScripData = $data['B6_ISS_SCRIPT_DATA'];
+        }
 
         $response = new stdClass();
         $response -> tokenC0 = json_decode(json_encode($responseTC0), true);
+        $response -> tokenC4 = json_decode(json_encode($responseTC4), true);
         $response -> tokenCZ = json_decode(json_encode($responseTCZ), true);
+        $response -> tokenB2 = json_decode(json_encode($responseTB2), true);
+        $response -> tokenB3 = json_decode(json_encode($responseTB3), true);
+        $response -> tokenB4 = json_decode(json_encode($responseTB4), true);
+        $response -> tokenB5 = json_decode(json_encode($responseTB5), true);
+        $response -> tokenB6 = json_decode(json_encode($responseTB6), true);
 
         return json_decode(json_encode($response), true);
     }

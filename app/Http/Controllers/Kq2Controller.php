@@ -15,22 +15,44 @@ class Kq2Controller extends Controller
      */
     public function index(Request $request)
     {
-        $kq2 = DB::select("select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
-        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
-        where main.CODIGO_RESPUESTA < '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
-        inner join
-        (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
-        where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
-        on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO ORDER BY accepted.KQ2_ID_MEDIO_ACCESO");
-        $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
-        $answer = array();
-        foreach($array as $key => $data){
-            $answer[$key] = new stdClass();
-            $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
-            $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
+        if($request -> tp === 'KM'){
+            $kq2 = DB::select("select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
+            (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
+            from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+            where main.CODIGO_RESPUESTA < '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted
+            inner join
+            (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
+            from medioacceso as kq2 inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+            where main.CODIGO_RESPUESTA >= '010' group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
+            on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO ORDER BY accepted.KQ2_ID_MEDIO_ACCESO");
+
+            
+            $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
+            $answer = array();
+            foreach($array as $key => $data){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
+                $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
+            }
+        }else{
+            $kq2 = DB::select("select accepted.TKN_Q2_ID_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA,
+            rejected.MONTOR, rejected.TXSR FROM (select main.TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO) AS 
+            MONTOA, count(*) as TXSA from medioacceso as kq2 inner join testing_ptlf_1 as main on kq2.KQ2_ID_MEDIO_ACCESO = main.TKN_Q2_ID_ACCESO 
+            where main.RESPUESTA < '010' group by main.TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as accepted inner join 
+            (select main.TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO) AS MONTOR, count(*) as TXSR from medioacceso 
+            as kq2 inner join testing_ptlf_1 as main on kq2.KQ2_ID_MEDIO_ACCESO = main.TKN_Q2_ID_ACCESO where main.RESPUESTA >= '010' 
+            group by main.TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected on accepted.TKN_Q2_ID_ACCESO = rejected.TKN_Q2_ID_ACCESO
+            ORDER BY accepted.TKN_Q2_ID_ACCESO;");
+
+            $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
+            $answer = array();
+            foreach($array as $key => $data){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> ID = $data['TKN_Q2_ID_ACCESO'];
+                $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
+            }
         }
+        
         $arrayJson = json_decode(json_encode($answer), true);
         return $arrayJson;
     }

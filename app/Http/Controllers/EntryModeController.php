@@ -15,24 +15,43 @@ class EntryModeController extends Controller
      */
     public function index(Request $request)
     {
-        $entryMode = DB::select("select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES FROM 
+        if($request -> tp === 'KM'){
+            $entryMode = DB::select("select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES FROM 
             (select main.ENTRY_MODE, entry.Entry_Mode_Des  from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
             where main.CODIGO_RESPUESTA < '010' group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
             inner join
             (select main.ENTRY_MODE, entry.Entry_Mode_Des from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-            where main.CODIGO_RESPUESTA >= '010'group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE;");
-        $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
+                where main.CODIGO_RESPUESTA >= '010'group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE;");
+            $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
 
-        $answer = array();
+            $answer = array();
 
-        foreach ($array as $key => $data) {
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID = $data['ENTRY_MODE'];
-            $answer[$key]->Description = $data['ENTRY_MODE_DES'];
+            foreach ($array as $key => $data) {
+                $answer[$key] = new stdClass();
+                $answer[$key]->ID = $data['ENTRY_MODE'];
+                $answer[$key]->Description = $data['ENTRY_MODE_DES'];
+            }
+        }else{
+            $entryMode = DB::select("select accepted.PEM, accepted.ENTRY_MODE_DES FROM 
+            (select main.PEM, entry.Entry_Mode_Des  from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.PEM
+            where main.RESPUESTA < '010' group by main.PEM, entry.Entry_Mode_Des) as accepted
+            inner join
+            (select main.PEM, entry.Entry_Mode_Des from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.PEM
+            where main.RESPUESTA >= '010'group by main.PEM, entry.Entry_Mode_Des) as rejected on accepted.PEM = rejected.PEM");
+            $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
+
+            $answer = array();
+
+            foreach ($array as $key => $data) {
+                $answer[$key] = new stdClass();
+                $answer[$key]->ID = $data['PEM'];
+                $answer[$key]->Description = $data['ENTRY_MODE_DES'];
+            }
         }
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
     }
+
     public function filterEntryMode(Request $request)
     {
         $values = array();

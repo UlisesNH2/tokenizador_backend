@@ -635,7 +635,13 @@ class BreakerController extends Controller
                         if(is_numeric($len) && ltrim($len, '0') > 1){
                             $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
                             $retailerData = $this -> getChain($message, $initPos, $finalPos); //Long 30
-                            $response[$counter] -> $value = $retailerData;
+                            if(strpos($retailerData, '!')){
+                                $response[$counter] -> $value = 'error - Error en el contenido del campo -> Posición: '.strpos($retailerData, '!');
+                                $i = 300;
+                                break;
+                            }else{
+                                $response[$counter] -> $value = $retailerData;
+                            }
                         }else{
                             $response[$counter] -> $value = 'error - tipo de dato no válido';
                         }

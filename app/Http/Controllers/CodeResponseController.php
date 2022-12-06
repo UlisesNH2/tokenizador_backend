@@ -15,15 +15,28 @@ class codeResponseController extends Controller
      */
     public function index(Request $request)
     {
-        $codeResponse = DB::select("select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES 
-        from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA 
-        group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES");
-        $array = json_decode(json_encode($codeResponse), true); //Codificar un array asociativo
-        $answer = array();
-        foreach ($array as $key => $data) {
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID = $data['CODIGO_RESPUESTA'];
-            $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
+        if($request -> tp === 'KM'){
+            $codeResponse = DB::select("select main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES 
+            from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA 
+            group by CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES");
+            $array = json_decode(json_encode($codeResponse), true); //Codificar un array asociativo
+            $answer = array();
+            foreach ($array as $key => $data) {
+                $answer[$key] = new stdClass();
+                $answer[$key]->ID = $data['CODIGO_RESPUESTA'];
+                $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
+            }
+        }else{
+            $codeResponse = DB::select("select main.RESPUESTA, code.CODIGO_RESPUESTA_DES 
+            from ".$request -> bd." as main inner join codrespuesta as code on main.RESPUESTA = code.CODIGO_RESPUESTA 
+            group by main.RESPUESTA, code.CODIGO_RESPUESTA_DES");
+            $array = json_decode(json_encode($codeResponse), true); //Codificar un array asociativo
+            $answer = array();
+            foreach ($array as $key => $data) {
+                $answer[$key] = new stdClass();
+                $answer[$key]->ID = $data['RESPUESTA'];
+                $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
+            }
         }
         $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
         return $arrayJson;
@@ -66,11 +79,8 @@ class codeResponseController extends Controller
         from ".$request -> bd." as main inner join codrespuesta as code on main.CODIGO_RESPUESTA = code.CODIGO_RESPUESTA
         where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
 
-        $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";
-
-        
+        $secondQuery = " group by main.CODIGO_RESPUESTA, code.CODIGO_RESPUESTA_DES";        
         $totalTX = 0;
-
         //Eliminar filtros no seleccionados
         for($key = 0; $key < 11; $key++){
             if(empty($values[$key])){
