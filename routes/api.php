@@ -36,7 +36,7 @@ Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filter
 
 //FILTROS TERMINALES
 Route::post('/terminalFilter', 'App\Http\Controllers\TerminalController@index');
-Route::get('/getCatalogs', 'App\Http\Controllers\TerminalController@getCatalogs');
+Route::post('/getCatalogs', 'App\Http\Controllers\TerminalController@getCatalogs');
 
 //RUTAS TODOS LOS TOKENS
 Route::post('/allTokensKM', 'App\Http\Controllers\AllTokensController@getKM');

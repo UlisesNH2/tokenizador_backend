@@ -13,13 +13,14 @@ class ProjectController extends Controller
         $projectExist = DB::select('select * from projects where ID_PROJECT = ?', [$request -> idProject]);
         if(empty($projectExist)){
             //Se registra el proyecto en la tabla 'projects' de la base de datos
-            $createProject = DB::insert('insert into projects (ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO )
-            values (?,?,?,?,?)',[ 
+            $createProject = DB::insert('insert into projects (ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO, TIPO )
+            values (?,?,?,?,?,?)',[ 
             $request -> idProject, 
             $request -> name,
             $request -> date,
             $request -> date,
-            $request -> userId]);
+            $request -> userId,
+            $request -> tp]);
             if($createProject == 1){
                 $data = $request -> data;
                 $host = "pyjcproas.duckdns.org";

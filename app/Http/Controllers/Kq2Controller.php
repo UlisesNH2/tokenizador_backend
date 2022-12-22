@@ -98,6 +98,11 @@ class Kq2Controller extends Controller
         group by main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES) as rejected 
         on accepted.KQ2_ID_MEDIO_ACCESO = rejected.KQ2_ID_MEDIO_ACCESO";
 
+        $querymamalon = "select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, MONTO1, CODIGO_RESPUESTA from prueba_kmn_1_28 as 
+        main inner join medioacceso as kq2 on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO 
+        where (main.FECHA_TRANS >= '221213' and main.FECHA_TRANS <= '221213') 
+        and (main.HORA_TRANS >= '08483000' and main.HORA_TRANS <= '11431600')";
+
         //Query modificado para obtener los valores decuerdo al filtro
         $firstQuery = "select accepted.KQ2_ID_MEDIO_ACCESO, accepted.KQ2_ID_MEDIO_ACCESO_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
         (select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES, sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
@@ -169,6 +174,7 @@ class Kq2Controller extends Controller
                     }
                 }
             }
+            //return $firstQuery . $secondQuery . $thirthQuery;
             $response = DB::select($firstQuery . $secondQuery . $thirthQuery, [...$valuesExtra, ...$arrayValues, ...$valuesExtra, ...$arrayValues]);
             $array = json_decode(json_encode($response), true);
         }

@@ -476,24 +476,24 @@ class TerminalController extends Controller
         return $responseSub;
     }
 
-    public function getCatalogs(){
+    public function getCatalogs(Request $request){ //Reestructuración para la obtención del catalogo: 21 de dic 2022
 
-        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from test as main
+        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from ".$request -> bd." as main
         join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
 
-        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from test as main 
+        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from ".$request -> bd." as main 
         join fiid_tarj as catTarj on main.FIID_TARJ = catTarj.FIID_TARJ";
 
-        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from test as main 
+        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from ".$request -> bd." as main 
         join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
 
-        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from test as main 
+        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from ".$request -> bd." as main 
         join ln_comer as catLNComer on main.LN_COMER = catLNComer.LN_COMER";
 
-        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from test as main
+        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from ".$request -> bd." as main
         join ln_comer as catLNComer on main.LN_TERM = catLNComer.LN_COMER";
 
-        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from test as main
+        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from ".$request -> bd." as main
         join ln_tarj as catLNTarj on main.LN_TARJ = catLNTarj.LN_TARJ";
         $z = 0;
 
