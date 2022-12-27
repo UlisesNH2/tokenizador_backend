@@ -13,7 +13,7 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function dashKMN(Request $request)
     {
         $values = array();
         $valuesExtra = array();
@@ -127,6 +127,38 @@ class DashboardController extends Controller
             $answer[$key] -> tx = $data['TXS'];
         }
         $arrayJSON = json_decode(json_encode($answer), true);
+        return $arrayJSON;
+    }
+
+    public function dashPTLF(Request $request){
+        $values = array();
+        $dash = array();
+        $values[0] = $request -> kq2;
+        $values[1] = $request -> codeResponse;
+        $values[2] = $request -> entryMode;
+        
+        $queryOutFilters = 'select TKN_Q2_ID_ACCESO, RESPUESTA, PEM, COMERCIO, TERM_ID, EMISOR, ADQUIRENTE,
+        LN, RED, sum(MONTO) AS MONTO, count(*) as TXS from '.$request -> bd.' group by TKN_Q2_ID_ACCESO, RESPUESTA, 
+        PEM, COMERCIO, TERM_ID, EMISOR, ADQUIRENTE, LN, RED';
+
+        $response = DB::select($queryOutFilters);
+        $datajson = json_decode(json_encode($response), true);
+
+        foreach($datajson as $key => $data){
+            $dash[$key] = new stdClass();
+            $dash[$key] -> code_Response = $data['RESPUESTA'];
+            $dash[$key] -> ID_Access_Mode = $data['TKN_Q2_ID_ACCESO'];
+            $dash[$key] -> entry_Mode = $data['PEM'];
+            $dash[$key] -> amount = $data['MONTO'];
+            $dash[$key] -> tx = $data['TXS'];
+            $dash[$key] -> Fiid_Comer = $data['EMISOR'];
+            $dash[$key] -> Fiid_Term = $data['EMISOR'];
+            $dash[$key] -> Fiid_Tarj = $data['ADQUIRENTE'];
+            $dash[$key] -> Ln_Comer = $data['LN'];
+            $dash[$key] -> Ln_Term = $data['LN'];
+            $dash[$key] -> Ln_Tarj = $data['RED'];
+        }
+        $arrayJSON = json_decode(json_encode($dash), true);
         return $arrayJSON;
     }
 }

@@ -478,23 +478,36 @@ class TerminalController extends Controller
 
     public function getCatalogs(Request $request){ //Reestructuración para la obtención del catalogo: 21 de dic 2022
 
-        $queryFIID_COMER = "select main.FIID_COMER, catComer.FIID_COMER_DES from ".$request -> bd." as main
-        join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
+        switch($request -> tp){
+            case 'KM' : {
+                $fiidComer = 'FIID_COMER'; $fiidTarj = 'FIID_TARJ'; $fiidTerm = 'FIID_TERM'; $lnComer = 'LN_COMER';
+                $lnComer = 'LN_COMER'; $lnTerm = 'LN_TERM'; $lnTarj = 'LN_TARJ';
+                break;
+            }
+            case 'PTLF' : {
+                $fiidComer = 'EMISOR'; $fiidTarj = 'ADQUIRENTE'; $fiidTerm = 'EMISOR'; $lnComer = 'LN';
+                $lnComer = 'LN'; $lnTerm = 'LN'; $lnTarj = 'RED';
+                break;
+            }
+        }
 
-        $queryFIID_TARJ = "select main.FIID_TARJ, catTarj.FIID_TARJ_DES from ".$request -> bd." as main 
-        join fiid_tarj as catTarj on main.FIID_TARJ = catTarj.FIID_TARJ";
+        $queryFIID_COMER = "select main.".$fiidComer.", catComer.FIID_COMER_DES from ".$request -> bd." as main
+        join fiid_comer as catComer on main.".$fiidComer." = catComer.FIID_COMER";
 
-        $queryFIID_TERM = "select main.FIID_TERM, catComer.FIID_COMER_DES from ".$request -> bd." as main 
-        join fiid_comer as catComer on main.FIID_COMER = catComer.FIID_COMER";
+        $queryFIID_TARJ = "select main.".$fiidTarj.", catTarj.FIID_TARJ_DES from ".$request -> bd." as main 
+        join fiid_tarj as catTarj on main.".$fiidTarj." = catTarj.FIID_TARJ";
 
-        $queryLN_COMER = "select main.LN_COMER, catLNComer.LN_COMER_DES from ".$request -> bd." as main 
-        join ln_comer as catLNComer on main.LN_COMER = catLNComer.LN_COMER";
+        $queryFIID_TERM = "select main.".$fiidTerm.", catComer.FIID_COMER_DES from ".$request -> bd." as main 
+        join fiid_comer as catComer on main.".$fiidTerm." = catComer.FIID_COMER";
 
-        $queryLN_TERM = "select main.LN_TERM, catLNComer.LN_COMER_DES from ".$request -> bd." as main
-        join ln_comer as catLNComer on main.LN_TERM = catLNComer.LN_COMER";
+        $queryLN_COMER = "select main.".$lnComer.", catLNComer.LN_COMER_DES from ".$request -> bd." as main 
+        join ln_comer as catLNComer on main.".$lnComer." = catLNComer.LN_COMER";
 
-        $queryLN_TARJ = "select main.LN_TARJ, catLNTarj.LN_TARJ_DES from ".$request -> bd." as main
-        join ln_tarj as catLNTarj on main.LN_TARJ = catLNTarj.LN_TARJ";
+        $queryLN_TERM = "select main.".$lnTerm.", catLNComer.LN_COMER_DES from ".$request -> bd." as main
+        join ln_comer as catLNComer on main.".$lnTerm." = catLNComer.LN_COMER";
+
+        $queryLN_TARJ = "select main.".$lnTarj.", catLNTarj.LN_TARJ_DES from ".$request -> bd." as main
+        join ln_tarj as catLNTarj on main.".$lnTarj." = catLNTarj.LN_TARJ";
         $z = 0;
 
         //Consulta para FIID_COMER
@@ -503,7 +516,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach ($arrayClened as $key => $data) {
             $answer[$z] = new stdClass();
-            $answer[$z]->Fiid_Comer = $data['FIID_COMER'];
+            $answer[$z]->Fiid_Comer = $data[$fiidComer];
             $answer[$z]->Fiid_Comer_Des = $data['FIID_COMER_DES'];
             $z++;
         }
@@ -513,7 +526,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach ($arrayClened as $key => $data) {
             $answer[$z] = new stdClass();
-            $answer[$z]->Fiid_Term = $data['FIID_TERM'];
+            $answer[$z]->Fiid_Term = $data[$fiidTerm];
             $answer[$z]->Fiid_Term_Des = $data['FIID_COMER_DES'];
             $z++;
         }
@@ -523,7 +536,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach ($arrayClened as $key => $data) {
             $answer[$z] = new stdClass();
-            $answer[$z]->Fiid_Tarj = $data['FIID_TARJ'];
+            $answer[$z]->Fiid_Tarj = $data[$fiidTarj];
             $answer[$z]->Fiid_Tarj_Des = $data['FIID_TARJ_DES'];
             $z++;
         }
@@ -533,7 +546,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach ($arrayClened as $key => $data) {
             $answer[$z] = new stdClass();
-            $answer[$z]->Ln_Comer = $data['LN_COMER'];
+            $answer[$z]->Ln_Comer = $data[$lnComer];
             $answer[$z]->Ln_Comer_Des = $data['LN_COMER_DES'];
             $z++;
         }
@@ -543,7 +556,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach ($arrayClened as $key => $data) {
             $answer[$z] = new stdClass();
-            $answer[$z]->Ln_Term = $data['LN_TERM'];
+            $answer[$z]->Ln_Term = $data[$lnTerm];
             $answer[$z]->Ln_Term_Des = $data['LN_COMER_DES'];
             $z++;
         }
@@ -553,7 +566,7 @@ class TerminalController extends Controller
         $arrayClened = array_values(array_unique($array, SORT_REGULAR));
         foreach($arrayClened as $key => $data){
             $answer[$z] = new stdClass();
-            $answer[$z]->Ln_Tarj = $data['LN_TARJ'];
+            $answer[$z]->Ln_Tarj = $data[$lnTarj];
             $answer[$z]->Ln_Tarj_Des = $data['LN_TARJ_DES'];
             $z++;
         }

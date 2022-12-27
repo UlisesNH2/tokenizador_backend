@@ -172,18 +172,33 @@ class ProjectController extends Controller
     }
 
     public function getDateAndTime(Request $request){
-        $datetime = DB::select('select max(FECHA_TRANS), min(FECHA_TRANS), max(HORA_TRANS), min(HORA_TRANS) from '.$request -> bd);
-        $response = json_decode(json_encode($datetime), true);
-
         $answer = array();
-        foreach($response as $key => $data){
-            $answer[$key] = new stdClass();
-            $answer[$key] -> startDate = $data['min(FECHA_TRANS)'];
-            $answer[$key] -> finishDate = $data['max(FECHA_TRANS)'];
-            $answer[$key] -> startHour = $data['min(HORA_TRANS)'];
-            $answer[$key] -> finishHour = $data['max(HORA_TRANS)'];
+        if($request -> tp === 'KM'){
+            $datetime = DB::select('select max(FECHA_TRANS), min(FECHA_TRANS), max(HORA_TRANS), min(HORA_TRANS) from '.$request -> bd);
+            $response = json_decode(json_encode($datetime), true);
+
+            foreach($response as $key => $data){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> startDate = $data['min(FECHA_TRANS)'];
+                $answer[$key] -> finishDate = $data['max(FECHA_TRANS)'];
+                $answer[$key] -> startHour = $data['min(HORA_TRANS)'];
+                $answer[$key] -> finishHour = $data['max(HORA_TRANS)'];
+            }
+            $respJson = json_decode(json_encode($answer), true);
+            return $respJson;
+        }else{
+            $datetime = DB::select("select max(FECHA), min(FECHA), max(HORA), min(HORA) from ".$request -> bd);
+            $response = json_decode(json_encode($datetime), true);
+
+            foreach($response as $key => $data){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> startDate = $data['min(FECHA)'];
+                $answer[$key] -> finishDate = $data['max(FECHA)'];
+                $answer[$key] -> startHour = $data['min(HORA)'];
+                $answer[$key] -> finishHour = $data['max(HORA)'];
+            }
+            $respJson = json_decode(json_encode($answer), true);
+            return $respJson;
         }
-        $respJson = json_decode(json_encode($answer), true);
-        return $respJson;
     }
 }

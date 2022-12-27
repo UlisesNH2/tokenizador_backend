@@ -22,11 +22,13 @@ Route::post('/deleteUser', 'App\Http\Controllers\UserController@deleteUser'); //
 Route::post('/updatePersonalData', 'App\Http\Controllers\UserController@updatePersonalData'); //Actualizar información personal
 Route::post('/updatePassword', 'App\Http\Controllers\UserController@updatePassword'); //Actualizar contraseña
 
-Route::post('/dashboard','App\Http\Controllers\DashboardController@index'); //Traer los datos para dashboard
+Route::post('/dashboardKMN','App\Http\Controllers\DashboardController@dashKMN'); //Traer los datos para dashboard
+Route::post('/dashboardPTLF', 'App\Http\Controllers\DashboardController@dashPTLF'); 
 
 //PRINCIPALES FILTROS
 Route::post('/kq2', 'App\Http\Controllers\Kq2Controller@index'); //Traer los datos para Medio-Acceso (gráficos)
 Route::post('/kq2Filter', 'App\Http\Controllers\Kq2Controller@filterKq2');
+Route::get('/Q2Catalog', 'App\Http\Controllers\Kq2Controller@getKq2');
 
 Route::post('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
 Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@filterCodeResponse');
