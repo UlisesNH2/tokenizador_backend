@@ -32,9 +32,11 @@ Route::get('/Q2Catalog', 'App\Http\Controllers\Kq2Controller@getKq2');
 
 Route::post('/codeResponse', 'App\Http\Controllers\CodeResponseController@index'); //Traer datos para Codigo de Respuesta
 Route::post('/codeResponseFilter', 'App\Http\Controllers\CodeResponseController@filterCodeResponse');
+Route::get('/codeRespCatalog', 'App\Http\Controllers\CodeResponseController@getCodeResp');
 
 Route::post('/entryMode', 'App\Http\Controllers\EntryModeController@index'); //Traer datos para Entry Mode
 Route::post('/entryModeFilter', 'App\Http\Controllers\EntryModeController@filterEntryMode');
+Route::get('/PEMcatalog', 'App\Http\Controllers\EntryModeController@getPEM');
 
 //FILTROS TERMINALES
 Route::post('/terminalFilter', 'App\Http\Controllers\TerminalController@index');

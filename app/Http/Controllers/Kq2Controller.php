@@ -95,7 +95,7 @@ class Kq2Controller extends Controller
                 where (main.FECHA >= ? and main.FECHA <= ?) 
                 and (main.HORA >= ? and main.HORA <= ?)";
 
-                $query = $queryOutFilters. 'and ';
+                $query = $queryOutFilters. ' and ';
                 break;
             }
         }
@@ -162,10 +162,10 @@ class Kq2Controller extends Controller
                     $answer[$key] = new stdClass();
                     $answer[$key] -> ID = $data['KQ2_ID_MEDIO_ACCESO'];
                     $answer[$key] -> Description = $data['KQ2_ID_MEDIO_ACCESO_DES'];
-                    $answer[$key] -> code_Resp = $data['CODIGO_RESPUESTA'];
                     $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
                     $int = substr($data['MONTO1'], 0, strlen($data['MONTO1'])-2);
                     $answer[$key] -> amount = $int.".".$dec;
+                    $answer[$key] -> code_Resp = $data['CODIGO_RESPUESTA'];
                 }
                 break;
             }

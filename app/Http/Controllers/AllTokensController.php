@@ -127,7 +127,7 @@ class AllTokensController extends Controller
         foreach($datajson as $key => $data){
             $dataElements[$key] = new stdClass();
             $dataElements[$key] -> idQ2 = 'Q2';
-            $dataElements[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $dataElements[$key]->kq2 = $data['KQ2_ID_MEDIO_ACCESO']; 
             $dataElements[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
             $dataElements[$key] -> entryMode = $data['ENTRY_MODE'];
             $dataElements[$key] -> type = $data['TIPO'];
@@ -161,9 +161,6 @@ class AllTokensController extends Controller
             $dataElements[$key] -> money = $data['MONEDA'];
             $dataElements[$key] -> currency = $data['CURRENCY'];
             $dataElements[$key] -> pre6 = $data['PREFIJO6'];
-            $dec = substr($data['MONTO1'], strlen($data['MONTO1']) -2, 2);
-            $int = substr($data['MONTO1'], 0, strlen($data['MONTO1']) -2);
-            $dataElements[$key] -> amount = '$'.number_format($int.'.'.$dec, 2);
             $dataElements[$key]->ID_Comer = $data['ID_COMER'];
             $dataElements[$key]->Term_Comer = $data['TERM_COMER'];
             $dataElements[$key]->Fiid_Comer = $data['FIID_COMER'];
@@ -320,45 +317,39 @@ class AllTokensController extends Controller
         $responseTB2 = array(); $responseTB3 = array();
         $responseTB4 = array(); $responseTB5 = array();
         $responseTB6 = array(); $values = array();
+        $dataElements = array();
 
-        $labels = ['TKN_Q2_ID_ACCESO', 'RESPUESTA', 'PEM', 'MENSAJE', 'LN', 'EMISOR', 'RED', 'ADQUIRENTE', 
-                '(select substring(TKN_C4, 11, 1))', '(select substring(TKN_C4, 12, 1))', '(select substring(TKN_C4, 13, 1))',
-                '(select substring(TKN_C4, 14, 1))', '(select substring(TKN_C4, 15, 1))', '(select substring(TKN_C4, 16, 1))',
-                '(select substring(TKN_C4, 17, 1))', '(select substring(TKN_C4, 18, 1))', '(select substring(TKN_C4, 19, 1))',
-                '(select substring(TKN_C4, 20, 1))', '(select substring(TKN_C4, 21, 1))', '(select substring(TKN_C4, 22, 1))'];
+        $labels = [
+            'TKN_Q2_ID_ACCESO', 
+            'RESPUESTA', 
+            'PEM', 
+            'MENSAJE', 
+            'LN', 
+            'EMISOR', 
+            'RED', 
+            'ADQUIRENTE',
+            'RVRL_CDE',
+            'OPERACION',
+            'IND_CASHBACK',
+            'DFC',
+            'TERM_ID',
+            'RESPONDER',
+            'T',
+            'COMERCIO',
+            'TERM_CITY',
+            'GIRO',
+            'APROBACION',
+            '(select substring(TKN_C4, 11, 1))', '(select substring(TKN_C4, 12, 1))', '(select substring(TKN_C4, 13, 1))',
+            '(select substring(TKN_C4, 14, 1))', '(select substring(TKN_C4, 15, 1))', '(select substring(TKN_C4, 16, 1))',
+            '(select substring(TKN_C4, 17, 1))', '(select substring(TKN_C4, 18, 1))', '(select substring(TKN_C4, 19, 1))',
+            '(select substring(TKN_C4, 20, 1))', '(select substring(TKN_C4, 21, 1))', '(select substring(TKN_C4, 22, 1))'];
 
         $arrayValues = array();
 
-        $queryOutFilters = "select TKN_Q2_ID_ACCESO, PEM, OPERACION, RESPUESTA, MENSAJE, SECUENCIA, LN, ADQUIRENTE, EMISOR, RED, APROBACION,
-        C0_05, C0_06, C0_07, C0_08, TKN_CZ, TKN_C4,
-        B2_BIT_MAP, B2_USER_FLD1, B2_CRYPTO_INFO_DATA, B2_ARQC, B2_AMT_AUTH, B2_AMT_OTHER,
-        B2_ATC, B2_TERM_CNTRY_CDE, B2_TRAN_CRNCY_CDE, B2_TRAN_DAT, B2_TRAN_TYPE, B2_UNPREDICT_NUM, 
-        B2_ISS_APPL_DATA_LGTH, B2_ISS_APPL_DATA, B2_TVR, B2_AIP,
-        B3_BIT_MAP, B3_TERM_SERL_NUM, B3_EMV_TERM_CAP, B3_USER_FLD1, 
-        B3_USER_FLD2, B3_EMV_TERM_TYPE, B3_APPL_VER_NUM, B3_CVM_RSLTS, 
-        B3_DF_NAME_LGTH, B3_DF_NAME, 
-        B4_PT_SRV_ENTRY_MDE, B4_TERM_ENTRY_CAP, B4_LAST_EMV_STAT, 
-        B4_DATA_SUSPECT, B4_APPL_PAN_SEQ_NUM, B4_DEV_INFO, 
-        B4_RSN_ONL_CDE, B4_ARQC_VRFY, B4_USER_FLD1,
-        B5_ISS_AUTH_DATA_LGTH, B5_ARPC, B5_ADDL_DATA, B5_SEND_CRD_BLK, 
-        B5_SEND_PUT_DATA,
-        B6_ISS_SCRIPT_DATA_LGTH, B6_ISS_SCRIPT_DATA from ".$request -> bd;
+        $queryOutFilters = "select * from ".$request -> bd;
 
-        $query = "select TKN_Q2_ID_ACCESO, PEM, OPERACION, RESPUESTA, MENSAJE, SECUENCIA, LN, ADQUIRENTE, EMISOR, RED, APROBACION,
-        C0_05, C0_06, C0_07, C0_08, TKN_CZ, TKN_C4,
-        B2_BIT_MAP, B2_USER_FLD1, B2_CRYPTO_INFO_DATA, B2_ARQC, B2_AMT_AUTH, B2_AMT_OTHER,
-        B2_ATC, B2_TERM_CNTRY_CDE, B2_TRAN_CRNCY_CDE, B2_TRAN_DAT, B2_TRAN_TYPE, B2_UNPREDICT_NUM, 
-        B2_ISS_APPL_DATA_LGTH, B2_ISS_APPL_DATA, B2_TVR, B2_AIP,
-        B3_BIT_MAP, B3_TERM_SERL_NUM, B3_EMV_TERM_CAP, B3_USER_FLD1, 
-        B3_USER_FLD2, B3_EMV_TERM_TYPE, B3_APPL_VER_NUM, B3_CVM_RSLTS, 
-        B3_DF_NAME_LGTH, B3_DF_NAME, 
-        B4_PT_SRV_ENTRY_MDE, B4_TERM_ENTRY_CAP, B4_LAST_EMV_STAT, 
-        B4_DATA_SUSPECT, B4_APPL_PAN_SEQ_NUM, B4_DEV_INFO, 
-        B4_RSN_ONL_CDE, B4_ARQC_VRFY, B4_USER_FLD1,
-        B5_ISS_AUTH_DATA_LGTH, B5_ARPC, B5_ADDL_DATA, B5_SEND_CRD_BLK, 
-        B5_SEND_PUT_DATA,
-        B6_ISS_SCRIPT_DATA_LGTH, B6_ISS_SCRIPT_DATA from ".$request -> bd." where ";
-
+        $query = "select * from ".$request -> bd." where ";
+        //Data elements
         $values[0] = $request -> kq2; 
         $values[1] = $request -> codeResponse;
         $values[2] = $request -> entryMode;
@@ -367,21 +358,33 @@ class AllTokensController extends Controller
         $values[5] = $request -> trans;
         $values[6] = $request -> network;
         $values[7] = $request -> adq;
-        $values[8] = $request -> idTermAtt;
-        $values[9] = $request -> idTerm;
-        $values[10] = $request -> termLoc;
-        $values[11] = $request -> chPres;
-        $values[12] = $request -> cardPres;
-        $values[13] = $request -> cardCap;
-        $values[14] = $request -> status;
-        $values[15] = $request -> secLevel;
-        $values[16] = $request -> idRouting;
-        $values[17] = $request -> termActCh;
-        $values[18] = $request -> termDataTrans;
-        $values[19] = $request -> chMeth;
+        $values[8] = $request -> rvl;
+        $values[9] = $request -> op;
+        $values[10] = $request -> cashbk;
+        $values[11] = $request -> dfc;
+        $values[12] = $request -> termId;
+        $values[13] = $request -> responder;
+        $values[14] = $request -> t;
+        $values[15] = $request -> comer;
+        $values[16] = $request -> termcty;
+        $values[17] = $request -> giro;
+        $values[18] = $request -> aprov;
+        //tokenB2
+        $values[19] = $request -> idTermAtt;
+        $values[20] = $request -> idTerm;
+        $values[21] = $request -> termLoc;
+        $values[22] = $request -> chPres;
+        $values[23] = $request -> cardPres;
+        $values[24] = $request -> cardCap;
+        $values[25] = $request -> status;
+        $values[26] = $request -> secLevel;
+        $values[27] = $request -> idRouting;
+        $values[28] = $request -> termActCh;
+        $values[29] = $request -> termDataTrans;
+        $values[30] = $request -> chMeth;
 
         //Eliminar filtros no seleccionados
-        for($key = 0; $key < 20; $key++){
+        for($key = 0; $key < 31; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($labels[$key]);
@@ -439,18 +442,43 @@ class AllTokensController extends Controller
         }
 
         foreach($datajson as $key => $data){
+            $dataElements[$key] = new stdClass();
+            $dataElements[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
+            $dataElements[$key] -> entryMode = $data['PEM'];
+            $dataElements[$key] -> codeResp = $data['RESPUESTA'];
+            $dataElements[$key] -> op = $data['OPERACION'];
+            $dataElements[$key] -> mess = $data['MENSAJE'];
+            $dataElements[$key] -> sec = $data['SECUENCIA'];
+            $dataElements[$key] -> ln = $data['LN'];
+            $dataElements[$key] -> trans = $data['EMISOR'];
+            $dataElements[$key] -> network = $data['RED'];
+            $dataElements[$key] -> adq = $data['ADQUIRENTE'];
+            $dataElements[$key] -> aprov = $data['APROBACION'];
+            $dataElements[$key] -> pre = $data['PREFIJO'];
+            //
+            $dataElements[$key] -> numCard = $data['NUM_TARJETA'];
+            $dataElements[$key] -> afi = $data['AFILIACION'];
+            $dataElements[$key] -> date = $data['FECHA'];
+            $dataElements[$key] -> time = $data['HORA'];
+            $dataElements[$key] -> sec = $data['SECUENCIA'];
+            $dataElements[$key] -> amount1 = $data['MONTO'];
+            $dataElements[$key] -> amount2 = $data['MONTO2'];
+            $dataElements[$key] -> rvrl = $data['RVRL_CDE'];
+            $dataElements[$key] -> cashbk = $data['IND_CASHBACK'];
+            $dataElements[$key] -> dfc = $data['DFC'];
+            $dataElements[$key] -> termId = $data['TERM_ID'];
+            $dataElements[$key] -> responder = $data['RESPONDER'];
+            $dataElements[$key] -> t = $data['T'];
+            $dataElements[$key] -> comer = $data['COMERCIO'];
+            $dataElements[$key] -> termcty = $data['TERM_CITY'];
+            $dataElements[$key] -> giro = $data['GIRO']; //Pendiente consultar con catálogo
+        }
+
+        foreach($datajson as $key => $data){
             $responseTC0[$key] = new stdClass();
             $responseTC0[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
             $responseTC0[$key] -> entryMode = $data['PEM'];
             $responseTC0[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTC0[$key] -> op = $data['OPERACION'];
-            $responseTC0[$key] -> mess = $data['MENSAJE'];
-            $responseTC0[$key] -> sec = $data['SECUENCIA'];
-            $responseTC0[$key] -> ln = $data['LN'];
-            $responseTC0[$key] -> trans = $data['EMISOR'];
-            $responseTC0[$key] -> network = $data['RED'];
-            $responseTC0[$key] -> adq = $data['ADQUIRENTE'];
-            $responseTC0[$key] -> aprov = $data['APROBACION'];
             //Token C0
             $responseTC0[$key] -> idTokenC0 = 'C0';
             $responseTC0[$key] -> ecommerce = $data['C0_05'];
@@ -463,14 +491,6 @@ class AllTokensController extends Controller
             $responseTC4[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
             $responseTC4[$key] -> entryMode = $data['PEM'];
             $responseTC4[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTC4[$key] -> op = $data['OPERACION'];
-            $responseTC4[$key] -> mess = $data['MENSAJE'];
-            $responseTC4[$key] -> sec = $data['SECUENCIA'];
-            $responseTC4[$key] -> ln = $data['LN'];
-            $responseTC4[$key] -> trans = $data['EMISOR'];
-            $responseTC4[$key] -> network = $data['RED'];
-            $responseTC4[$key] -> adq = $data['ADQUIRENTE'];
-            $responseTC4[$key] -> aprov = $data['APROBACION'];
             //Token C4
             $responseTC4[$key] -> idTokenC4 = 'C4';
             $responseTC4[$key] -> c4 = $data['TKN_C4'];
@@ -479,15 +499,7 @@ class AllTokensController extends Controller
             $responseTCZ[$key] = new stdClass();
             $responseTCZ[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
             $responseTCZ[$key] -> entryMode = $data['PEM'];
-            $responseTCZ[$key] -> op = $data['OPERACION'];
             $responseTCZ[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTCZ[$key] -> mess = $data['MENSAJE'];
-            $responseTCZ[$key] -> sec = $data['SECUENCIA'];
-            $responseTCZ[$key] -> ln = $data['LN'];
-            $responseTCZ[$key] -> trans = $data['EMISOR'];
-            $responseTCZ[$key] -> network = $data['RED'];
-            $responseTCZ[$key] -> adq = $data['ADQUIRENTE'];
-            $responseTCZ[$key] -> aprov = $data['APROBACION'];
             //tokenCZ
             $responseTCZ[$key] -> idTokenCZ = 'CZ';
             $responseTCZ[$key] -> cz = $data['TKN_CZ'];
@@ -497,14 +509,6 @@ class AllTokensController extends Controller
             $responseTB2[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
             $responseTB2[$key] -> entryMode = $data['PEM'];
             $responseTB2[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTB2[$key] -> op = $data['OPERACION'];
-            $responseTB2[$key] -> mess = $data['MENSAJE'];
-            $responseTB2[$key] -> sec = $data['SECUENCIA'];
-            $responseTB2[$key] -> ln = $data['LN'];
-            $responseTB2[$key] -> trans = $data['EMISOR'];
-            $responseTB2[$key] -> network = $data['RED'];
-            $responseTB2[$key] -> adq = $data['ADQUIRENTE'];
-            $responseTB2[$key] -> aprov = $data['APROBACION'];
             //tokenB2
             $responseTB2[$key] -> idTokenB2 = 'B2';
             $responseTB2[$key] -> bitMapB2 = $data['B2_BIT_MAP'];
@@ -529,14 +533,6 @@ class AllTokensController extends Controller
             $responseTB3[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
             $responseTB3[$key] -> entryMode = $data['PEM'];
             $responseTB3[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTB3[$key] -> op = $data['OPERACION'];
-            $responseTB3[$key] -> mess = $data['MENSAJE'];
-            $responseTB3[$key] -> sec = $data['SECUENCIA'];
-            $responseTB3[$key] -> ln = $data['LN'];
-            $responseTB3[$key] -> trans = $data['EMISOR'];
-            $responseTB3[$key] -> network = $data['RED'];
-            $responseTB3[$key] -> aprov = $data['APROBACION'];
-            $responseTB3[$key] -> adq = $data['ADQUIRENTE'];
             //token B3
             $responseTB3[$key] -> idTokenB3 = 'B3';
             $responseTB3[$key]->bitMap = $data['B3_BIT_MAP'];
@@ -555,14 +551,6 @@ class AllTokensController extends Controller
             $responseTB4[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; //
             $responseTB4[$key] -> entryMode = $data['PEM'];
             $responseTB4[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTB4[$key] -> op = $data['OPERACION'];
-            $responseTB4[$key] -> mess = $data['MENSAJE'];
-            $responseTB4[$key] -> sec = $data['SECUENCIA'];
-            $responseTB4[$key] -> ln = $data['LN'];
-            $responseTB4[$key] -> trans = $data['EMISOR'];
-            $responseTB4[$key] -> network = $data['RED'];
-            $responseTB4[$key] -> aprov = $data['APROBACION'];
-            $responseTB4[$key] -> adq = $data['ADQUIRENTE'];
             //Token B4
             $responseTB4[$key] -> idTokenB4 = 'B4';
             $responseTB4[$key]->SerEntryMode = $data['B4_PT_SRV_ENTRY_MDE'];
@@ -580,14 +568,6 @@ class AllTokensController extends Controller
             $responseTB5[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; //
             $responseTB5[$key] -> entryMode = $data['PEM'];
             $responseTB5[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTB5[$key] -> op = $data['OPERACION'];
-            $responseTB5[$key] -> mess = $data['MENSAJE'];
-            $responseTB5[$key] -> sec = $data['SECUENCIA'];
-            $responseTB5[$key] -> ln = $data['LN'];
-            $responseTB5[$key] -> trans = $data['EMISOR'];
-            $responseTB5[$key] -> network = $data['RED'];
-            $responseTB5[$key] -> aprov = $data['APROBACION'];
-            $responseTB5[$key] -> adq = $data['ADQUIRENTE'];
             //Token B5
             $responseTB5[$key] -> idTokenB5 = 'B5';
             $responseTB5[$key] -> issAuthDataLen = $data['B5_ISS_AUTH_DATA_LGTH'];
@@ -603,14 +583,6 @@ class AllTokensController extends Controller
             $responseTB6[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO']; 
             $responseTB6[$key] -> entryMode = $data['PEM'];
             $responseTB6[$key] -> codeResp = $data['RESPUESTA'];
-            $responseTB6[$key] -> op = $data['OPERACION'];
-            $responseTB6[$key] -> mess = $data['MENSAJE'];
-            $responseTB6[$key] -> sec = $data['SECUENCIA'];
-            $responseTB6[$key] -> ln = $data['LN'];
-            $responseTB6[$key] -> trans = $data['EMISOR'];
-            $responseTB6[$key] -> network = $data['RED'];
-            $responseTB6[$key] -> aprov = $data['APROBACION'];
-            $responseTB6[$key] -> adq = $data['ADQUIRENTE'];
             //Token B6
             $responseTB6[$key] -> idTokenB6 = 'B6';
             $responseTB6[$key] -> issScripDataLen = $data['B6_ISS_SCRIPT_DATA_LGTH'];
@@ -618,6 +590,7 @@ class AllTokensController extends Controller
         }
 
         $response = new stdClass();
+        $response -> dataElements = json_decode(json_encode($dataElements), true);
         $response -> tokenC0 = json_decode(json_encode($responseTC0), true);
         $response -> tokenC4 = json_decode(json_encode($responseTC4), true);
         $response -> tokenCZ = json_decode(json_encode($responseTCZ), true);

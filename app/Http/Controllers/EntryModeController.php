@@ -56,8 +56,7 @@ class EntryModeController extends Controller
     {
         $values = array();
         $valuesExtra = array();
-        $labels = ['main.KQ2_ID_MEDIO_ACCESO', 'main.CODIGO_RESPUESTA', 'main.ENTRY_MODE', 'main.ID_COMER', 'main.TERM_COMER', 
-        'main.FIID_COMER', 'main.FIID_TERM', 'main.LN_COMER', 'main.LN_TERM', 'main.FIID_TARJ', 'main.LN_TARJ'];
+        $labels = [];
 
         $values[0] = $request -> kq2;
         $values[1] = $request -> codeResponse;
@@ -82,26 +81,33 @@ class EntryModeController extends Controller
         $array = array();
         $arrayValues = array();
 
-        $queryOutFilters = "select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
-        (select main.ENTRY_MODE, entry.Entry_Mode_Des,sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-        where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
-        group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
-        inner join
-        (select main.ENTRY_MODE, entry.Entry_Mode_Des, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-        where main.CODIGO_RESPUESTA >= '010'and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)
-        group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE";
+        switch($request -> tp){
+            case 'KM': {
+                $labels = ['main.KQ2_ID_MEDIO_ACCESO', 'main.CODIGO_RESPUESTA', 'main.ENTRY_MODE', 'main.ID_COMER', 'main.TERM_COMER', 
+                'main.FIID_COMER', 'main.FIID_TERM', 'main.LN_COMER', 'main.LN_TERM', 'main.FIID_TARJ', 'main.LN_TARJ'];
 
-        $firstQuery = "select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES, accepted.MONTOA, accepted.TXSA, rejected.MONTOR, rejected.TXSR FROM 
-        (select main.ENTRY_MODE, entry.Entry_Mode_Des,sum(main.MONTO1) AS MONTOA, count(*) as TXSA 
-        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-        where main.CODIGO_RESPUESTA < '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
-        $secondQuery = " group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
-        inner join ( select main.ENTRY_MODE, entry.Entry_Mode_Des, sum(main.MONTO1) AS MONTOR, count(*) as TXSR 
-        from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-        where main.CODIGO_RESPUESTA >= '010' and (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?) and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?) and ";
-        $thirthQuery = " group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE";
+                $queryOutFilters = "select main.ENTRY_MODE, em.ENTRY_MODE_DES, CODIGO_RESPUESTA, MONTO1 from ".$request -> bd." as main inner join
+                entrymode as em on em.ENTRY_MODE = main.ENTRY_MODE
+                where (main.FECHA_TRANS >= ? and main.FECHA_TRANS <= ?)
+                and (main.HORA_TRANS >= ? and main.HORA_TRANS <= ?)";
+
+                $query = $queryOutFilters. ' and ';
+                break;
+            }
+            case 'PTLF': {
+                $labels = ['main.TKN_Q2_ID_ACCESO', 'main.RESPUESTA', 'main.PEM', 'main.TERM_ID', 'main.TERM_ID', 
+                'main.ADQUIRENTE', 'main.ADQUIRENTE','main.RED', 'main.RED', 'main.EMISOR', 'main.LN'];
+
+                $queryOutFilters = "select main.PEM, cde.ENTRY_MODE_DES, RESPUESTA, MONTO from ".$request ->bd." as 
+                main inner join entrymode as cde on cde.ENTRY_MODE = main.PEM 
+                where (main.FECHA >= ? and main.FECHA <= ?) 
+                and (main.HORA >= ? and main.HORA <= ?)";
+
+                $query = $queryOutFilters. ' and ';
+                break;
+            }
+        }
+
 
         //Eliminar los filtros que no han sido elegidos
         for($key = 0; $key < 11; $key++){
@@ -113,82 +119,93 @@ class EntryModeController extends Controller
         $filteredValues = array_values($values);
         $filteredLabels = array_values($labels);
 
-        if(empty($filteredValues)){
-            $response = DB::select($queryOutFilters, [...$valuesExtra, ...$valuesExtra]);
+        if(empty($filteredValues)){ //En caso de que no se utilicen los filtros
+            $response = DB::select($queryOutFilters, [...$valuesExtra]);
             $array = json_decode(json_encode($response), true);
         }else{
-            //Ingresar todos los valores elegidos en el filtro dentro de un solo arreglo. (Valores para la consulta)
+            //Ingresar todos los $filteredValues en un solo arreglo
             for ($i = 0; $i < count($filteredValues); $i++) {
                 for ($j = 0; $j < count($filteredValues[$i]); $j++) {
                     array_push($arrayValues, $filteredValues[$i][$j]);
                 }
             }
-            $z = 1; //Variable 'controladora' de el largo del query
-            //Constructor del query (Varias consultas al mismo tiempo)
+            $z = 1; //variable para el control de la longitud del query
+            //Construcción del query varias consultas al mismo tiempo
             for ($i = 0; $i < count($filteredValues); $i++) {
                 for ($j = 0; $j < count($filteredValues[$i]); $j++) {
                     if ($j == count($filteredValues[$i]) - 1) {
                         if ($j == 0) {
                             if ($z == count($arrayValues)) {
-                                $firstQuery .= "(" . $filteredLabels[$i] . " = ?)";
-                                $secondQuery .= "(" . $filteredLabels[$i] . " = ?)";
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
                             } else {
-                                $firstQuery .= "(" . $filteredLabels[$i] . " = ?) and ";
-                                $secondQuery .= "(" . $filteredLabels[$i] . " = ?) and ";
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
                             }
                             $z++;
                         } else {
                             if ($z == count($arrayValues)) {
-                                $firstQuery .= $filteredLabels[$i] . " = ?)";
-                                $secondQuery .= $filteredLabels[$i] . " = ?)";
+                                $query .= $filteredLabels[$i] . " = ?)";
                                 $z = 1;
                             } else {
-                                $firstQuery .= $filteredLabels[$i] . " = ?) and ";
-                                $secondQuery .= $filteredLabels[$i] . " = ?) and ";
+                                $query .= $filteredLabels[$i] . " = ?) and ";
                                 $z++;
                             }
                         }
                     } else {
                         if ($j == 0) {
-                            $firstQuery .= "(" . $filteredLabels[$i] . " = ? or ";
-                            $secondQuery .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
                             $z++;
                         } else {
-                            $firstQuery .= $filteredLabels[$i] . " = ? or ";
-                            $secondQuery .= $filteredLabels[$i] . " = ? or ";
+                            $query .= $filteredLabels[$i] . " = ? or ";
                             $z++;
                         }
                     }
                 }
             }
-            //Consulta del query obtenido por los filtros y los valores elegidos
-            //Se llena un nuevo arreglo con los valores obtenidos por el filtro pero duplicados,
-            //esto para la ejecución del query (se requiere duplicado de los datos)
-            $response = DB::select($firstQuery . $secondQuery . $thirthQuery, [...$valuesExtra, ...$arrayValues, ...$valuesExtra, ...$arrayValues]);
+            $response = DB::select($query, [...$valuesExtra, ...$arrayValues]);
             $array = json_decode(json_encode($response), true);
         }
 
-        foreach ($array as $keyTotal => $data) {
-            $totalTX += $data['TXSA'] + $data['TXSR'];
+        switch($request -> tp){
+            case 'KM': {
+                foreach ($array as $key => $data) {
+                    $answer[$key] = new stdClass();
+                    $answer[$key]->ID = $data['ENTRY_MODE'];
+                    $answer[$key]->Description = $data['ENTRY_MODE_DES'];
+                    $answer[$key]->cdeRes = $data['CODIGO_RESPUESTA'];
+                    //Separación del numero decimal y entero de ambos montos
+                    $dec = substr($data['MONTO1'], strlen($data['MONTO1'])-2, 2);
+                    $int = substr($data['MONTO1'], 0, strlen($data['MONTO1'])-2);
+                    $answer[$key]->amount = $int.'.'.$dec;
+                }
+                break;
+            }
+            case 'PTLF' : {
+                foreach ($array as $key => $data) {
+                    $answer[$key] = new stdClass();
+                    $answer[$key]->ID = $data['PEM'];
+                    $answer[$key]->Description = $data['ENTRY_MODE_DES'];
+                    $answer[$key]->cdeRes = $data['RESPUESTA'];
+                    //Separación del numero decimal y entero de ambos montos
+                    $answer[$key]->amount = $data['MONTO'];
+                }
+            }
         }
-
-        foreach ($array as $key => $data) {
-            $answer[$key] = new stdClass();
-            $answer[$key]->ID = $data['ENTRY_MODE'];
-            $answer[$key]->Description = $data['ENTRY_MODE_DES'];
-            //Separación del numero decimal y entero de ambos montos
-            $decAccepted = substr($data['MONTOA'], strlen($data['MONTOA'])-2, 2);
-            $intAccepted = substr($data['MONTOA'], 0, strlen($data['MONTOA'])-2);
-            $answer[$key]->accepted_Amount = '$'.number_format($intAccepted.'.'.$decAccepted, 2);
-            $decRejected = substr($data['MONTOR'], strlen($data['MONTOR'])-2, 2);
-            $intRejected = substr($data['MONTOR'], 0, strlen($data['MONTOR'])-2);
-            $answer[$key]->rejected_Amount = '$'.number_format($intRejected.'.'.$decRejected, 2);
-            $answer[$key]->accepted_TX = number_format($data['TXSA']);
-            $answer[$key]->rejected_TX = number_format($data['TXSR']);
-            $answer[$key]->percenTX_Accepted = round((($data['TXSA'] / $totalTX) * 100), 2).'%';
-            $answer[$key]->percenTX_Rejected = round((($data['TXSR'] / $totalTX) * 100), 2).'%';
-        }
+        
         $arrayJSON = json_decode(json_encode($answer), true);
         return $arrayJSON;
+    }
+
+    public function getPEM(){
+        $catalog = DB::select("select * from entrymode");
+        $responseJson = json_decode(json_encode($catalog), true);
+        $response = array();
+
+        foreach($responseJson as $key => $data){
+            $response[$key] = new stdClass();
+            $response[$key] -> em = $data['entry_mode'];
+            $response[$key] -> emDes = $data['entry_mode_des'];
+        }
+
+        return json_decode(json_encode($response), true);
     }
 }
