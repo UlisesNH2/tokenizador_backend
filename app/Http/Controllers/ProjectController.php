@@ -10,17 +10,20 @@ use stdClass;
 class ProjectController extends Controller
 {
     public function uploadProject(Request $request){
-        $projectExist = DB::select('select * from projects where ID_PROJECT = ?', [$request -> idProject]);
+        $projectExist = DB::select('select * from projects where ID = ?', [$request -> idProject]);
         if(empty($projectExist)){
             //Se registra el proyecto en la tabla 'projects' de la base de datos
-            $createProject = DB::insert('insert into projects (ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO, TIPO )
-            values (?,?,?,?,?,?)',[ 
+            $createProject = DB::insert('insert into projects (ID, NOMBRE, NUMERO, EM_ADQ, BANCO, ID_USUARIO, FECHA_CREACION,
+            FECHA_MODIFICACION, ORIGEN ) values (?,?,?,?,?,?,?,?,?)',[ 
             $request -> idProject, 
             $request -> name,
-            $request -> date,
-            $request -> date,
+            $request -> number,
+            $request -> origin,
+            $request -> bank,
             $request -> userId,
-            $request -> tp]);
+            $request -> date,
+            $request -> date,
+            $request -> source]);
             if($createProject == 1){
                 $data = $request -> data;
                 $host = "pyjcproas.duckdns.org";
@@ -67,19 +70,88 @@ class ProjectController extends Controller
     }
 
     public function getProjects(Request $request){
-        $projects = DB::select('select ID_PROJECT, NOMBRE_PROYECTO, FECHA_CREACION, FECHA_MODIFICACION, ID_USUARIO, TIPO from projects where ID_USUARIO = ?', [
+        $values = array();
+        $arrayValues = array();
+        $labels = ['ID', 'BANCO'];
+        $values[0] = $request -> id;
+        $values[1] = $request -> bank;
+
+        /*
+        $projects = DB::select('select * from projects where ID_USUARIO = ?', [
             $request -> userId
         ]);
         $proArr = json_decode(json_encode($projects), true);
+        */
+        $queryOutFilters = 'select * from projects where ID_USUARIO = ?';
+        $query = $queryOutFilters.' and ';
+
+        //Eliminar los filtros que no han sido elegidos
+        for($key = 0; $key < 3; $key++){
+            if(empty($values[$key])){
+                unset($values[$key]);
+                unset($labels[$key]);
+            }
+        }
+        $filteredValues = array_values($values);
+        $filteredLabels = array_values($labels);
+
+        if(empty($filteredValues)){ //En caso de que no se utilicen los filtros
+            $response = DB::select($queryOutFilters, [$request -> userId]);
+            $array = json_decode(json_encode($response), true);
+        }else{
+            //Ingresar todos los $filteredValues en un solo arreglo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    array_push($arrayValues, $filteredValues[$i][$j]);
+                }
+            }
+            $z = 1; //variable para el control de la longitud del query
+            //Construcción del query varias consultas al mismo tiempo
+            for ($i = 0; $i < count($filteredValues); $i++) {
+                for ($j = 0; $j < count($filteredValues[$i]); $j++) {
+                    if ($j == count($filteredValues[$i]) - 1) {
+                        if ($j == 0) {
+                            if ($z == count($arrayValues)) {
+                                $query .= "(" . $filteredLabels[$i] . " = ?)";
+                            } else {
+                                $query .= "(" . $filteredLabels[$i] . " = ?) and ";
+                            }
+                            $z++;
+                        } else {
+                            if ($z == count($arrayValues)) {
+                                $query .= $filteredLabels[$i] . " = ?)";
+                                $z = 1;
+                            } else {
+                                $query .= $filteredLabels[$i] . " = ?) and ";
+                                $z++;
+                            }
+                        }
+                    } else {
+                        if ($j == 0) {
+                            $query .= "(" . $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        } else {
+                            $query .= $filteredLabels[$i] . " = ? or ";
+                            $z++;
+                        }
+                    }
+                }
+            }
+            $response = DB::select($query, [$request -> userId, ...$arrayValues]);
+            $array = json_decode(json_encode($response), true);
+        }
 
         $ans = array();
-        foreach($proArr as $key => $data){
+        foreach($array as $key => $data){
             $ans[$key] = new stdClass();
-            $ans[$key] -> id_proj = $data['ID_PROJECT'];
-            $ans[$key] -> pro_name = $data['NOMBRE_PROYECTO'];
+            $ans[$key] -> id_proj = $data['ID'];
+            $ans[$key] -> pro_name = $data['NOMBRE'];
+            $ans[$key] -> number = $data['NUMERO'];
+            $ans[$key] -> source = $data['EM_ADQ'];
+            $ans[$key] -> bank = $data['BANCO'];
             $ans[$key] -> date = $data['FECHA_CREACION'];
             $ans[$key] -> date_up = $data['FECHA_MODIFICACION'];
-            $ans[$key] -> tp = $data['TIPO'];
+            $ans[$key] -> tp = $data['ORIGEN'];
         }
 
         $proJSON = json_decode(json_encode($ans), true);
@@ -87,13 +159,16 @@ class ProjectController extends Controller
     }
 
     public function updateProject(Request $request){
-        $projectExist = DB::select('select ID_PROJECT from projects where ID_PROJECT = ?', [$request -> id]);
+        $projectExist = DB::select('select ID from projects where ID = ?', [$request -> id]);
         if(!empty($projectExist)){
-            $updateProject = DB::update('update projects set ID_PROJECT = ?, NOMBRE_PROYECTO = ?, FECHA_MODIFICACION = ? where ID_PROJECT = ?', [
-                $request -> newIdProj,
-                $request -> name_proj,
-                $request -> upDate,
-                $request -> id
+            $updateProject = DB::update('update projects set NOMBRE = ?, NUMERO = ?, EM_ADQ = ?, ORIGEN = ?, BANCO = ?, FECHA_MODIFICACION = ?  where ID = ?', [
+                $request -> name,
+                $request -> number,
+                $request -> origin,
+                $request -> source,
+                $request -> bank,
+                $request -> date,
+                $request -> proj_id
             ]);
             if($updateProject == 1){
                 $data = $request -> newData;
@@ -103,10 +178,10 @@ class ProjectController extends Controller
                 $pass = "";
                 $bd = "prosa_test";
                 $conn = new mysqli($host, $user, $pass, $bd, 3306);
-                $queryDropTable = "drop table ".$request -> id; //Eliminar la tabla
+                $queryDropTable = "drop table ".$request -> proj_id; //Eliminar la tabla
                 if($conn -> query($queryDropTable)){
                     //Construcción del query para crear la tabla con la nueva data
-                    $queryCreateTable = 'create table '.$request -> newIdProj.' ( ';
+                    $queryCreateTable = 'create table '.$request -> proj_id.' ( ';
                     $columns = '(';
                     for($i = 0; $i < count($data[0]); $i++){
                         if($i === count($data[0])-1){
@@ -119,7 +194,7 @@ class ProjectController extends Controller
                     }
                     if($conn -> query($queryCreateTable)){
                         //Insertar los valores a la nueva tabla
-                        $queryValues = "insert into ".$request -> newIdProj." ".$columns . " values ";
+                        $queryValues = "insert into ".$request -> proj_id." ".$columns . " values ";
                         for ($i = 1; $i < count($data); $i++) {
                             $queryValues .= '(';
                             for ($j = 0; $j < count($data[$i]); $j++) {
@@ -150,7 +225,7 @@ class ProjectController extends Controller
     }
 
     public function deleteProject(Request $request){
-        $existProject = DB::select('select ID_PROJECT from projects');
+        $existProject = DB::select('select ID from projects');
         if(!empty($existProject)){
             //Por jerarquía, se eliminará primero la tabla que contiene el proyecto dentro de la base de datos
             $host = "pyjcproas.duckdns.org";
@@ -160,7 +235,7 @@ class ProjectController extends Controller
             $db = "prosa_test";
             $conn = new mysqli($host, $user, $pass, $db, 3306);
             if($conn -> query("drop table ".$request -> id)){
-                $deleteProject = DB::delete('delete from projects where ID_PROJECT = ?', [$request -> id]);
+                $deleteProject = DB::delete('delete from projects where ID = ?', [$request -> id]);
                 mysqli_close($conn);
                 return $deleteProject;
             }else{
