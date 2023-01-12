@@ -72,21 +72,19 @@ class ProjectController extends Controller
     public function getProjects(Request $request){
         $values = array();
         $arrayValues = array();
-        $labels = ['ID', 'BANCO'];
+        $labels = ['ID', 'NOMBRE', 'NUMERO', 'EM_ADQ', 'BANCO', 'ORIGEN'];
         $values[0] = $request -> id;
-        $values[1] = $request -> bank;
+        $values[1] = $request -> name;
+        $values[2] = $request -> number;
+        $values[3] = $request -> source;
+        $values[4] = $request -> bank;
+        $values[5] = $request -> tp;
 
-        /*
-        $projects = DB::select('select * from projects where ID_USUARIO = ?', [
-            $request -> userId
-        ]);
-        $proArr = json_decode(json_encode($projects), true);
-        */
         $queryOutFilters = 'select * from projects where ID_USUARIO = ?';
         $query = $queryOutFilters.' and ';
 
         //Eliminar los filtros que no han sido elegidos
-        for($key = 0; $key < 3; $key++){
+        for($key = 0; $key < 6; $key++){
             if(empty($values[$key])){
                 unset($values[$key]);
                 unset($labels[$key]);

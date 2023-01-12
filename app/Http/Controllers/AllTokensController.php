@@ -127,7 +127,7 @@ class AllTokensController extends Controller
         foreach($datajson as $key => $data){
             $dataElements[$key] = new stdClass();
             $dataElements[$key] -> idQ2 = 'Q2';
-            $dataElements[$key]->kq2 = $data['KQ2_ID_MEDIO_ACCESO']; 
+            $dataElements[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO']; 
             $dataElements[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
             $dataElements[$key] -> entryMode = $data['ENTRY_MODE'];
             $dataElements[$key] -> type = $data['TIPO'];

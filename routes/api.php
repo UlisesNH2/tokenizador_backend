@@ -90,6 +90,9 @@ Route::post('/catalogo/hdrISO', 'App\Http\Controllers\HeaderISOController@getCat
 Route::get('/catalogo/getMessTypes', 'App\Http\Controllers\MessageType@index');
 Route::post('/catalogo/messType', 'App\Http\Controllers\MessageType@getCatalogTypeMessage');
 
+//CATALOGO DE CURRENCY
+Route::get('/CurrCatalog', 'App\Http\Controllers\CurrencyController@getCurrCatalog'); //Crear un controlador especifico
+
 //PROYECTOS
 Route::post('/createProject', 'App\Http\Controllers\ProjectController@uploadProject'); //Subir un nuevo proyecto a la base de datos
 Route::post('/getProjectsByUser', 'App\Http\Controllers\ProjectController@getProjects'); //Obtener todos los proyectos almacenados por usuario
