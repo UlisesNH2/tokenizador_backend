@@ -26,8 +26,8 @@ class ProjectController extends Controller
             $request -> source]);
             if($createProject == 1){
                 $data = $request -> data;
-                $host = "pyjcproas.duckdns.org";
-                //$host = "localhost";
+                //$host = "pyjcproas.duckdns.org";
+                $host = "localhost";
                 $user = "token_user";
                 $pass = "";
                 $bd = "prosa_test";
