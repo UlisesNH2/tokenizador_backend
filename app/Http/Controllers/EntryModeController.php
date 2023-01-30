@@ -16,12 +16,8 @@ class EntryModeController extends Controller
     public function index(Request $request)
     {
         if($request -> tp === 'KM'){
-            $entryMode = DB::select("select accepted.ENTRY_MODE, accepted.ENTRY_MODE_DES FROM 
-            (select main.ENTRY_MODE, entry.Entry_Mode_Des  from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-            where main.CODIGO_RESPUESTA < '010' group by main.ENTRY_MODE, entry.Entry_Mode_Des) as accepted
-            inner join
-            (select main.ENTRY_MODE, entry.Entry_Mode_Des from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.ENTRY_MODE
-                where main.CODIGO_RESPUESTA >= '010'group by main.ENTRY_MODE, entry.Entry_Mode_Des) as rejected on accepted.ENTRY_MODE = rejected.ENTRY_MODE;");
+            $entryMode = DB::select("select main.ENTRY_MODE, entry.ENTRY_MODE_DES FROM entrymode as entry inner join ".$request -> bd." 
+            as main on entry.ENTRY_MODE = main.ENTRY_MODE order by ENTRY_MODE, entry.ENTRY_MODE_DES");
             $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
 
             $answer = array();
@@ -32,14 +28,9 @@ class EntryModeController extends Controller
                 $answer[$key]->Description = $data['ENTRY_MODE_DES'];
             }
         }else{
-            $entryMode = DB::select("select accepted.PEM, accepted.ENTRY_MODE_DES FROM 
-            (select main.PEM, entry.Entry_Mode_Des  from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.PEM
-            where main.RESPUESTA < '010' group by main.PEM, entry.Entry_Mode_Des) as accepted
-            inner join
-            (select main.PEM, entry.Entry_Mode_Des from entrymode as entry inner join ".$request -> bd." as main on entry.entry_mode = main.PEM
-            where main.RESPUESTA >= '010'group by main.PEM, entry.Entry_Mode_Des) as rejected on accepted.PEM = rejected.PEM");
+            $entryMode = DB::select("select main.PEM, entry.ENTRY_MODE_DES FROM entrymode as entry inner join ".$request -> bd." 
+            as main on entry.ENTRY_MODE = main.PEM order by PEM, entry.ENTRY_MODE_DES");
             $array = json_decode(json_encode($entryMode), true); //Codificar arreglo asociativo
-
             $answer = array();
 
             foreach ($array as $key => $data) {
@@ -48,7 +39,7 @@ class EntryModeController extends Controller
                 $answer[$key]->Description = $data['ENTRY_MODE_DES'];
             }
         }
-        $arrayJSON = json_decode(json_encode($answer), true);
+        $arrayJSON = json_decode(json_encode(array_values(array_unique($answer, SORT_REGULAR))), true);
         return $arrayJSON;
     }
 

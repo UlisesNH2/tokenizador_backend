@@ -600,10 +600,26 @@ class BreakerController extends Controller
                         }
                         break;
                     }
-                    case 45: {
+                    case 45: { //Track 1 Data
+                        $initPos = $finalPos + 1; $finalPos += 2;
+                        $len = $this -> getChain($message, $initPos, $finalPos);
+                        //return $len;
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        if(is_numeric($len) && ltrim($len, '0') <= 76){
+                            $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
+                            $track1 = $this -> getChain($message, $initPos, $finalPos);
+                            $response[$counter] -> $value = $track1;
+                        }else{
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
+                        }
                         break;
                     }
-                    case 46: {
+                    case 46: { // Iso Aditional Data
                         $initPos = $finalPos + 1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
                         $initPos = $finalPos+1; $finalPos += intval(ltrim($len, '0'));
@@ -804,12 +820,13 @@ class BreakerController extends Controller
                         }else{
                             $additionalData = $this -> getChain($message, $initPos+3, $finalPos + intval($len));
                             $response[$counter] -> $value = $additionalData;
+                            //$finalPos += intval($len);
+                            //break;
                         }
-                        /*
                         if($additionalData[0] === ' ' && $additionalData[1] === ' '){
                             $finalPos += intval($len);
                             break;
-                        }*/
+                        }
                         //Obtención del header para la lectura y desglose de los tokens
                         $initPos = $finalPos+1; $finalPos += 12; 
                         $headerAllTokens = $this -> getChain($message, $initPos, $finalPos);

@@ -38,7 +38,7 @@ class codeResponseController extends Controller
                 $answer[$key]->Description = $data['CODIGO_RESPUESTA_DES'];
             }
         }
-        $arrayJson = json_decode(json_encode($answer), true); //Codificar a un array asociativo
+        $arrayJson = json_decode(json_encode(array_values(array_unique($answer, SORT_REGULAR))), true);
         return $arrayJson;
     }
 

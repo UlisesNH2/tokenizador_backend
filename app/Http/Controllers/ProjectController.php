@@ -26,8 +26,8 @@ class ProjectController extends Controller
             $request -> source]);
             if($createProject == 1){
                 $data = $request -> data;
-                $host = "pyjcproas.duckdns.org";
-                //$host = "localhost";
+                //$host = "pyjcproas.duckdns.org";
+                $host = "localhost";
                 $user = "token_user";
                 $pass = "";
                 $bd = "prosa_test";
@@ -170,8 +170,8 @@ class ProjectController extends Controller
             ]);
             if($updateProject == 1){
                 $data = $request -> newData;
-                $host = "pyjcproas.duckdns.org";
-                //$host = "localhost";
+                //$host = "pyjcproas.duckdns.org";
+                $host = "localhost";
                 $user = "token_user";
                 $pass = "";
                 $bd = "prosa_test";
@@ -226,8 +226,8 @@ class ProjectController extends Controller
         $existProject = DB::select('select ID from projects');
         if(!empty($existProject)){
             //Por jerarquía, se eliminará primero la tabla que contiene el proyecto dentro de la base de datos
-            $host = "pyjcproas.duckdns.org";
-            //$host = "localhost";
+            //$host = "pyjcproas.duckdns.org";
+            $host = "localhost";
             $user = "token_user";
             $pass = "";
             $db = "prosa_test";

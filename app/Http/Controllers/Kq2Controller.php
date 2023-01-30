@@ -18,7 +18,8 @@ class Kq2Controller extends Controller
         if($request -> tp === 'KM'){
 
             $kq2 = DB::select("select main.KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES from medioacceso as kq2
-            inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO");
+            inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.KQ2_ID_MEDIO_ACCESO
+            order by KQ2_ID_MEDIO_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES");
             
             $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
             $answer = array();
@@ -30,7 +31,8 @@ class Kq2Controller extends Controller
         }else{
 
             $kq2 = DB::select("select main.TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES from medioacceso as kq2
-            inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.TKN_Q2_ID_ACCESO");
+            inner join ".$request -> bd." as main on kq2.KQ2_ID_MEDIO_ACCESO = main.TKN_Q2_ID_ACCESO
+            order by TKN_Q2_ID_ACCESO, kq2.KQ2_ID_MEDIO_ACCESO_DES");
 
             $array = json_decode(json_encode($kq2), true); //Codificar un array asociativo
             $answer = array();
