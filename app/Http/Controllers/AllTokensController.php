@@ -13,6 +13,9 @@ class AllTokensController extends Controller
         $responseTB2 = array(); $responseTB3 = array(); $responseTB4 = array();
         $responseTB5 = array(); $responseTB6 = array();
         $responseTC0 = array(); $responseTC4 = array();
+        $responseTQ9 = array(); $responseTQR = array();
+        $responseTQ1 = array(); $responseTEZ = array();
+        $responseES = array();
         $values = array();
         $arrayValues = array();
         $queryOutFilters = "select * from ".$request -> bd;
@@ -132,7 +135,7 @@ class AllTokensController extends Controller
             $dataElements[$key] -> entryMode = $data['ENTRY_MODE'];
             $dataElements[$key] -> type = $data['TIPO'];
             $dataElements[$key] -> idItem = $data['ID_ITEM'];
-            $dataElements[$key] -> dateTimeFront = $data['FECHA_HORA_KM'];
+            $dataElements[$key] -> dateTimeFront = $data['FECHA_Y_HORA'];
             $dataElements[$key] -> cardNumber = $data['NUMERO_DE_TARJETA'];
             $dataElements[$key] -> region = $data['REGION'];
             $dataElements[$key] -> o = $data['O'];
@@ -295,6 +298,72 @@ class AllTokensController extends Controller
             $responseTC4[$key]->termDataTrans = $data['KC4_TERM_INPUT_CAP_IND']; //subcampo 11
             $responseTC4[$key]->chMeth = $data['KC4_CRDHLDR_ID_METHOD']; // subcampo 12
         }
+        foreach($datajson as $key => $data){
+            $responseTQ9[$key] = new stdClass();
+            $responseTQ9[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseTQ9[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseTQ9[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token Q9
+            $responseTQ9[$key] -> idTokenQ9 = 'Q9';
+            $responseTQ9[$key] -> orPem = $data['KQ9_ORIGINAL_POST_ENTRY_MODE'];
+            $responseTQ9[$key] -> cdeSer = $data['KQ9_SERVICE_CODE'];
+            $responseTQ9[$key] -> arqcVerq9 = $data['KQ9_ARQC_VERIFY'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTQR[$key] = new stdClass();
+            $responseTQR[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseTQR[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseTQR[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token QR
+            $responseTQR[$key] -> idTokenQR = 'QR';
+            $responseTQR[$key] -> cardTpDesc = $data['KQR_CRD_TYP_DESC'];
+            $responseTQR[$key] -> cardDesc = $data['KQR_CRD_DESC'];
+            $responseTQR[$key] -> issDesc = $data['KQR_ISS_DESC'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTQ1[$key] = new stdClass();
+            $responseTQ1[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseTQ1[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseTQ1[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token Q1
+            $responseTQ1[$key] -> idTokenQ1 = 'Q1';
+            $responseTQ1[$key] -> idMode = $data['KQ1_MODO_INDENTIFICADOR'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTEZ[$key] = new stdClass();
+            $responseTEZ[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseTEZ[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseTEZ[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token EZ
+            $responseTEZ[$key] -> idTokenEZ = 'EZ';
+            $responseTEZ[$key] -> ksn = $data['KEZ_KSN'];
+            $responseTEZ[$key] -> crypCnt = $data['KEZ_ENCRYPT_CNT'];
+            $responseTEZ[$key] -> cryptFail = $data['KEZ_ENCRYPT_FAIL_CNT'];
+            $responseTEZ[$key] -> tk3Fl = $data['KEZ_TRACK3_FLG'];
+            $responseTEZ[$key] -> EZPem = $data['KEZ_ENTRY_MDE'];
+            $responseTEZ[$key] -> tk2Len = $data['KEZ_TRACK2_LGTH'];
+            $responseTEZ[$key] -> cvv2Flag = $data['KEZ_CVV2_FLG'];
+            $responseTEZ[$key] -> cvv2Len = $data['KEZ_CVV2_LGTH'];
+            $responseTEZ[$key] -> tk1Fl = $data['KEZ_TRACK1_FLG'];
+            $responseTEZ[$key] -> crypBuff = $data['KEZ_ENCRYPT_BUFFER'];
+            $responseTEZ[$key] -> panl4 = $data['KEZ_PAN_LAST4'];
+            $responseTEZ[$key] -> crc = $data['KEZ_ENCRYPT_BUFFER_CRC32'];
+        }
+        foreach($datajson as $key => $data){
+            $responseTES[$key] = new stdClass();
+            $responseTES[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseTES[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseTES[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token ES
+            $responseTES[$key] -> idTokenES = 'ES';
+            $responseTES[$key] -> softVer = $data['KES_SOFTWARE_VER'];
+            $responseTES[$key] -> pinPad = $data['KES_PIN_PAD_SERIAL_NUM'];
+            $responseTES[$key] -> crypType = $data['KES_ENCRYPT_TYP'];
+            $responseTES[$key] -> binNxt = $data['KES_BIN_TBL_ID_NXT'];
+            $responseTES[$key] -> binCur = $data['KES_BIN_TBL_ID_CUR'];
+            $responseTES[$key] -> binVer = $data['KES_BIN_TBL_VER'];
+            $responseTES[$key] -> newKeyfl = $data['KES_NEW_KEY_FLG'];
+        }
 
         $response = array();
         $response = new stdClass();
@@ -306,6 +375,11 @@ class AllTokensController extends Controller
         $response -> tokenB6 = json_decode(json_encode($responseTB6), true);
         $response -> tokenC0 = json_decode(json_encode($responseTC0), true);
         $response -> tokenC4 = json_decode(json_encode($responseTC4), true);
+        $response -> tokenQ9 = json_decode(json_encode($responseTQ9), true);
+        $response -> tokenQR = json_decode(json_encode($responseTQR), true);
+        $response -> tokenQ1 = json_decode(json_encode($responseTQ1), true);
+        $response -> tokenEZ = json_decode(json_encode($responseTEZ), true);
+        $response -> tokenES = json_decode(json_encode($responseTES), true);
 
         $responseJson = json_decode(json_encode($response), true);
         return $responseJson;
