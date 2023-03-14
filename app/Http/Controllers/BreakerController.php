@@ -12,7 +12,7 @@ class BreakerController extends Controller
         $message =  $request -> message;
         $positions = array();
         $response = array();
-        $initPos = 32; $finalPos = 47;
+        $initPos = 0; $finalPos = 0;
         //Variables de cada uno de los Campos
         $secondaryBitmap = ''; $secondaryBMValue = '';
         $isoWord = $message[0].$message[1].$message[2]; //Extraer la palabra ISO
@@ -26,17 +26,6 @@ class BreakerController extends Controller
             $mainBitmap = $this -> getChain($message, 16, 31);
             //Conversión a binario del bitmap principal
             $binaryBitmap = $this -> getBinary($mainBitmap, 0, 16);
-            //Conversión a binario del secondary bitmap
-            $secondaryBitmap = $this -> getChain($message, 32, 47); //Logitud: 16
-            $secondaryBMValue = $this -> getBinary($secondaryBitmap, 0, 16);
-            //Se ingresa al response los siguienetes datos: header, tipo, bitmap principal. (Datos principales)
-
-            $counter = 0; //Indicador/controlador de la cantidad de objetos que hay en el arreglo final
-            $response[$counter] = new stdClass();
-            $response[$counter] -> message = $message;
-            $response[$counter] -> header = $isoWord.$header;
-            $response[$counter] -> typeMess = $typeMess;
-            $response[$counter] -> bitmap = $mainBitmap.$secondaryBitmap;
 
             //Identificación de los campos habilidatos de acuerdo al bitmap principal
             for($i = 0; $i < strlen($binaryBitmap); $i++){
@@ -44,13 +33,37 @@ class BreakerController extends Controller
                     array_push($positions, $i+1); //Se ingresan las posiciones habilidatas a un arreglo
                 }
             }
-            
+
+            if($positions[0] === 1){
+                $initPos = 32; $finalPos = 47;
+                //Conversión a binario del secondary bitmap
+                $secondaryBitmap = $this -> getChain($message, 32, 47); //Logitud: 16
+                $secondaryBMValue = $this -> getBinary($secondaryBitmap, 0, 16);
+                //Se ingresa al response los siguienetes datos: header, tipo, bitmap principal. (Datos principales)
+
+                $counter = 0; //Indicador/controlador de la cantidad de objetos que hay en el arreglo final
+                $response[$counter] = new stdClass();
+                $response[$counter] -> message = $message;
+                $response[$counter] -> header = $isoWord.$header;
+                $response[$counter] -> typeMess = $typeMess;
+                $response[$counter] -> bitmap = $mainBitmap.$secondaryBitmap;
+            }else{
+                $initPos = 16; $finalPos = 31;
+                $counter = 0; //Indicador/controlador de la cantidad de objetos que hay en el arreglo final
+                $response[$counter] = new stdClass();
+                $response[$counter] -> message = $message;
+                $response[$counter] -> header = $isoWord.$header;
+                $response[$counter] -> typeMess = $typeMess;
+                $response[$counter] -> bitmap = $mainBitmap;
+            }
+
             //Identificación de los campos habilitados en base al bitmap secundario
             for($i = 0; $i < strlen($secondaryBMValue); $i++){
                 if($secondaryBMValue[$i] === '1'){
                     array_push($positions, $i+65); //Se ingresan al mismo arreglo las posiciones habilitadas para el arreglo
                 }
             }
+            
             //Se obtiene el catalogo de acuerdo a las posiciones obtenidas en el bitmap
             $catalog = $this -> getCatalog($positions);
             //return $positions;
@@ -681,7 +694,7 @@ class BreakerController extends Controller
                             $response[$counter] -> $value = $currCode;
                         }else{
                             //$initPos = $finalPos+1; $finalPos += 3;
-                            $response[$counter] -> $value = $currCode.' error - no existe el dato';
+                            $response[$counter] -> $value = $currCode.' error - no existe el dato dentro del catálogo';
                         }
                         break;
                     }
@@ -718,7 +731,6 @@ class BreakerController extends Controller
                     case 54: {
                         $initPos = $finalPos+1; $finalPos += 3;
                         $len = $this -> getChain($message, $initPos, $finalPos);
-                        $initPos = $finalPos+1; $finalPos += $len;
                         $AddAmounts = $this -> getChain($message, $initPos, $finalPos);
                         $counter++; $id++;
                         $response[$counter] = new stdClass();
@@ -726,8 +738,15 @@ class BreakerController extends Controller
                         $response[$counter] -> $field = $catalog[$i][$field];
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
-                        $response[$counter] -> $value = $AddAmounts;
-                        break;
+                        if( is_numeric($len) && intval($len) === 16 ){
+                            $initPos = $finalPos+1; $finalPos += $len;
+                            $response[$counter] -> $value = $AddAmounts;
+                            break;
+                        }else{
+                            $response[$counter] -> $value = 'error - tipo de dato no válido';
+                            $i = 300;
+                            break;
+                        }
                     }
                     case 55: {
                         break;
@@ -823,7 +842,7 @@ class BreakerController extends Controller
                             //$finalPos += intval($len);
                             //break;
                         }
-                        if($additionalData[0] === ' ' && $additionalData[1] === ' '){
+                        if($additionalData[0] !== '&' && $additionalData[1] !== ' '){
                             $finalPos += intval($len);
                             break;
                         }

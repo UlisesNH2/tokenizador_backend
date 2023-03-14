@@ -62,6 +62,8 @@ class ProjectController extends Controller
                             }
                         }
                     }
+                }else{
+                    return 'No se ha creado la tabla';
                 }
                 $insertValues = DB::insert($queryValues);
                 return $insertValues;
@@ -259,7 +261,7 @@ class ProjectController extends Controller
             }
             $respJson = json_decode(json_encode($answer), true);
             return $respJson;
-        }else{
+        }else if($request -> tp === 'PTLF'){
             $datetime = DB::select("select max(FECHA), min(FECHA), max(HORA), min(HORA) from ".$request -> bd);
             $response = json_decode(json_encode($datetime), true);
 
@@ -270,6 +272,20 @@ class ProjectController extends Controller
                 $answer[$key] -> startHour = $data['min(HORA)'];
                 $answer[$key] -> finishHour = $data['max(HORA)'];
             }
+            $respJson = json_decode(json_encode($answer), true);
+            return $respJson;
+        }else{
+            $datetime = DB::select("select max(FECHA_MATCH), min(FECHA_MATCH) from ".$request -> bd);
+            $response = json_decode(json_encode($datetime), true);
+
+            foreach($response as $key => $data){
+                $answer[$key] = new stdClass();
+                $answer[$key] -> startDate = $data['max(FECHA_MATCH)'];
+                $answer[$key] -> finishDate = $data['min(FECHA_MATCH)'];
+                $answer[$key] -> startHour = $data['max(FECHA_MATCH)'];
+                $answer[$key] -> finishHour = $data['max(FECHA_MATCH)'];
+            }
+
             $respJson = json_decode(json_encode($answer), true);
             return $respJson;
         }

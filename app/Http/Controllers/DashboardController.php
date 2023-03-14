@@ -52,7 +52,7 @@ class DashboardController extends Controller
         $values[27] = $request -> c;
         $values[28] = $request -> cardType;
         $values[29] = $request -> aprovCode;
-        $values[30] = $request -> ft;
+        $values[30] = $request -> dft;
         $values[31] = $request -> codeRev;
         $values[32] = $request -> money;
         $values[33] = $request -> currency;

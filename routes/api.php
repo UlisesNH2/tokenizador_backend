@@ -44,6 +44,7 @@ Route::post('/getCatalogs', 'App\Http\Controllers\TerminalController@getCatalogs
 //RUTAS TODOS LOS TOKENS
 Route::post('/allTokensKM', 'App\Http\Controllers\AllTokensController@getKM');
 Route::post('/allTokensPTLF', 'App\Http\Controllers\AllTokensController@getPTLF');
+Route::post('/allTokensPTLFGV', 'App\Http\Controllers\AllTokensController@getPTLFGV');
 
 //RUTAS TOKEN C4
 Route::post('/tokenC4', 'App\Http\Controllers\TokenC4Controller@index'); //Datos para el formulario

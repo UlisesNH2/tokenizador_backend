@@ -15,7 +15,7 @@ class AllTokensController extends Controller
         $responseTC0 = array(); $responseTC4 = array();
         $responseTQ9 = array(); $responseTQR = array();
         $responseTQ1 = array(); $responseTEZ = array();
-        $responseES = array();
+        $responseTES = array(); $responseQ6 = array();
         $values = array();
         $arrayValues = array();
         $queryOutFilters = "select * from ".$request -> bd;
@@ -130,7 +130,8 @@ class AllTokensController extends Controller
         foreach($datajson as $key => $data){
             $dataElements[$key] = new stdClass();
             $dataElements[$key] -> idQ2 = 'Q2';
-            $dataElements[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO']; 
+            $dataElements[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $dataElements[$key] -> lenQ2 = $data['KQ2_LONGITUD'];
             $dataElements[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
             $dataElements[$key] -> entryMode = $data['ENTRY_MODE'];
             $dataElements[$key] -> type = $data['TIPO'];
@@ -164,16 +165,17 @@ class AllTokensController extends Controller
             $dataElements[$key] -> money = $data['MONEDA'];
             $dataElements[$key] -> currency = $data['CURRENCY'];
             $dataElements[$key] -> pre6 = $data['PREFIJO6'];
-            $dataElements[$key]->ID_Comer = $data['ID_COMER'];
-            $dataElements[$key]->Term_Comer = $data['TERM_COMER'];
-            $dataElements[$key]->Fiid_Comer = $data['FIID_COMER'];
-            $dataElements[$key]->Fiid_Term = $data['FIID_TERM'];
-            $dataElements[$key]->Ln_Comer = $data['LN_COMER'];
-            $dataElements[$key]->Ln_Term = $data['LN_TERM'];
-            $dataElements[$key]->Fiid_Card = $data['FIID_TARJ'];
-            $dataElements[$key]->Ln_Card = $data['LN_TARJ'];
-            $dataElements[$key]->Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
-            $dataElements[$key]->Number_Sec = $data['NUM_SEC'];
+            $dataElements[$key] -> ID_Comer = $data['ID_COMER'];
+            $dataElements[$key] -> Term_Comer = $data['TERM_COMER'];
+            $dataElements[$key] -> Fiid_Comer = $data['FIID_COMER'];
+            $dataElements[$key] -> Fiid_Term = $data['FIID_TERM'];
+            $dataElements[$key] -> Ln_Comer = $data['LN_COMER'];
+            $dataElements[$key] -> Ln_Term = $data['LN_TERM'];
+            $dataElements[$key] -> Fiid_Card = $data['FIID_TARJ'];
+            $dataElements[$key] -> Ln_Card = $data['LN_TARJ'];
+            $dataElements[$key] -> Terminal_Name = $data['NOMBRE_DE_TERMINAL'];
+            $dataElements[$key] -> Number_Sec = $data['NUM_SEC'];
+            $dataElements[$key] -> pt_cde = $data['PT_SRV_COND_CDE'];
         }
 
         //Token B2
@@ -272,10 +274,11 @@ class AllTokensController extends Controller
             $responseTC0[$key] -> entryMode = $data['ENTRY_MODE'];
             //Token C0
             $responseTC0[$key] -> idTokenC0 = 'C0';
-            $responseTC0[$key]->ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
-            $responseTC0[$key]->cardtp = $data['KC0_TIPO_DE_TARJETA'];
-            $responseTC0[$key]->cvv2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
-            $responseTC0[$key]->info = $data['KC0_INDICADOR_DE_INFORMACION_A'];
+            $responseTC0[$key] -> dataLenC0 = $data['KC0_LONGITUD_DE_DATOS'];
+            $responseTC0[$key] -> ecommerce = $data['KC0_INDICADOR_DE_COMERCIO_ELEC'];
+            $responseTC0[$key] -> cardtp = $data['KC0_TIPO_DE_TARJETA'];
+            $responseTC0[$key] -> cvv2 = $data['KC0_INDICADOR_DE_CVV2_CVC2_PRE'];
+            $responseTC0[$key] -> info = $data['KC0_INDICADOR_DE_INFORMACION_A'];
         }
 
         foreach($datajson as $key => $data){
@@ -327,6 +330,7 @@ class AllTokensController extends Controller
             $responseTQ1[$key] -> entryMode = $data['ENTRY_MODE'];
             //Token Q1
             $responseTQ1[$key] -> idTokenQ1 = 'Q1';
+            $responseTQ1[$key] -> lenQ1 = $data['KQ1_LONGITUD_DATOS'];
             $responseTQ1[$key] -> idMode = $data['KQ1_MODO_INDENTIFICADOR'];
         }
         foreach($datajson as $key => $data){
@@ -364,6 +368,19 @@ class AllTokensController extends Controller
             $responseTES[$key] -> binVer = $data['KES_BIN_TBL_VER'];
             $responseTES[$key] -> newKeyfl = $data['KES_NEW_KEY_FLG'];
         }
+        // //////////////////////////////////////////////////////////////
+        foreach($datajson as $key => $data){
+            $responseQ6[$key] = new stdClass();
+            $responseQ6[$key] -> kq2 = $data['KQ2_ID_MEDIO_ACCESO'];
+            $responseQ6[$key] -> codeResp = $data['CODIGO_RESPUESTA'];
+            $responseQ6[$key] -> entryMode = $data['ENTRY_MODE'];
+            //Token Q6
+            $responseQ6[$key] -> idTokenQ6 = 'Q6';
+            $responseQ6[$key] -> dif = $data['KQ6_DIFERIMIENTO'];
+            $responseQ6[$key] -> parcial = $data['KQ6_PARCIALIZACION'];
+            $responseQ6[$key] -> plan = $data['KQ6_TIPO_PLAN'];
+        }
+
 
         $response = array();
         $response = new stdClass();
@@ -380,6 +397,7 @@ class AllTokensController extends Controller
         $response -> tokenQ1 = json_decode(json_encode($responseTQ1), true);
         $response -> tokenEZ = json_decode(json_encode($responseTEZ), true);
         $response -> tokenES = json_decode(json_encode($responseTES), true);
+        $response -> tokenQ6 = json_decode(json_encode($responseQ6), true);
 
         $responseJson = json_decode(json_encode($response), true);
         return $responseJson;
@@ -675,5 +693,123 @@ class AllTokensController extends Controller
         $response -> tokenB6 = json_decode(json_encode($responseTB6), true);
 
         return json_decode(json_encode($response), true);
+    }
+
+    public function getPTLFGV(Request $request){
+
+        $dataElements = array();
+        $tokenq2 = array(); $tokenC0 = array(); $tokenC4 = array();
+        $tokenCZ = array();
+
+        $query = "select * from ".$request -> bd;
+        $response = DB::select($query);
+        $datajson = json_decode(json_encode($response), true);
+        foreach($datajson as $key => $data){
+            $dataElements[$key] = new stdClass();
+            $dataElements[$key] -> file = $data['ARCHIVO'];
+            $dataElements[$key] -> atCtyCde = $data['AUTH_CRNCY_CDE'];
+            $dataElements[$key] -> c = $data['C'];
+            $dataElements[$key] -> clerkID = $data['CLERK_ID'];
+            $dataElements[$key] -> cardTp = $data['CRD_TYP'];
+            $dataElements[$key] -> cutOver = $data['CUTOVER_TYP'];
+            $dataElements[$key] -> dest = $data['DEST'];
+            $dataElements[$key] -> dft = $data['DFT_CAPTURE_FLG'];
+            $dataElements[$key] -> fechaMatch = $data['FECHA_MATCH'];
+            $dataElements[$key] -> fiid = $data['FIID'];
+            $dataElements[$key] -> fiidC = $data['FIIDC'];
+            $dataElements[$key] -> ids = $data['ID'];
+            $dataElements[$key] -> idBenf = $data['IND_BENEFICIOS'];
+            $dataElements[$key] -> idCashBk = $data['IND_CASHBACK'];
+            $dataElements[$key] -> idSponsor = $data['IND_SPONSOR'];
+            $dataElements[$key] -> ln = $data['LN'];
+            $dataElements[$key] -> lnk = $data['LNK'];
+            $dataElements[$key] -> tandem = $data['TANDEMENE51'];
+            $dataElements[$key] -> orig = $data['ORIGINATOR'];
+            $dataElements[$key] -> entryMode = $data['PT_SRV_ENTRY_MDE'];
+            $dataElements[$key] -> recFt = $data['REC_FRMT'];
+            $dataElements[$key] -> recTyp = $data['REC_TYP'];
+            $dataElements[$key] -> reg = $data['REGN'];
+            $dataElements[$key] -> codeResp = $data['RESP_CDE'];
+            $dataElements[$key] -> responder = $data['RESPONDER'];
+            $dataElements[$key] -> retID = $data['RETAILER_ID'];
+            $dataElements[$key] -> siCde = $data['RETL_SIC_CDE'];
+            $dataElements[$key] -> rteStat = $data['RTE_STAT'];
+            $dataElements[$key] -> rvrCde = $data['RVRL_CDE'];
+            $dataElements[$key] -> setctyCode = $data['SETL_CRNCY_CDE'];
+            $dataElements[$key] -> t = $data['T'];
+            $dataElements[$key] -> tc = $data['TC'];
+            $dataElements[$key] -> termCity = $data['TERM_CITY'];
+            $dataElements[$key] -> termCtyCode = $data['TERM_CNTRY_CDE'];
+            $dataElements[$key] -> termID = $data['TERM_ID'];
+            $dataElements[$key] -> termNum = $data['TERM_NUM'];
+            $dataElements[$key] -> termName = $data['TERM_OWNER_NAME'];
+            $dataElements[$key] -> termSt = $data['TERM_ST'];
+            $dataElements[$key] -> termTyp = $data['TERM_TYP'];
+            $dataElements[$key] -> type = $data['TYP'];
+        }
+
+        //token Q2
+        foreach($datajson as $key => $data){
+            $tokenq2[$key] = new stdClass();
+            $tokenq2[$key] -> idQ2 = 'Q2';
+            $tokenq2[$key] -> kq2 = $data['TKN_Q2_ID_ACCESO'];
+        }
+        //token C0
+        foreach($datajson as $key => $data){
+            $tokenC0[$key] = new stdClass();
+            $tokenC0[$key] -> idC0 = 'C0';
+            $tokenC0[$key] -> C0 = $data['TKNS_C0'];
+        }
+        //token C4
+        foreach($datajson as $key => $data){
+            $tokenC4[$key] = new stdClass();
+            $tokenC4[$key] -> idC4 = 'C4';
+            $tokenC4[$key] -> C4 = $data['TKN_C4'];
+        }
+        //token CZ
+        foreach($datajson as $key => $data){
+            $tokenCZ[$key] = new stdClass();
+            $tokenCZ[$key] -> idCZ = 'CZ';
+            $tokenCZ[$key] -> CZ = $data['TKN_CZ'];
+        }
+        //tokenQ1
+        foreach($datajson as $key => $data){
+            $tokenQ1[$key] = new stdClass();
+            $tokenQ1[$key] -> idQ1 = 'Q1';
+            $tokenQ1[$key] -> Q1 = $data['TKN_Q1'];
+        }
+        //tokenB2
+        foreach($datajson as $key => $data){
+            $tokenB2[$key] = new stdClass();
+            $tokenB2[$key] -> idB2 = 'B2';
+            $tokenB2[$key] -> entryMode = $data['PT_SRV_ENTRY_MDE'];
+            $tokenB2[$key] -> codeResp = $data['RESP_CDE'];
+            $tokenB2[$key] -> bitMapB2 = $data['B2_BIT_MAP'];
+            $tokenB2[$key] -> UsrFO = $data['B2_USER_FLD1'];
+            $tokenB2[$key] -> CrypData = $data['B2_CRYPTO_INFO_DATA'];
+            $tokenB2[$key] -> ARQC = $data['B2_ARQC'];
+            $tokenB2[$key] -> AMTAuth = $data['B2_AMT_AUTH'];
+            $tokenB2[$key] -> AMTOther = $data['B2_AMT_OTHER'];
+            $tokenB2[$key] -> TermCounCode = $data['B2_TERM_CNTRY_CDE'];
+            $tokenB2[$key] -> TermCurrCode = $data['B2_TRAN_CRNCY_CDE'];
+            $tokenB2[$key] -> TranDate = $data['B2_TRAN_DAT'];
+            $tokenB2[$key] -> TranType = $data['B2_TRAN_TYPE'];
+            $tokenB2[$key] -> UmpNum = $data['B2_UNPREDICT_NUM'];
+            $tokenB2[$key] -> IssAppDataLen = '    ';
+            $tokenB2[$key] -> IssAppData = $data['B2_ISS_APPL_DATA'];
+            $tokenB2[$key] -> TVR = $data['B2_TVR'];
+            $tokenB2[$key] -> AIP = $data['B2_AIP'];
+            $tokenB2[$key] -> ATC = $data['B2_ATC'];
+        }
+
+        $response = new stdClass();
+        $response -> dataElements = json_decode(json_encode($dataElements), true);
+        $response -> tokenQ2 = json_decode(json_encode($tokenq2), true);
+        $response -> tokenC0 = json_decode(json_encode($tokenC0), true);
+        $response -> tokenC4 = json_decode(json_encode($tokenC4), true);
+        $response -> tokenCZ = json_decode(json_encode($tokenCZ), true);
+        $response -> tokenQ1 = json_decode(json_encode($tokenQ1), true);
+        $response -> tokenB2 = json_decode(json_encode($tokenB2), true);
+        return $response;
     }
 }
