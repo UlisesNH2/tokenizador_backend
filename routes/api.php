@@ -82,6 +82,8 @@ Route::post('/tokenB6Filter/main', 'App\Http\Controllers\TokenB6Controller@getDa
 //DESGLOSADOR
 Route::post('/breaker', 'App\Http\Controllers\BreakerController@getBreakes'); 
 Route::post('/getCatalogMessage', 'App\Http\Controllers\BreakerController@getCatalog');
+Route::post('/breakerBNET', 'App\Http\Controllers\BnetController@bnetMessage');
+Route::post('/breakerVISA', 'App\Http\Controllers\VisaController@getBreakesVisa');
 
 //CATALOGO HEADER ISO
 Route::post('/catalogo/hdrISO', 'App\Http\Controllers\HeaderISOController@getCatalogHdrMess'); //Obtener el catalogo de acuerdo al tipo de mensaje
