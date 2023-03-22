@@ -727,6 +727,111 @@ class BnetController extends Controller{
                         $response[$counter] -> $value = $pinData;
                         break;
                     }
+                    case 53:{ // DE 53 - Security-Related Control Information
+                        $intPos = $finalPos+1; $finalPos += 32;
+                        $secRelControlInfo = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $secRelControlInfo;
+                        break;
+                    }
+                    case 54:{ // DE 54 - Additional Amounts
+                        $initPos = $finalPos+1; $finalPos += 480;
+                        $addAmounts = $this -> getChain($message, $initPos, $finalPos); // Longitud 240
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $addAmounts;
+                        break;
+                    }
+                    case 55:{ // DE 55 - Integrated Circuit Card (ICC) System-Related Data
+                        $initPos = $finalPos+1; $finalPos += 510;
+                        $iccSysRelData = $this -> getChain($message, $initPos, $finalPos); // Longitud 255
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $iccSysRelData;
+                        break;
+                    }
+                    case 56:{ // DE 56 - Payment Account Data
+                        $initPos = $finalPos+1; $finalPos += 74;
+                        $payAccData = $this -> getChain($message, $initPos, $finalPos); // Longitud 37
+                        $counter++; $i++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $payAccData;
+                        break;
+                    }
+                    case 57:{ // DE 57 - Reserved for National Use
+                        break;
+                    }
+                    case 58:{ // DE 58 - Reserved for National Use
+                        break;
+                    }
+                    case 59:{ // DE 59 - Reserved for National Use
+                        break;
+                    }
+                    case 60:{ // DE 60 - Advice Reason Code 
+                        $initPos = $finalPos+1; $finalPos += 120;
+                        $advReasonCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 60
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $advReasonCode;
+                        break;
+                    }
+                    case 61:{ // DE 61 - Point-of-Service [POS] Data
+                        $initPos = $finalPos+1; $finalPos += 46;
+                        $posData = $this -> getChain($message, $initPos, $finalPos); // Longitud 23
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $posData;
+                        break;
+                    }
+                    case 62:{ // DE 62 - Intermediate Network Facility (INF) Data
+                        $initPos = $finalPos+1; $finalPos += 200;
+                        $infData = $this -> getChain($message, $initPos, $finalPos); // Longitud 100
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $infData;
+                        break;
+                    }
+                    case 63:{ // DE 63 - Network Data
+                        $initPos = $finalPos+1; $finalPos += 100;
+                        $networkData = $this -> getChain($message, $initPos, $finalPos); // Longitud 50
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $networkData;
+                        break;
+                    }
                 }
             }
 
