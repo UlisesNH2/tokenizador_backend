@@ -16,6 +16,8 @@ class BnetController extends Controller{
         $initPos=32;
         $finalPos=40;
 
+        //Creo que esto puede ser una gran aportación al proyecto
+
         $bitmapSecondary=''; 
         $bitmapSecundario= '';
 
