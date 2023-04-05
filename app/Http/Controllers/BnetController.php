@@ -10,11 +10,13 @@ use stdClass;
 class BnetController extends Controller{
 
     public function bnetMessage(Request $request){
-        $message = $request->message;
+        $message = $request -> message;
         $positions = array();
         $response = array();
         $initPos=32;
         $finalPos=40;
+
+        //Creo que esto puede ser una gran aportación al proyecto
 
         $bitmapSecondary=''; 
         $bitmapSecundario= '';
@@ -723,6 +725,863 @@ class BnetController extends Controller{
                         $response[$counter] -> $name = $catalog[$i][$name];
                         $response[$counter] -> $type = $catalog[$i][$type];
                         $response[$counter] -> $value = $pinData;
+                        break;
+                    }
+                    case 53:{ // DE 53 - Security-Related Control Information
+                        $intPos = $finalPos+1; $finalPos += 32;
+                        $secRelControlInfo = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $secRelControlInfo;
+                        break;
+                    }
+                    case 54:{ // DE 54 - Additional Amounts
+                        $initPos = $finalPos+1; $finalPos += 480;
+                        $addAmounts = $this -> getChain($message, $initPos, $finalPos); // Longitud 240
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $addAmounts;
+                        break;
+                    }
+                    case 55:{ // DE 55 - Integrated Circuit Card (ICC) System-Related Data
+                        $initPos = $finalPos+1; $finalPos += 510;
+                        $iccSysRelData = $this -> getChain($message, $initPos, $finalPos); // Longitud 255
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $iccSysRelData;
+                        break;
+                    }
+                    case 56:{ // DE 56 - Payment Account Data
+                        $initPos = $finalPos+1; $finalPos += 74;
+                        $payAccData = $this -> getChain($message, $initPos, $finalPos); // Longitud 37
+                        $counter++; $i++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $payAccData;
+                        break;
+                    }
+                    case 57:{ // DE 57 - Reserved for National Use
+                        break;
+                    }
+                    case 58:{ // DE 58 - Reserved for National Use
+                        break;
+                    }
+                    case 59:{ // DE 59 - Reserved for National Use
+                        break;
+                    }
+                    case 60:{ // DE 60 - Advice Reason Code 
+                        $initPos = $finalPos+1; $finalPos += 120;
+                        $advReasonCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 60
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $advReasonCode;
+                        break;
+                    }
+                    case 61:{ // DE 61 - Point-of-Service [POS] Data
+                        $initPos = $finalPos+1; $finalPos += 46;
+                        $posData = $this -> getChain($message, $initPos, $finalPos); // Longitud 23
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $posData;
+                        break;
+                    }
+                    case 62:{ // DE 62 - Intermediate Network Facility (INF) Data
+                        $initPos = $finalPos+1; $finalPos += 200;
+                        $infData = $this -> getChain($message, $initPos, $finalPos); // Longitud 100
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $infData;
+                        break;
+                    }
+                    case 63:{ // DE 63 - Network Data
+                        $initPos = $finalPos+1; $finalPos += 100;
+                        $networkData = $this -> getChain($message, $initPos, $finalPos); // Longitud 50
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $networkData;
+                        break;
+                    }
+                    case 64:{ // DE 64 - Message Authentication Code
+                        $initPos= $finalPos+1; $finalPos += 16;
+                        $messageAuthCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 8
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $messageAuthCode;
+                        break;
+                    }
+                    case 65:{ // DE 65 - Bit Map, Extended
+                        $initPos= $finalPos+1; $finalPos += 16;
+                        $bitmapExt = $this -> getChain($message, $initPos, $finalPos); // Longitud 8
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $bitmapExt;
+                    }
+                    case 66:{ // DE 66 - Settlement Code
+                        $initPos= $finalPos+1; $finalPos += 2;
+                        $settlementCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 1
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $settlementCode;
+                        break;
+                    }
+                    case 67:{ // DE 67 - Extended Payment Code
+                        $initPos= $finalPos+1; $finalPos += 4;
+                        $extPaymentCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 2
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $extPaymentCode;
+                        break;
+                    }
+                    case 68:{ // DE 68 - Receiving Institution Country Code
+                        $initPos= $finalPos+1; $finalPos += 6;
+                        $recInstitutionCountryCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 3
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $recInstitutionCountryCode;
+                        break;
+                    }
+                    case 69:{ // DE 69 - Settlement Institution Country Code
+                        $initPos= $finalPos+1; $finalPos += 6;
+                        $setInstitutionCounCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 3
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $setInstitutionCounCode;
+                        break;
+                    }
+                    case 70:{ // DE 70 - Network Management Information Code
+                        $initPos= $finalPos+1; $finalPos += 6;
+                        $netManagementInfoCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 3
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $netManagementInfoCode;
+                        break;
+                    }
+                    case 71:{ // DE 71 - Message Number
+                        $initPos = $finalPos+1; $finalPos += 8;
+                        $messageNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 4
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $messageNumber;
+                        break;
+                    }
+                    case 72:{ // DE 72 - Message Number Last
+                        $initPos= $finalPos+1; $finalPos += 8;
+                        $messageNumberLast = $this -> getChain($message, $initPos, $finalPos); // Longitud 4
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $messageNumberLast;
+                        break;
+                    }
+                    case 73:{ // DE 73 - Date, Action
+                        $initPos= $finalPo+1; $finalPos += 12;
+                        $dateAction = $this -> getChain($message, $initPos, $finalPos); // Longitud 6
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $dateAction;
+                        break;
+                    }
+                    case 74:{ // DE 74 - Credits, Number
+                        $initPos= $finalPos+1; $finalPos += 20;
+                        $creditsNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsNumber;
+                        break;
+                    }
+                    case 75:{ // DE 75 - Credits, Reversal Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $creditsReversalNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsReversalNumber;
+                        break;
+                    }
+                    case 76:{ // DE 76 - Debits, Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $debitsNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsNumber;
+                        break;
+                    }
+                    case 77:{ // DE 77 - Debits, Reversal Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $debitsReversalNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsReversalNumber;
+                        break;
+                    }
+                    case 78:{ // DE 78 - Transfers, Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $transfersNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $transfersNumber;
+                        break;
+                    }
+                    case 79:{ // DE 79 - Transfers, Reversal Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $transfersReversalNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $transfersReversalNumber;
+                        break;
+                    }
+                    case 80:{ // DE 80 - Inquiries, Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $inquiriesNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $inquiriesNumber;
+                        break;
+                    }
+                    case 81:{ // DE 81 - Authorizations, Number
+                        $initPos = $finalPos+1; $finalPos += 20;
+                        $authorizationsNumber = $this -> getChain($message, $initPos, $finalPos); // Longitud 10
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $authorizationsNumber;
+                        break;
+                    }
+                    case 82:{ // DE 82 - Credits, Processing Fee Amount
+                        $initPos = $finalPos+1; $finalPos += 24;
+                        $creditsProcessingFeeAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 12
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsProcessingFeeAmount;
+                        break;
+                    }
+                    case 83:{ // DE 83 - Credits, Transaction Fee Amount
+                        $initPos = $finalPos+1; $finalPos += 24;
+                        $creditsTransactionFeeAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 12
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsTransactionFeeAmount;
+                        break;
+                    }
+                    case 84:{ // DE 84 - Debits, Processing Fee Amount
+                        $initPos = $finalPos+1; $finalPos += 24;
+                        $debitsProcessingFeeAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 12
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsProcessingFeeAmount;
+                        break;
+                    }
+                    case 85:{ // DE 85 - Debits, Transaction Fee Amount
+                        $initPos = $finalPos+1; $finalPos += 24;
+                        $debitsTransactionFeeAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 12
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsTransactionFeeAmount;
+                        break;
+                    }
+                    case 86:{ // DE 86 - Credits, Amount
+                        $initPos = $finalPos+1; $finalPos += 32;
+                        $creditsAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsAmount;
+                        break;
+                    }
+                    case 87:{ // DE 87 - Credits, Reversal Amount
+                        $initPos = $finalPos+1; $finalPos += 32;
+                        $creditsReversalAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $creditsReversalAmount;
+                        break;
+                    }
+                    case 88:{ // DE 88 - Debits, Amount
+                        $initPos = $finalPos+1; $finalPos += 32;
+                        $debitsAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsAmount;
+                        break;
+                    }
+                    case 89:{ // DE 89 - Debits, Reversal Amount
+                        $initPos = $finalPos+1; $finalPos += 32;
+                        $debitsReversalAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 16
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $debitsReversalAmount;
+                        break;
+                    }
+                    case 90:{ // DE 90 - Original Data Elements
+                        $initPos = $finalPos+1; $finalPos += 84;
+                        $originalDataElements = $this -> getChain($message, $initPos, $finalPos); // Longitud 42
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $originalDataElements;
+                        break;
+                    }
+                    case 91:{ // DE 91 - Issuer File Update Code
+                        $initPos = $finalPos+1; $finalPos += 2;
+                        $fileUpdateCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 1
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $fileUpdateCode;
+                        break;
+                    }
+                    case 92:{ // DE 92 - File Security Code
+                        $initPos = $finalPos+1; $finalPos += 4;
+                        $fileSecurityCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 2
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $fileSecurityCode;
+                        break;
+                    }
+                    case 93:{ // DE 93 - Response Indicator
+                        $initPos = $finalPos+1; $finalPos += 10;
+                        $responseIndicator = $this -> getChain($message, $initPos, $finalPos); // Longitud 5
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $responseIndicator;
+                        break;
+                    }
+                    case 94:{ // DE 94 - Service Indicator
+                        $initPos = $finalPos+1; $finalPos += 14;
+                        $serviceIndicator = $this -> getChain($message, $initPos, $finalPos); // Longitud 7
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $serviceIndicator;
+                        break;
+                    }
+                    case 95:{ // DE 95 - Replacement Amounts
+                        $initPos = $finalPos+1; $finalPos += 84;
+                        $replacementAmounts = $this -> getChain($message, $initPos, $finalPos); // Longitud 32
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $replacementAmounts;
+                        break;
+                    }
+                    case 96:{ // DE 96 - Message Security Code
+                        $initPos = $finalPos+1; $finalPos += 16;
+                        $messageSecurityCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 8
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $messageSecurityCode;
+                        break;
+                    }
+                    case 97:{ // DE 97 - Amount, Net Settlement
+                        $initPos = $finalPos+1; $finalPos += 34;
+                        $netSettlementAmount = $this -> getChain($message, $initPos, $finalPos); // Longitud 17
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $netSettlementAmount;
+                        break;
+                    }
+                    case 98:{ // DE 98 - Payee
+                        $initPos = $finalPos+1; $finalPos += 50;
+                        $payee = $this -> getChain($message, $initPos, $finalPos); // Longitud 25
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $payee;
+                        break;
+                    }
+                    case 99:{ // DE 99 - Settlement Institution ID Code
+                        $initPos = $finalPos+1; $finalPos += 22;
+                        $settlementInstitutionIdentificationCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 11
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $settlementInstitutionIdentificationCode;
+                        break;
+                    }
+                    case 100:{ // DE 100 - Receiving Institution ID Code
+                        $initPos = $finalPos+1; $finalPos += 22;
+                        $receivingInstitutionIdentificationCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 11
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $receivingInstitutionIdentificationCode;
+                        break;
+                    }
+                    case 101:{ // DE 101 - File Name
+                        $initPos = $finalPos+1; $finalPos += 34;
+                        $fileName = $this -> getChain($message, $initPos, $finalPos); // Longitud 17
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $fileName;
+                        break;
+                    }
+                    case 102:{ // DE 102 - Account ID 1
+                        $initPos = $finalPos+1; $finalPos += 56;
+                        $accountIdentification1 = $this -> getChain($message, $initPos, $finalPos); // Longitud 28
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $accountIdentification1;
+                        break;
+                    }
+                    case 103:{ // DE 103 - Account ID 2
+                        $initPos = $finalPos+1; $finalPos += 56;
+                        $accountIdentification2 = $this -> getChain($message, $initPos, $finalPos); // Longitud 28
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $accountIdentification2;
+                        break;
+                    }
+                    case 104:{ // DE 104 - Digital Payment Data
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $digitalPaymentData = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $digitalPaymentData;
+                        break;
+                    }
+                    case 105:{ // Reserved for MasterCard Use
+                        break;
+                    }
+                    case 106:{ // Reserved for MasterCard Use
+                        break;
+                    }
+                    case 107:{ // Reserved for MasterCard Use
+                        break;
+                    }
+                    case 108:{ // DE 108 - Additional Transaction Reference Data
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $additionalTransactionReferenceData = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $additionalTransactionReferenceData;
+                        break;
+                    }
+                    case 109:{ // DE 109 - Reserved for ISO Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForISOUse = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForISOUse;
+                        break;
+                    }
+                    case 110:{ // DE 110 - Additional Data–2
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $additionalData2 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $additionalData2;
+                        break;
+                    }
+                    case 111:{ // DE 111- Reserved for ISO Use 2
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForISOUse2 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForISOUse2;
+                        break;
+                    }
+                    case 112:{ // DE 112 - Additional Data (National Use)
+                        $initPos = $finalPos+1; $finalPos += 200;
+                        $additionalDataNationalUse = $this -> getChain($message, $initPos, $finalPos); // Longitud 100 - for global usage **
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $additionalDataNationalUse;
+                        break;
+                    }
+                    case 113:{ // DE 113 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse;
+                        break;
+                    }
+                    case 114:{ // DE 114 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse2 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse2;
+                        break;
+                    }
+                    case 115:{ // DE 115 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse3 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse3;
+                        break;
+                    }
+                    case 116:{ // DE 116 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse4 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse4;
+                        break;
+                    }
+                    case 117:{ // DE 117 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse5 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse5;
+                        break;
+                    }
+                    case 118:{ // DE 118 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse6 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse6;
+                        break;
+                    }
+                    case 119:{ // DE 119 - Reserved for National Use
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $reservedForNationalUse7 = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $reservedForNationalUse7;
+                        break;
+                    }
+                    case 120:{ // DE 120 - Record Data
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $recordData = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $recordData;
+                        break;
+                    }
+                    case 121:{ // DE 121 - Authorizing Agent ID Code
+                        $initPos = $finalPos+1; $finalPos += 12;
+                        $authorizingAgentIDCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 6
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $authorizingAgentIDCode;
+                        break;
+                    }
+                    case 122:{ // DE 122 - Additional Record Data
+                        $initPos = $finalPos+1; $finalPos += 1998;
+                        $additionalRecordData = $this -> getChain($message, $initPos, $finalPos); // Longitud 999
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $additionalRecordData;
+                        break;
+                    }
+                    case 123:{ // DE 123 - Receipt Free Text
+                        $initPos = $finalPos+1; $finalPos += 1024;
+                        $receiptFreeText = $this -> getChain($message, $initPos, $finalPos); // Longitud 512
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $receiptFreeText;
+                        break;
+                    }
+                    case 124:{ // DE 124 - Member-Defined Data
+                        $initPos = $finalPos+1; $finalPos += 598;
+                        $memberDefinedData = $this -> getChain($message, $initPos, $finalPos); // Longitud 299
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $memberDefinedData;
+                        break;
+                    }
+                    case 125:{ // DE 125 - New PIN Data
+                        $initPos = $finalPos+1; $finalPos += 16;
+                        $newPINData = $this -> getChain($message, $initPos, $finalPos); // Longitud 8
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $newPINData;
+                        break;
+                    }
+                    case 126:{ // DE 126 - Private Data
+                        $initPos = $finalPos+1; $finalPos += 200;
+                        $privateData = $this -> getChain($message, $initPos, $finalPos); // Longitud 100
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $privateData;
+                        break;
+                    }
+                    case 127:{ // DE 127 - Private Data
+                        $initPos = $finalPos+1; $finalPos += 200;
+                        $privateData2 = $this -> getChain($message, $initPos, $finalPos); // Longitud 100
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $privateData2;
+                        break;
+                    }
+                    case 128:{ // DE 128 - Message Authentication Code
+                        $initPos = $finalPos+1; $finalPos += 16;
+                        $messageAuthenticationCode = $this -> getChain($message, $initPos, $finalPos); // Longitud 8
+                        $counter++; $id++;
+                        $response[$counter] = new stdClass();
+                        $response[$counter] -> $number = $id;
+                        $response[$counter] -> $field = $catalog[$i][$field];
+                        $response[$counter] -> $name = $catalog[$i][$name];
+                        $response[$counter] -> $type = $catalog[$i][$type];
+                        $response[$counter] -> $value = $messageAuthenticationCode;
                         break;
                     }
                 }
